@@ -61,17 +61,7 @@
       </div>
 
       <div class="header-center">
-        <div id="activeFileIndicator" class="active-file-indicator hidden">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="file-icon">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l-4 4l6 6l4-16l-18 7l8 2l2 7z" />
-          </svg>
-          <span id="activeFileName" class="file-name">demo_file.mp4</span>
-          <span id="activeModelBadge" class="model-badge">base</span>
-          <button id="btnWorkspaceDeleteSession" class="btn btn-sm btn-action-pill btn-action-danger btn-workspace-delete" title="Delete current session from history">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            Delete
-          </button>
-        </div>
+        <!-- Center title area cleaned: filename moved to tabs -->
       </div>
 
       <div class="header-right">
@@ -475,45 +465,40 @@
         <!-- Left Column: Video Player, Captions, Waveform -->
         <div class="workspace-left">
           
-          <!-- Media Player Wrapper with Overlaid Auto-Hide Controls -->
-          <div class="player-container">
-            <div class="video-wrapper" id="videoWrapper">
-              <!-- Top Overlay Bar: Title Section & Action Pills (Inside Player, hides when playing) -->
-              <div class="video-player-top-bar" id="videoPlayerTopBar">
-                <div class="video-top-title-col">
-                  <span id="workspaceTitleText" class="workspace-title-text">Active Media Session</span>
-                  <span id="workspaceModelPill" class="workspace-model-pill">Whisper Base</span>
-                  <span id="workspaceDurationPill" class="workspace-duration-pill">--:--</span>
-                </div>
-                <div class="video-top-actions">
-                  <button id="btnToggleSidebar" class="btn btn-sm btn-action-pill" title="Toggle transcript sidebar">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs">
-                      <rect width="18" height="18" x="3" y="3" rx="2"></rect>
-                      <path d="M15 3v18"></path>
-                    </svg>
-                    <span id="btnToggleSidebarText">Panel</span>
-                  </button>
-                  <button id="btnBarMerge" class="btn btn-sm btn-action-pill" title="Merge misclassified speakers">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs">
-                      <circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 9v12m12-9c0 3-2 6-6 6"></path>
-                    </svg>
-                    Merge
-                  </button>
-                  <button id="btnBarExport" class="btn btn-sm btn-action-pill" title="Export subtitles">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
-                    Export
-                  </button>
-                  <button id="btnBarDelete" class="btn btn-sm btn-action-pill btn-action-danger" title="Delete session">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs">
-                      <polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    </svg>
-                    Delete
-                  </button>
-                </div>
+          <div class="workspace-editor-group" id="workspaceEditorGroup">
+            <!-- VS Code Editor Tabs Bar (Requirement 1) -->
+            <div class="workspace-tabs-bar" id="workspaceTabsBar">
+              <div class="workspace-tabs-scroll" id="workspaceTabsContainer">
+                <!-- Dynamically populated workspace tabs -->
               </div>
+              <div class="workspace-tabs-right">
+                <button id="btnReopenSidebar" class="workspace-tab-action-btn hidden" title="Show transcript panel">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs">
+                    <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                    <path d="M15 3v18"></path>
+                  </svg>
+                  <span>Panel</span>
+                </button>
+              </div>
+            </div>
 
+            <!-- Empty Tabs State (Shown when all tabs are closed) -->
+            <div id="workspaceEmptyTabsState" class="workspace-empty-tabs-view hidden">
+              <div class="empty-tabs-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                  <line x1="8" y1="21" x2="16" y2="21"></line>
+                  <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+              </div>
+              <h3 class="empty-tabs-title">No Open Media Editors</h3>
+              <p class="empty-tabs-desc">Select a file from the explorer sidebar, open a recent session from Home, or transcribe new media.</p>
+              <button id="btnEmptyTabsHome" class="btn btn-primary btn-sm">Go to Home Overview</button>
+            </div>
+
+            <!-- Media Player Wrapper with Overlaid Auto-Hide Controls -->
+            <div class="player-container" id="workspacePlayerContainer">
+            <div class="video-wrapper" id="videoWrapper">
               <!-- Main Video Stage (Unobstructed View) -->
               <div class="video-stage" id="videoStage">
                 <video id="mediaVideo" playsinline preload="metadata">
@@ -682,6 +667,7 @@
               </div>
             </div>
           </div>
+          </div><!-- /.workspace-editor-group -->
 
           <!-- Dedicated Subtitle Banner Below Waveform: <Avatar><Name>: <Text> -->
           <div id="captionOverlay" class="subtitle-banner">
@@ -695,8 +681,62 @@
         </div>
 
         <!-- Right Column: Speakers Bar & Synced Transcript Panel (Requirement F8) -->
-        <div class="workspace-right">
+        <div class="workspace-right" id="workspaceRightCol">
           
+          <!-- Workspace Right Action Controls Bar (Requirement 3: Controls moved to right panel) -->
+          <div class="workspace-right-toolbar" id="workspaceRightToolbar">
+            <div class="right-toolbar-pills">
+              <button id="btnToggleSidebar" class="btn btn-sm btn-action-pill btn-action-panel" title="Toggle transcript panel">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs">
+                  <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                  <path d="M15 3v18"></path>
+                </svg>
+                <span id="btnToggleSidebarText">Panel</span>
+              </button>
+
+              <button id="btnBarMerge" class="btn btn-sm btn-action-pill" title="Merge misclassified speakers">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs">
+                  <circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 9v12m12-9c0 3-2 6-6 6"></path>
+                </svg>
+                Merge
+              </button>
+              
+              <div class="export-dropdown-wrapper">
+                <button id="btnBarExport" class="btn btn-sm btn-action-pill" title="Export subtitles">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  Export
+                </button>
+                <div id="exportMenu" class="dropdown-menu hidden">
+                  <button class="dropdown-item" data-format="srt">
+                    <span class="fmt-title">SubRip (.srt)</span>
+                    <span class="fmt-desc">With speaker names</span>
+                  </button>
+                  <button class="dropdown-item" data-format="vtt">
+                    <span class="fmt-title">WebVTT (.vtt)</span>
+                    <span class="fmt-desc">HTML5 video standard</span>
+                  </button>
+                  <button class="dropdown-item" data-format="json">
+                    <span class="fmt-title">Full JSON (.json)</span>
+                    <span class="fmt-desc">With word-level timestamps</span>
+                  </button>
+                  <button class="dropdown-item" data-format="txt">
+                    <span class="fmt-title">Plain Text (.txt)</span>
+                    <span class="fmt-desc">Formatted dialogue script</span>
+                  </button>
+                </div>
+              </div>
+
+              <button id="btnBarDelete" class="btn btn-sm btn-action-pill btn-action-danger" title="Delete current session">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs">
+                  <polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                Delete
+              </button>
+            </div>
+          </div>
+
           <!-- Speakers Summary Bar (Clean Avatar Grid: 5 Top, 4 Bottom + (+N)) -->
           <div class="speakers-panel">
             <div class="speakers-grid-header">
@@ -722,7 +762,7 @@
             <button id="btnOpenMergeModal" class="hidden" style="display:none;"></button>
           </div>
 
-          <!-- Transcript Header with Search & Export -->
+          <!-- Transcript Header with Search -->
           <div class="transcript-panel">
             <div class="transcript-header">
               <div class="search-box">
@@ -731,36 +771,6 @@
                   <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
                 <input id="transcriptSearchInput" type="text" placeholder="Search transcript..." class="search-input">
-              </div>
-
-              <!-- Export Dropdown (Requirement F10) -->
-              <div class="export-dropdown-wrapper">
-                <button id="btnExportMenu" class="btn btn-secondary">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                  </svg>
-                  Export
-                </button>
-                <div id="exportMenu" class="dropdown-menu hidden">
-                  <button class="dropdown-item" data-format="srt">
-                    <span class="fmt-title">SubRip (.srt)</span>
-                    <span class="fmt-desc">With speaker names</span>
-                  </button>
-                  <button class="dropdown-item" data-format="vtt">
-                    <span class="fmt-title">WebVTT (.vtt)</span>
-                    <span class="fmt-desc">HTML5 video standard</span>
-                  </button>
-                  <button class="dropdown-item" data-format="json">
-                    <span class="fmt-title">Full JSON (.json)</span>
-                    <span class="fmt-desc">With word-level timestamps</span>
-                  </button>
-                  <button class="dropdown-item" data-format="txt">
-                    <span class="fmt-title">Plain Text (.txt)</span>
-                    <span class="fmt-desc">Formatted dialogue script</span>
-                  </button>
-                </div>
               </div>
               <button id="btnCloseSidebar" class="btn btn-secondary btn-icon" title="Collapse sidebar panel">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">

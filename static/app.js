@@ -32,6 +32,12 @@ class WhoSaidApp {
     this.currentDbPage = 1;
     this.currentDbTableData = null;
     this.dbFilterQuery = "";
+    this.openTabs = [];
+    this.activeTabId = null;
+    this.workspaceTabsContainer = document.getElementById("workspaceTabsContainer");
+    this.workspaceTabsBar = document.getElementById("workspaceTabsBar");
+    this.workspaceEmptyTabsState = document.getElementById("workspaceEmptyTabsState");
+    this.workspacePlayerContainer = document.getElementById("workspacePlayerContainer");
     this.navWorkspaceDot = document.getElementById("navWorkspaceDot");
     this.navLogo = document.getElementById("navLogo");
     this.btnHomeUpload = document.getElementById("btnHomeUpload");
@@ -225,6 +231,7 @@ class WhoSaidApp {
     this.openEditorsItem = document.getElementById("openEditorsItem");
     this.openEditorName = document.getElementById("openEditorName");
     this.noOpenEditors = document.getElementById("noOpenEditors");
+    this.bodyOpenEditors = document.getElementById("bodyOpenEditors");
 
     // Transcribe Path Modal
     this.transcribePathModal = document.getElementById("transcribePathModal");
@@ -288,6 +295,10 @@ class WhoSaidApp {
       const toggleText = document.getElementById("btnToggleSidebarText");
       if (toggleText) {
         toggleText.textContent = isCollapsed ? "Show Panel" : "Panel";
+      }
+      const reopenBtn = document.getElementById("btnReopenSidebar");
+      if (reopenBtn) {
+        reopenBtn.classList.toggle("hidden", !isCollapsed);
       }
     }
   }
@@ -389,6 +400,7 @@ class WhoSaidApp {
     if (this.navWorkspace) this.navWorkspace.classList.add("active");
     if (this.navBackendSettings) this.navBackendSettings.classList.remove("active");
     this.updateActivityBar("workspace");
+    this.renderWorkspaceTabs();
   }
 
   showBackendSettingsView() {
@@ -599,23 +611,52 @@ class WhoSaidApp {
     if (this.btnCancelDelete) this.btnCancelDelete.addEventListener("click", () => this.closeDeleteConfirmModal());
     if (this.btnExecuteDelete) this.btnExecuteDelete.addEventListener("click", () => this.executeDeleteSession());
 
-    // Workspace actions
-    if (this.btnWorkspaceDeleteSession) {
-      this.btnWorkspaceDeleteSession.addEventListener("click", () => {
+    // Workspace action controls (Requirement 3: Right Panel controls)
+    const btnBarMerge = document.getElementById("btnBarMerge");
+    const btnBarExport = document.getElementById("btnBarExport");
+    const btnBarDelete = document.getElementById("btnBarDelete");
+    const btnReopenSidebar = document.getElementById("btnReopenSidebar");
+    const btnEmptyTabsHome = document.getElementById("btnEmptyTabsHome");
+    const exportMenu = document.getElementById("exportMenu");
+
+    if (btnBarMerge) {
+      btnBarMerge.addEventListener("click", () => this.openSpeakerFolderModal());
+    }
+
+    if (btnBarExport && exportMenu) {
+      btnBarExport.addEventListener("click", (e) => {
+        e.stopPropagation();
+        exportMenu.classList.toggle("hidden");
+      });
+      document.addEventListener("click", () => exportMenu.classList.add("hidden"));
+      exportMenu.querySelectorAll(".dropdown-item").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const fmt = btn.getAttribute("data-format");
+          if (fmt) this.triggerExport(fmt);
+          exportMenu.classList.add("hidden");
+        });
+      });
+    }
+
+    if (btnBarDelete) {
+      btnBarDelete.addEventListener("click", () => {
         if (this.currentTranscript) {
-          const fn = this.activeFileName ? this.activeFileName.textContent : "Current Session";
-          this.openDeleteConfirmModal(this.currentTranscript.job_id, fn);
+          const fn = this.currentTranscript.filename || "Current Session";
+          this.openDeleteConfirmModal(this.currentTranscript.job_id, fn, () => {
+            this.closeWorkspaceTab(this.currentTranscript.id);
+          });
         }
       });
     }
 
-    // Media action sub-bar actions (Ref Image 2)
-    const btnBarMerge = document.getElementById("btnBarMerge");
-    const btnBarExport = document.getElementById("btnBarExport");
-    const btnBarDelete = document.getElementById("btnBarDelete");
-    if (btnBarMerge) btnBarMerge.addEventListener("click", () => this.openSpeakerFolderModal());
-    if (btnBarExport) btnBarExport.addEventListener("click", () => this.btnExportMenu && this.btnExportMenu.click());
-    if (btnBarDelete) btnBarDelete.addEventListener("click", () => this.btnWorkspaceDeleteSession && this.btnWorkspaceDeleteSession.click());
+    if (btnReopenSidebar) {
+      btnReopenSidebar.addEventListener("click", () => this.toggleSidebar(true));
+    }
+
+    if (btnEmptyTabsHome) {
+      btnEmptyTabsHome.addEventListener("click", () => this.showHomeView());
+    }
 
     // Two-Column Speaker Directory & Folder Viewer events
     if (this.btnOpenFolderModalDirect) {
@@ -2770,7 +2811,7 @@ class WhoSaidApp {
     }
   }
 
-  // --- Load Full Transcript Workspace ---
+  // --- Load Full Transcript Workspace with Multi-Tab Support (Requirement 1) ---
   async loadTranscript(transcriptId) {
     try {
       const resp = await fetch(`/api/transcripts/${transcriptId}`);
@@ -2779,94 +2820,221 @@ class WhoSaidApp {
         return;
       }
       const data = await resp.json();
-      this.currentAudioPeaks = data.peaks || [];
-
-      // Reset active turn tracking
-      this.activeTurnId = null;
-      document.querySelectorAll(".transcript-turn-card.active-turn").forEach((c) => c.classList.remove("active-turn"));
-
-      // 1. Render Transcript & Speakers FIRST so content ALWAYS displays regardless of media availability!
-      this.renderTranscript(data);
-
-      // Switch to Workspace view & update navigation tabs
-      this.showWorkspaceView();
-      if (this.navWorkspaceDot) this.navWorkspaceDot.classList.remove("hidden");
-      if (this.btnHomeWorkspace) this.btnHomeWorkspace.classList.remove("hidden");
-      this.activeFileIndicator.classList.remove("hidden");
-
-      this.activeFileName.textContent = data.filename || `Job ${data.job_id.slice(0, 8)}`;
-      this.activeModelBadge.textContent = data.model_size || "base";
-
-      this.updateOpenEditors(data.filename || `Job ${data.job_id.slice(0, 8)}`);
-      if (this.actBarWorkspaceDot) this.actBarWorkspaceDot.classList.remove("hidden");
-      if (data.file_path) this.highlightActiveTreeFile(data.file_path);
-
-      const wsTitle = document.getElementById("workspaceTitleText");
-      const wsModel = document.getElementById("workspaceModelPill");
-      const wsDur = document.getElementById("workspaceDurationPill");
-      if (wsTitle) wsTitle.textContent = data.filename || `Job ${data.job_id.slice(0, 8)}`;
-      if (wsModel) wsModel.textContent = `Whisper ${data.model_size || "base"}`;
-
-      if (data.duration) {
-        this.timeDuration.textContent = this.formatTime(data.duration);
-        if (this.vTimeDuration) this.vTimeDuration.textContent = this.formatTime(data.duration);
-        if (wsDur) wsDur.textContent = this.formatTime(data.duration);
-      }
-
-      // 2. Video Player & Media stream handling
-      if (data.media_available && data.media_url) {
-        if (this.mediaExpiredBanner) this.mediaExpiredBanner.classList.add("hidden");
-        this.mediaVideo.classList.remove("hidden");
-        this.mediaVideo.src = data.media_url;
-        this.mediaVideo.load();
-        this.mediaVideo.onloadedmetadata = () => {
-          if (this.mediaVideo.duration) {
-            const dur = this.formatTime(this.mediaVideo.duration);
-            this.timeDuration.textContent = dur;
-            if (this.vTimeDuration) this.vTimeDuration.textContent = dur;
-          }
-        };
-      } else if (data.audio_available && data.audio_url) {
-        // Fallback to audio stream if original video is missing
-        if (this.mediaExpiredBanner) {
-          this.mediaExpiredBanner.classList.remove("hidden");
-          const t = document.getElementById("expiredBannerTitle");
-          const d = document.getElementById("expiredBannerDesc");
-          if (t) t.textContent = "Audio Stream Active";
-          if (d) d.textContent = "Original video file is not on disk. Audio waveform is ready. Click below to attach your local video file if desired.";
-        }
-        this.mediaVideo.classList.remove("hidden");
-        this.mediaVideo.src = data.audio_url;
-        this.mediaVideo.load();
-      } else {
-        if (this.mediaExpiredBanner) {
-          this.mediaExpiredBanner.classList.remove("hidden");
-          const t = document.getElementById("expiredBannerTitle");
-          const d = document.getElementById("expiredBannerDesc");
-          if (t) t.textContent = "Media Files Unavailable";
-          if (d) d.textContent = "Raw media was not found on disk. Click below to attach your local video file to restore full player playback.";
-        }
-        this.mediaVideo.classList.add("hidden");
-        this.mediaVideo.removeAttribute("src");
-      }
-
-      // 3. WaveSurfer Audio Waveform handling
-      if (data.audio_available && data.audio_url) {
-        try {
-          this.initWaveSurfer(data.audio_url, data.peaks);
-        } catch (wsErr) {
-          console.warn("WaveSurfer init error:", wsErr);
-        }
-      } else {
-        if (this.waveformContainer) {
-          this.waveformContainer.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);font-size:0.85rem">Audio waveform unavailable</div>';
-        }
-      }
-
+      this.openWorkspaceTab(data);
+      this.applyActiveTranscript(data);
       this.showToast(data.media_available ? "Session loaded with video playback" : (data.audio_available ? "Session loaded with audio waveform" : "Transcript loaded"), "success");
     } catch (e) {
       console.error("loadTranscript error:", e);
       this.showToast("Error loading transcript", "error");
+    }
+  }
+
+  openWorkspaceTab(data) {
+    if (!data || !data.id) return;
+    const existing = this.openTabs.find((t) => t.id === data.id);
+    if (existing) {
+      existing.data = data;
+      existing.filename = data.filename || `Job ${data.job_id ? data.job_id.slice(0, 8) : "session"}`;
+      existing.modelSize = data.model_size || "base";
+      existing.duration = data.duration || 0;
+    } else {
+      this.openTabs.push({
+        id: data.id,
+        transcriptId: data.id,
+        jobId: data.job_id,
+        filename: data.filename || `Job ${data.job_id ? data.job_id.slice(0, 8) : "session"}`,
+        modelSize: data.model_size || "base",
+        duration: data.duration || 0,
+        data: data
+      });
+    }
+    this.activeTabId = data.id;
+    this.renderWorkspaceTabs();
+    this.updateOpenEditors();
+  }
+
+  renderWorkspaceTabs() {
+    const container = document.getElementById("workspaceTabsContainer");
+    if (!container) return;
+    container.innerHTML = "";
+
+    if (this.openTabs.length === 0) {
+      if (this.workspaceEmptyTabsState) this.workspaceEmptyTabsState.classList.remove("hidden");
+      if (this.workspacePlayerContainer) this.workspacePlayerContainer.classList.add("hidden");
+      return;
+    } else {
+      if (this.workspaceEmptyTabsState) this.workspaceEmptyTabsState.classList.add("hidden");
+      if (this.workspacePlayerContainer) this.workspacePlayerContainer.classList.remove("hidden");
+    }
+
+    this.openTabs.forEach((tab) => {
+      const tabEl = document.createElement("div");
+      tabEl.className = `workspace-tab ${tab.id === this.activeTabId ? "active" : ""}`;
+      tabEl.dataset.tabId = tab.id;
+      tabEl.title = tab.filename;
+
+      tabEl.innerHTML = `
+        <svg class="tab-media-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="23 7 16 12 23 17 23 7"></polygon>
+          <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+        </svg>
+        <span class="tab-label">${this.escapeHtml(tab.filename)}</span>
+        <span class="tab-badge">${this.escapeHtml(tab.modelSize || "base")}</span>
+        <button class="tab-close-btn" title="Close Tab (Ctrl+W)">&times;</button>
+      `;
+
+      tabEl.addEventListener("click", () => {
+        this.switchWorkspaceTab(tab.id);
+      });
+
+      const closeBtn = tabEl.querySelector(".tab-close-btn");
+      if (closeBtn) {
+        closeBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          this.closeWorkspaceTab(tab.id);
+        });
+      }
+
+      container.appendChild(tabEl);
+    });
+
+    const activeEl = container.querySelector(".workspace-tab.active");
+    if (activeEl) {
+      activeEl.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+    }
+  }
+
+  switchWorkspaceTab(tabId) {
+    if (this.activeTabId === tabId) return;
+    const tab = this.openTabs.find((t) => t.id === tabId);
+    if (!tab) return;
+    this.activeTabId = tabId;
+    this.renderWorkspaceTabs();
+    this.updateOpenEditors();
+    if (tab.data) {
+      this.applyActiveTranscript(tab.data);
+    } else {
+      this.loadTranscript(tab.transcriptId);
+    }
+  }
+
+  closeWorkspaceTab(tabId) {
+    const idx = this.openTabs.findIndex((t) => t.id === tabId);
+    if (idx === -1) return;
+
+    const isClosingActive = this.activeTabId === tabId;
+    this.openTabs.splice(idx, 1);
+
+    if (isClosingActive) {
+      if (this.openTabs.length > 0) {
+        const nextIdx = Math.min(idx, this.openTabs.length - 1);
+        const nextTab = this.openTabs[nextIdx];
+        this.activeTabId = nextTab.id;
+        this.renderWorkspaceTabs();
+        this.updateOpenEditors();
+        if (nextTab.data) {
+          this.applyActiveTranscript(nextTab.data);
+        } else {
+          this.loadTranscript(nextTab.transcriptId);
+        }
+      } else {
+        this.activeTabId = null;
+        this.currentTranscript = null;
+        if (this.mediaVideo) {
+          this.mediaVideo.pause();
+          this.mediaVideo.removeAttribute("src");
+        }
+        if (this.transcriptContainer) this.transcriptContainer.innerHTML = "";
+        if (this.speakersAvatarGrid) this.speakersAvatarGrid.innerHTML = "";
+        if (this.waveformContainer) this.waveformContainer.innerHTML = "";
+        if (this.navWorkspaceDot) this.navWorkspaceDot.classList.add("hidden");
+        if (this.actBarWorkspaceDot) this.actBarWorkspaceDot.classList.add("hidden");
+        this.renderWorkspaceTabs();
+        this.updateOpenEditors();
+      }
+    } else {
+      this.renderWorkspaceTabs();
+      this.updateOpenEditors();
+    }
+  }
+
+  applyActiveTranscript(data) {
+    this.currentTranscript = data;
+    this.currentAudioPeaks = data.peaks || [];
+
+    // Hide empty tabs watermark, reveal player container
+    if (this.workspaceEmptyTabsState) this.workspaceEmptyTabsState.classList.add("hidden");
+    if (this.workspacePlayerContainer) this.workspacePlayerContainer.classList.remove("hidden");
+
+    // Reset active turn tracking
+    this.activeTurnId = null;
+    document.querySelectorAll(".transcript-turn-card.active-turn").forEach((c) => c.classList.remove("active-turn"));
+
+    // 1. Render Transcript & Speakers FIRST so content ALWAYS displays regardless of media availability!
+    this.renderTranscript(data);
+
+    // Switch to Workspace view & update navigation tabs
+    this.showWorkspaceView();
+    if (this.navWorkspaceDot) this.navWorkspaceDot.classList.remove("hidden");
+    if (this.btnHomeWorkspace) this.btnHomeWorkspace.classList.remove("hidden");
+    if (this.activeFileIndicator) this.activeFileIndicator.classList.remove("hidden");
+
+    if (this.actBarWorkspaceDot) this.actBarWorkspaceDot.classList.remove("hidden");
+    if (data.file_path) this.highlightActiveTreeFile(data.file_path);
+
+    if (data.duration) {
+      if (this.timeDuration) this.timeDuration.textContent = this.formatTime(data.duration);
+      if (this.vTimeDuration) this.vTimeDuration.textContent = this.formatTime(data.duration);
+    }
+
+    // 2. Video Player & Media stream handling
+    if (data.media_available && data.media_url) {
+      if (this.mediaExpiredBanner) this.mediaExpiredBanner.classList.add("hidden");
+      this.mediaVideo.classList.remove("hidden");
+      this.mediaVideo.src = data.media_url;
+      this.mediaVideo.load();
+      this.mediaVideo.onloadedmetadata = () => {
+        if (this.mediaVideo.duration) {
+          const dur = this.formatTime(this.mediaVideo.duration);
+          if (this.timeDuration) this.timeDuration.textContent = dur;
+          if (this.vTimeDuration) this.vTimeDuration.textContent = dur;
+        }
+      };
+    } else if (data.audio_available && data.audio_url) {
+      // Fallback to audio stream if original video is missing
+      if (this.mediaExpiredBanner) {
+        this.mediaExpiredBanner.classList.remove("hidden");
+        const t = document.getElementById("expiredBannerTitle");
+        const d = document.getElementById("expiredBannerDesc");
+        if (t) t.textContent = "Audio Stream Active";
+        if (d) d.textContent = "Original video file is not on disk. Audio waveform is ready. Click below to attach your local video file if desired.";
+      }
+      this.mediaVideo.classList.remove("hidden");
+      this.mediaVideo.src = data.audio_url;
+      this.mediaVideo.load();
+    } else {
+      if (this.mediaExpiredBanner) {
+        this.mediaExpiredBanner.classList.remove("hidden");
+        const t = document.getElementById("expiredBannerTitle");
+        const d = document.getElementById("expiredBannerDesc");
+        if (t) t.textContent = "Media Files Unavailable";
+        if (d) d.textContent = "Raw media was not found on disk. Click below to attach your local video file to restore full player playback.";
+      }
+      this.mediaVideo.classList.add("hidden");
+      this.mediaVideo.removeAttribute("src");
+    }
+
+    // 3. WaveSurfer Audio Waveform handling
+    if (data.audio_available && data.audio_url) {
+      try {
+        this.initWaveSurfer(data.audio_url, data.peaks);
+      } catch (wsErr) {
+        console.warn("WaveSurfer init error:", wsErr);
+      }
+    } else {
+      if (this.waveformContainer) {
+        this.waveformContainer.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);font-size:0.85rem">Audio waveform unavailable</div>';
+      }
     }
   }
 
@@ -3438,11 +3606,45 @@ class WhoSaidApp {
     });
   }
 
-  updateOpenEditors(filename) {
-    if (!this.openEditorsItem || !this.openEditorName || !this.noOpenEditors) return;
-    this.openEditorName.textContent = filename || "Session";
-    this.openEditorsItem.classList.remove("hidden");
-    this.noOpenEditors.classList.add("hidden");
+  updateOpenEditors() {
+    if (!this.bodyOpenEditors) {
+      this.bodyOpenEditors = document.getElementById("bodyOpenEditors");
+    }
+    if (!this.bodyOpenEditors) return;
+
+    if (!this.openTabs || this.openTabs.length === 0) {
+      this.bodyOpenEditors.innerHTML = `<div id="noOpenEditors" class="tree-empty-hint">No active session</div>`;
+      return;
+    }
+
+    this.bodyOpenEditors.innerHTML = "";
+    this.openTabs.forEach((tab) => {
+      const row = document.createElement("div");
+      const isActive = tab.id === this.activeTabId;
+      row.className = `open-editor-row ${isActive ? "active" : ""}`;
+      row.title = tab.filename;
+      row.innerHTML = `
+        <span class="file-icon-wrap" style="margin-right: 6px; font-size: 13px;">🎬</span>
+        <span class="item-name">${this.escapeHtml(tab.filename)}</span>
+        <button class="open-editor-close" title="Close Tab (Ctrl+W)">&times;</button>
+        ${isActive ? '<span class="active-dot" style="margin-left: 4px; font-size: 10px; color: #38bdf8;">●</span>' : ''}
+      `;
+
+      row.addEventListener("click", () => {
+        this.switchWorkspaceTab(tab.id);
+        this.showWorkspaceView();
+      });
+
+      const closeBtn = row.querySelector(".open-editor-close");
+      if (closeBtn) {
+        closeBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          this.closeWorkspaceTab(tab.id);
+        });
+      }
+
+      this.bodyOpenEditors.appendChild(row);
+    });
   }
 
   applyTreeFilter() {
