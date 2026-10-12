@@ -1,7 +1,7 @@
 # Who Said — Local Video Transcriber with Speaker Captions
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Beta Release](https://img.shields.io/badge/Release-v1.0.0--beta.1-orange.svg)](https://github.com/JoshCyril/WhoSaid/releases/tag/v1.0.0-beta.1)
+[![Beta Release](https://img.shields.io/badge/Release-v1.0.0--beta.2-orange.svg)](https://github.com/JoshCyril/WhoSaid/releases/tag/v1.0.0-beta.2)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Electron 44](https://img.shields.io/badge/Electron-44.7-47848F.svg)](https://www.electronjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg)](https://fastapi.tiangolo.com/)
@@ -60,9 +60,9 @@ Everything runs locally on your CPU with **zero cloud calls**.
 
 You can download pre-compiled Windows executable binaries directly from [GitHub Releases](https://github.com/JoshCyril/WhoSaid/releases):
 
-- 📦 **[WhoSaid Setup 1.0.0.exe (Installer)](https://github.com/JoshCyril/WhoSaid/releases/download/v1.0.0-beta.1/WhoSaid.Setup.1.0.0.exe)** — Standard Windows installer.
-- 🚀 **[WhoSaid 1.0.0.exe (Portable)](https://github.com/JoshCyril/WhoSaid/releases/download/v1.0.0-beta.1/WhoSaid.1.0.0.exe)** — Zero-install standalone executable.
-- 🗄️ **[sample_whosaid.db (Starter Database)](https://github.com/JoshCyril/WhoSaid/releases/download/v1.0.0-beta.1/sample_whosaid.db)** — Bundled sample SQLite database with pre-loaded demo session & voice profiles.
+- 📦 **[WhoSaid Setup 1.0.0-beta.2.exe (Installer)](https://github.com/JoshCyril/WhoSaid/releases/download/v1.0.0-beta.2/WhoSaid.Setup.1.0.0-beta.2.exe)** — Standard Windows installer.
+- 🚀 **[WhoSaid 1.0.0-beta.2.exe (Portable)](https://github.com/JoshCyril/WhoSaid/releases/download/v1.0.0-beta.2/WhoSaid.1.0.0-beta.2.exe)** — Zero-install standalone executable.
+- 🗄️ **[sample_whosaid.db (Starter Database)](https://github.com/JoshCyril/WhoSaid/releases/download/v1.0.0-beta.2/sample_whosaid.db)** — Bundled sample SQLite database with pre-loaded demo session & voice profiles.
 
 ---
 

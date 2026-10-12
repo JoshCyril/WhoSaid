@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil
 import asyncio
 import threading
 import warnings
@@ -925,7 +926,7 @@ async def api_db_stats():
     stats["uploads_size"] = folder_size(UPLOADS_DIR)
     stats["audio_size"] = folder_size(AUDIO_DIR)
     stats["server_port"] = 8000
-    stats["app_version"] = "1.0.0"
+    stats["app_version"] = "1.0.0-beta.2"
     stats["platform"] = sys.platform
     stats["frozen"] = getattr(sys, "frozen", False)
     return stats
