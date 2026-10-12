@@ -43,6 +43,39 @@ function saveRecentFolder(folderPath) {
   }
 }
 
+// Path for storing custom SQLite Database file location configuration
+function getDbConfigFilePath() {
+  const userDataDir = app.getPath('userData');
+  return path.join(userDataDir, 'db-config.json');
+}
+
+function loadDbConfig() {
+  try {
+    const filePath = getDbConfigFilePath();
+    if (fs.existsSync(filePath)) {
+      const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+      if (data && typeof data.dbPath === 'string') return data;
+    }
+  } catch (err) {
+    console.warn('[DbConfig] Error reading:', err);
+  }
+  return { dbPath: null };
+}
+
+function saveDbConfig(dbPath) {
+  try {
+    const filePath = getDbConfigFilePath();
+    const cleanPath = (dbPath && typeof dbPath === 'string' && dbPath.trim()) ? dbPath.trim() : null;
+    const data = { dbPath: cleanPath };
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+    console.log('[DbConfig] Saved database path configuration:', cleanPath);
+    return data;
+  } catch (err) {
+    console.warn('[DbConfig] Error saving:', err);
+    return { dbPath: null };
+  }
+}
+
 // Check if Python backend is alive
 function checkBackendHealthy() {
   return new Promise((resolve) => {
@@ -77,8 +110,16 @@ async function ensureBackendRunning() {
   fs.mkdirSync(path.join(storageDir, 'uploads'), { recursive: true });
   fs.mkdirSync(path.join(storageDir, 'audio'), { recursive: true });
 
-  // Connect & Seed Database: copy bundled seed DB if persistent storage DB does not exist
-  const targetDbPath = path.join(storageDir, 'whosaid.db');
+  const dbConfig = loadDbConfig();
+  const configuredDbPath = dbConfig.dbPath ? dbConfig.dbPath.trim() : null;
+
+  // Use configured DB path if specified, otherwise default to storage/whosaid.db
+  const targetDbPath = configuredDbPath || path.join(storageDir, 'whosaid.db');
+  const targetDbDir = path.dirname(targetDbPath);
+  if (!fs.existsSync(targetDbDir)) {
+    fs.mkdirSync(targetDbDir, { recursive: true });
+  }
+
   const bundledDbCandidates = [
     path.join(PROJECT_ROOT, 'storage', 'whosaid.db'),
     path.join(PROJECT_ROOT, 'whosaid-backend', 'storage', 'whosaid.db'),
@@ -91,7 +132,7 @@ async function ensureBackendRunning() {
       if (fs.existsSync(bDb)) {
         try {
           fs.copyFileSync(bDb, targetDbPath);
-          console.log(`[Storage] Initialized persistent SQLite DB from ${bDb}`);
+          console.log(`[Storage] Initialized persistent SQLite DB from ${bDb} to ${targetDbPath}`);
           break;
         } catch (e) {
           console.warn('[Storage] Copy DB warning:', e);
@@ -115,6 +156,7 @@ async function ensureBackendRunning() {
 
   const env = Object.assign({}, process.env, {
     WHOSAID_STORAGE_DIR: storageDir,
+    WHOSAID_DB_PATH: configuredDbPath || undefined,
     WHOSAID_MODELS_DIR: fs.existsSync(modelsDir) ? modelsDir : undefined,
     WHOSAID_STATIC_DIR: fs.existsSync(staticDir) ? staticDir : undefined,
     PYTHONUNBUFFERED: '1'
@@ -328,6 +370,47 @@ ipcMain.handle('fs:saveRecentFolder', async (_event, folderPath) => {
 });
 
 ipcMain.handle('app:getVersion', () => '1.0.0');
+
+// Database File Picker & Configuration IPCs
+ipcMain.handle('dialog:selectDbFile', async () => {
+  if (!mainWindow) return null;
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: 'Select SQLite Database File',
+    properties: ['openFile'],
+    filters: [
+      { name: 'SQLite Database (*.db, *.sqlite)', extensions: ['db', 'sqlite', 'sqlite3'] },
+      { name: 'All Files (*.*)', extensions: ['*'] }
+    ]
+  });
+  if (result.canceled || !result.filePaths || result.filePaths.length === 0) {
+    return null;
+  }
+  return result.filePaths[0];
+});
+
+ipcMain.handle('dialog:createDbFile', async () => {
+  if (!mainWindow) return null;
+  const result = await dialog.showSaveDialog(mainWindow, {
+    title: 'Create or Choose New SQLite Database Location',
+    defaultPath: 'whosaid.db',
+    filters: [
+      { name: 'SQLite Database (*.db)', extensions: ['db', 'sqlite', 'sqlite3'] },
+      { name: 'All Files (*.*)', extensions: ['*'] }
+    ]
+  });
+  if (result.canceled || !result.filePath) {
+    return null;
+  }
+  return result.filePath;
+});
+
+ipcMain.handle('config:getDbPath', async () => {
+  return loadDbConfig().dbPath || null;
+});
+
+ipcMain.handle('config:setDbPath', async (_event, newDbPath) => {
+  return saveDbConfig(newDbPath);
+});
 
 // App Lifecycle
 app.whenReady().then(async () => {

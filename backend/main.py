@@ -17,7 +17,8 @@ from backend.db import (
     save_transcript, get_transcript, get_transcript_by_job_id, update_transcript_content,
     get_all_voice_profiles, save_voice_profile, delete_voice_profile,
     get_transcription_history, delete_job_and_transcript,
-    get_db_stats, get_table_rows, run_readonly_query, DB_PATH
+    get_db_stats, get_table_rows, run_readonly_query, DB_PATH,
+    get_db_path, get_default_db_path, set_db_path
 )
 from backend.audio import (
     extract_audio_16k, compute_file_hash, generate_waveform_peaks
@@ -929,11 +930,53 @@ async def api_backend_cleanup():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Cleanup error: {e}")
 
+@app.get("/api/backend/db-config")
+async def api_get_db_config():
+    active_path = get_db_path()
+    default_path = get_default_db_path()
+    return JSONResponse({
+        "current_db_path": active_path,
+        "default_db_path": default_path,
+        "is_custom": os.path.abspath(active_path) != default_path,
+        "exists": os.path.exists(active_path),
+        "file_size": os.path.getsize(active_path) if os.path.exists(active_path) else 0
+    })
+
+@app.post("/api/backend/db-config")
+async def api_set_db_config(request: Request):
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+
+    reset = body.get("reset_to_default", False)
+    new_path = body.get("db_path")
+
+    if reset or not new_path:
+        updated_path = set_db_path(None)
+    else:
+        clean_path = str(new_path).strip()
+        if not clean_path.lower().endswith((".db", ".sqlite", ".sqlite3")):
+            clean_path = f"{clean_path}.db"
+        updated_path = set_db_path(clean_path)
+
+    stats = get_db_stats()
+    return JSONResponse({
+        "status": "success",
+        "message": f"Connected to database at {updated_path}",
+        "current_db_path": updated_path,
+        "default_db_path": get_default_db_path(),
+        "is_custom": os.path.abspath(updated_path) != get_default_db_path(),
+        "stats": stats
+    })
+
 @app.get("/api/db/download")
 async def api_db_download():
-    if not os.path.exists(DB_PATH):
+    active_path = get_db_path()
+    if not os.path.exists(active_path):
         raise HTTPException(status_code=404, detail="Database file not found")
-    return FileResponse(DB_PATH, media_type="application/x-sqlite3", filename="whosaid.db")
+    filename = os.path.basename(active_path) or "whosaid.db"
+    return FileResponse(active_path, media_type="application/x-sqlite3", filename=filename)
 
 @app.get("/favicon.ico")
 async def get_favicon():

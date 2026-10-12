@@ -13,12 +13,43 @@ else:
     APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     ROOT_DIR = APP_DIR
 
-DB_DIR = os.environ.get("WHOSAID_STORAGE_DIR") or os.path.join(ROOT_DIR, "storage")
-DB_PATH = os.path.join(DB_DIR, "whosaid.db")
+DEFAULT_DB_DIR = os.environ.get("WHOSAID_STORAGE_DIR") or os.path.join(ROOT_DIR, "storage")
+DEFAULT_DB_PATH = os.path.join(DEFAULT_DB_DIR, "whosaid.db")
+
+_ACTIVE_DB_PATH: Optional[str] = os.environ.get("WHOSAID_DB_PATH")
+
+def get_default_db_path() -> str:
+    return os.path.abspath(DEFAULT_DB_PATH)
+
+def get_db_path() -> str:
+    global _ACTIVE_DB_PATH
+    if _ACTIVE_DB_PATH and _ACTIVE_DB_PATH.strip():
+        return os.path.abspath(_ACTIVE_DB_PATH.strip())
+    return os.path.abspath(DEFAULT_DB_PATH)
+
+def set_db_path(new_path: Optional[str]) -> str:
+    global _ACTIVE_DB_PATH
+    if not new_path or not str(new_path).strip():
+        _ACTIVE_DB_PATH = None
+    else:
+        clean_path = os.path.abspath(str(new_path).strip())
+        parent_dir = os.path.dirname(clean_path)
+        if parent_dir:
+            os.makedirs(parent_dir, exist_ok=True)
+        _ACTIVE_DB_PATH = clean_path
+    init_db()
+    return get_db_path()
+
+# For backwards compatibility
+DB_DIR = DEFAULT_DB_DIR
+DB_PATH = get_db_path()
 
 def get_connection():
-    os.makedirs(DB_DIR, exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
+    active_path = get_db_path()
+    parent_dir = os.path.dirname(active_path)
+    if parent_dir:
+        os.makedirs(parent_dir, exist_ok=True)
+    conn = sqlite3.connect(active_path)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -299,7 +330,8 @@ def delete_job_and_transcript(job_id: str):
 # --- Database Introspection & Management ---
 
 def get_db_stats() -> Dict[str, Any]:
-    file_size = os.path.getsize(DB_PATH) if os.path.exists(DB_PATH) else 0
+    active_path = get_db_path()
+    file_size = os.path.getsize(active_path) if os.path.exists(active_path) else 0
     conn = get_connection()
     cursor = conn.cursor()
     tables_info = {}
@@ -312,9 +344,10 @@ def get_db_stats() -> Dict[str, Any]:
             tables_info[table] = {"count": 0, "columns": []}
     conn.close()
     return {
-        "db_path": os.path.abspath(DB_PATH),
-        "db_dir": os.path.abspath(DB_DIR),
-        "db_exists": os.path.exists(DB_PATH),
+        "db_path": os.path.abspath(active_path),
+        "db_dir": os.path.abspath(os.path.dirname(active_path)),
+        "is_custom": os.path.abspath(active_path) != get_default_db_path(),
+        "db_exists": os.path.exists(active_path),
         "file_size": file_size,
         "db_size_bytes": file_size,
         "jobs_count": tables_info.get("jobs", {}).get("count", 0),

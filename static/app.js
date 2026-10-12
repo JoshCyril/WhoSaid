@@ -4057,6 +4057,147 @@ class WhoSaidApp {
         }
       });
     }
+
+    // 9. Database Path Selection, Creation & Dynamic Switching
+    const inputActiveDbPath = document.getElementById("inputActiveDbPath");
+    const btnBrowseDbFile = document.getElementById("btnBrowseDbFile");
+    const btnCreateNewDbFile = document.getElementById("btnCreateNewDbFile");
+    const btnApplyDbPath = document.getElementById("btnApplyDbPath");
+    const btnResetDefaultDb = document.getElementById("btnResetDefaultDb");
+    const btnCopyActiveDbPath = document.getElementById("btnCopyActiveDbPath");
+    const btnSysBrowseDb = document.getElementById("btnSysBrowseDb");
+    const btnSysShowInFolder = document.getElementById("btnSysShowInFolder");
+    const btnNavDbLocation = document.getElementById("btnNavDbLocation");
+
+    if (btnBrowseDbFile) {
+      btnBrowseDbFile.addEventListener("click", async () => {
+        let chosenPath = null;
+        if (window.electronAPI && window.electronAPI.selectDbFileDialog) {
+          chosenPath = await window.electronAPI.selectDbFileDialog();
+        } else {
+          chosenPath = prompt("Enter path to existing SQLite database file (.db):", inputActiveDbPath ? inputActiveDbPath.value : "");
+        }
+        if (chosenPath && chosenPath.trim()) {
+          if (inputActiveDbPath) inputActiveDbPath.value = chosenPath.trim();
+          await this.switchDatabase(chosenPath.trim());
+        }
+      });
+    }
+
+    if (btnCreateNewDbFile) {
+      btnCreateNewDbFile.addEventListener("click", async () => {
+        let chosenPath = null;
+        if (window.electronAPI && window.electronAPI.createDbFileDialog) {
+          chosenPath = await window.electronAPI.createDbFileDialog();
+        } else {
+          chosenPath = prompt("Enter path for new SQLite database file (.db):", inputActiveDbPath ? inputActiveDbPath.value : "");
+        }
+        if (chosenPath && chosenPath.trim()) {
+          if (inputActiveDbPath) inputActiveDbPath.value = chosenPath.trim();
+          await this.switchDatabase(chosenPath.trim());
+        }
+      });
+    }
+
+    if (btnApplyDbPath) {
+      btnApplyDbPath.addEventListener("click", async () => {
+        const val = inputActiveDbPath ? inputActiveDbPath.value.trim() : "";
+        if (!val) {
+          this.showToast("Please enter or select a database file path", "warning");
+          return;
+        }
+        await this.switchDatabase(val);
+      });
+    }
+
+    if (btnResetDefaultDb) {
+      btnResetDefaultDb.addEventListener("click", async () => {
+        await this.switchDatabase(null, true);
+      });
+    }
+
+    if (btnCopyActiveDbPath) {
+      btnCopyActiveDbPath.addEventListener("click", () => {
+        const pathVal = inputActiveDbPath ? inputActiveDbPath.value.trim() : (this.currentDbPath || "");
+        if (pathVal) {
+          navigator.clipboard.writeText(pathVal).then(() => {
+            this.showToast("Database path copied to clipboard", "success");
+          });
+        }
+      });
+    }
+
+    if (btnSysBrowseDb) {
+      btnSysBrowseDb.addEventListener("click", () => {
+        if (btnBrowseDbFile) btnBrowseDbFile.click();
+      });
+    }
+
+    if (btnSysShowInFolder) {
+      btnSysShowInFolder.addEventListener("click", () => {
+        const pathVal = this.currentDbPath;
+        if (pathVal && window.electronAPI && window.electronAPI.showInFolder) {
+          window.electronAPI.showInFolder(pathVal);
+        } else {
+          this.showToast(pathVal || "No active database file path", "info");
+        }
+      });
+    }
+
+    if (btnNavDbLocation) {
+      btnNavDbLocation.addEventListener("click", () => {
+        this.showBackendSettingsView();
+        if (inputActiveDbPath) {
+          inputActiveDbPath.focus();
+          inputActiveDbPath.select();
+        }
+      });
+    }
+  }
+
+  async switchDatabase(dbPath, resetToDefault = false) {
+    try {
+      this.showToast("Switching database connection...", "info");
+      const resp = await fetch("/api/backend/db-config", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          db_path: resetToDefault ? null : dbPath,
+          reset_to_default: resetToDefault
+        })
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json();
+        throw new Error(err.detail || "Failed to switch database");
+      }
+
+      const res = await resp.json();
+      const updatedPath = res.current_db_path;
+      this.currentDbPath = updatedPath;
+
+      // Persist in desktop electron app config
+      if (window.electronAPI && window.electronAPI.setConfiguredDbPath) {
+        await window.electronAPI.setConfiguredDbPath(resetToDefault ? null : updatedPath);
+      }
+
+      const inputActiveDbPath = document.getElementById("inputActiveDbPath");
+      if (inputActiveDbPath) inputActiveDbPath.value = updatedPath;
+
+      const dbName = updatedPath.split(/[\\/]/).pop() || "database";
+      const msg = resetToDefault
+        ? "Switched to default app storage database"
+        : `Connected to separate database: ${dbName}`;
+      this.showToast(msg, "success");
+
+      // Refresh DB stats, tables, and home recent sessions
+      await this.loadDbStats();
+      this.loadDbTable(this.currentDbTable || "jobs", 1);
+      this.loadHomeRecentSessions();
+    } catch (e) {
+      console.error("Database switch error:", e);
+      this.showToast(e.message || "Failed to connect to database", "error");
+    }
   }
 
   async loadDbStats() {
@@ -4064,6 +4205,32 @@ class WhoSaidApp {
       const resp = await fetch("/api/db/stats");
       if (!resp.ok) return;
       const data = await resp.json();
+
+      this.currentDbPath = data.db_path || "";
+      const inputActiveDbPath = document.getElementById("inputActiveDbPath");
+      if (inputActiveDbPath) inputActiveDbPath.value = data.db_path || "";
+
+      const dbStorageTypeBadge = document.getElementById("dbStorageTypeBadge");
+      if (dbStorageTypeBadge) {
+        if (data.is_custom) {
+          dbStorageTypeBadge.textContent = "Custom External DB";
+          dbStorageTypeBadge.className = "db-type-badge custom";
+        } else {
+          dbStorageTypeBadge.textContent = "Default Storage";
+          dbStorageTypeBadge.className = "db-type-badge default";
+        }
+      }
+
+      const sysDbBadge = document.getElementById("sysDbBadge");
+      if (sysDbBadge) {
+        if (data.is_custom) {
+          sysDbBadge.textContent = "Custom External";
+          sysDbBadge.className = "db-type-badge custom";
+        } else {
+          sysDbBadge.textContent = "Default";
+          sysDbBadge.className = "db-type-badge default";
+        }
+      }
 
       const dbSizeBytes = data.file_size || data.db_size_bytes || 0;
       const jobsCount = data.jobs_count ?? data.tables?.jobs?.count ?? 0;
@@ -4075,7 +4242,7 @@ class WhoSaidApp {
       if (kpiDbSize) kpiDbSize.textContent = this.formatBytes(dbSizeBytes);
 
       const kpiDbPath = document.getElementById("kpiDbPath");
-      if (kpiDbPath) kpiDbPath.textContent = data.db_path || "whosaid.db";
+      if (kpiDbPath) kpiDbPath.textContent = data.db_path ? data.db_path.split(/[\\/]/).pop() : "whosaid.db";
 
       const kpiJobsCount = document.getElementById("kpiJobsCount");
       if (kpiJobsCount) kpiJobsCount.textContent = jobsCount.toLocaleString();

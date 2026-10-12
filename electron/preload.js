@@ -6,5 +6,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   showInFolder: (filePath) => ipcRenderer.invoke('fs:showInFolder', filePath),
   getRecentFolders: () => ipcRenderer.invoke('fs:getRecentFolders'),
   saveRecentFolder: (folderPath) => ipcRenderer.invoke('fs:saveRecentFolder', folderPath),
-  getAppVersion: () => ipcRenderer.invoke('app:getVersion')
+  getAppVersion: () => ipcRenderer.invoke('app:getVersion'),
+  // Database file selection & configuration
+  selectDbFileDialog: () => ipcRenderer.invoke('dialog:selectDbFile'),
+  createDbFileDialog: () => ipcRenderer.invoke('dialog:createDbFile'),
+  getConfiguredDbPath: () => ipcRenderer.invoke('config:getDbPath'),
+  setConfiguredDbPath: (newDbPath) => ipcRenderer.invoke('config:setDbPath', newDbPath)
 });

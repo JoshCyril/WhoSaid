@@ -49,7 +49,8 @@ Everything runs locally on your CPU with **zero cloud calls**.
 - **Progress Tracking & Instant Caching**: WebSocket real-time progress indicator across extraction, diarization, transcription, and turn alignment. SHA-256 caching makes reopening previously processed files instant.
 - **Subtitle & Data Exports**: Export as SubRip (`.srt`), WebVTT (`.vtt`), full word-level (`.json`), and readable dialogue script (`.txt`).
 - **VS Code Style Folder Explorer**: Browse local directories with an authentic activity bar and collapsible folder tree. Video and audio files are highlighted, pre-cached files show ready indicators, and files can be transcribed directly from disk.
-- **All-In-One Self-Hosted Executable**: Bundled Electron desktop shell that self-hosts the backend and connects to the embedded SQLite database with zero external Python runtime required.
+- **User-Selectable & Decoupled Database**: The SQLite database (`whosaid.db`) is completely decoupled from the executable. Users can browse and select existing `.db` files or create fresh database files anywhere (e.g. external drive, Documents, shared storage) directly from the in-app interface, with persistent settings across app restarts.
+- **All-In-One Self-Hosted Executable**: Bundled Electron desktop shell that self-hosts the backend and connects to the SQLite database with zero external Python runtime required.
 
 ---
 

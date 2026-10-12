@@ -117,6 +117,16 @@
                 <span>History (<span id="headerHistoryCountBadge">0</span>)</span>
               </div>
             </button>
+            <button id="btnNavDbLocation" class="dropdown-item">
+              <div class="dropdown-item-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+                  <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                  <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                  <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                </svg>
+                <span>Database File Location</span>
+              </div>
+            </button>
           </div>
         </div>
       </div>
@@ -872,6 +882,55 @@
           </div>
         </div>
 
+        <!-- Database File Location & Custom Path Selector -->
+        <div class="db-config-banner" id="dbConfigBanner">
+          <div class="db-config-top">
+            <div class="db-config-title-group">
+              <div class="db-config-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+                  <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                  <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                  <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                </svg>
+              </div>
+              <div class="db-config-text">
+                <div class="db-config-label-row">
+                  <span class="db-config-heading">Active SQLite Database File</span>
+                  <span id="dbStorageTypeBadge" class="db-type-badge default">Default Storage</span>
+                  <span class="db-live-status-pill"><span class="db-live-dot"></span> Live</span>
+                </div>
+                <p class="db-config-desc">Decouple and store your database anywhere (e.g. external drive, Documents, custom project directory). The app connects dynamically and retains settings across restarts.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="db-config-input-row">
+            <div class="db-path-input-wrap">
+              <input type="text" id="inputActiveDbPath" class="form-input form-input-mono db-path-input" spellcheck="false" placeholder="Enter or select SQLite database file (*.db)..." />
+              <button id="btnCopyActiveDbPath" class="btn-copy-path" title="Copy database path to clipboard">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              </button>
+            </div>
+            <div class="db-config-buttons">
+              <button id="btnBrowseDbFile" class="btn btn-secondary btn-sm" title="Select an existing SQLite database file (.db, .sqlite)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                Select DB File
+              </button>
+              <button id="btnCreateNewDbFile" class="btn btn-secondary btn-sm" title="Create or specify a new database file">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                New DB...
+              </button>
+              <button id="btnApplyDbPath" class="btn btn-primary btn-sm" title="Connect and switch active database">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Connect
+              </button>
+              <button id="btnResetDefaultDb" class="btn btn-ghost btn-sm" title="Reset to standard app data storage">
+                Reset Default
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- KPI Metric Cards Grid -->
         <div class="db-kpi-grid">
           <div class="db-kpi-card">
@@ -1011,11 +1070,26 @@
         <div id="dbSystemContainer" class="db-tab-content hidden">
           <div class="db-system-grid">
             <div class="system-card">
-              <h3 class="system-card-title">Database File Location</h3>
+              <div class="system-card-header-flex">
+                <h3 class="system-card-title">Database File Location</h3>
+                <span id="sysDbBadge" class="db-type-badge default">Default</span>
+              </div>
               <div class="system-path-box" id="sysDbPath">...</div>
               <div class="system-stat-row">
                 <span>File Size:</span>
                 <strong id="sysDbSize">0 KB</strong>
+              </div>
+              <div class="system-stat-row">
+                <span>Engine / Mode:</span>
+                <strong style="color:#38bdf8;">SQLite 3 (WAL mode)</strong>
+              </div>
+              <div class="system-actions mt-3">
+                <button id="btnSysBrowseDb" class="btn btn-secondary btn-sm" title="Select or change database file">
+                  Change DB File...
+                </button>
+                <button id="btnSysShowInFolder" class="btn btn-secondary btn-sm" title="Reveal database in File Explorer">
+                  Reveal in Explorer
+                </button>
               </div>
             </div>
 

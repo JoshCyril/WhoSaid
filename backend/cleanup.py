@@ -2,14 +2,15 @@ import os
 import time
 import sqlite3
 from typing import List, Optional, Set
-from backend.db import DB_PATH, DB_DIR
+from backend.db import get_db_path, get_connection, DB_DIR
 
 def get_active_job_files() -> Set[str]:
     files = set()
-    if not os.path.exists(DB_PATH):
+    active_path = get_db_path()
+    if not os.path.exists(active_path):
         return files
     try:
-        conn = sqlite3.connect(DB_PATH)
+        conn = get_connection()
         cursor = conn.cursor()
         for row in cursor.execute("SELECT file_path, audio_path FROM jobs").fetchall():
             for p in row:
