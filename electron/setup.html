@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Who Said - Database Setup</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: #181c20;
+      color: #eaeaea;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      user-select: none;
+    }
+    .setup-container {
+      width: 100%;
+      max-width: 680px;
+      background: #20252b;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 32px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+    .brand-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .brand-icon-box {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .brand-icon-box svg {
+      width: 24px;
+      height: 24px;
+    }
+    .brand-text h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #f8fafc;
+      letter-spacing: -0.01em;
+    }
+    .brand-text p {
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+    .setup-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #f1f5f9;
+      margin-bottom: 6px;
+    }
+    .setup-desc {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-bottom: 20px;
+      line-height: 1.45;
+    }
+    .options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+    .option-card {
+      background: #181c20;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 14px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.15s ease;
+    }
+    .option-card:hover {
+      background: #1c2228;
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+    .option-card.selected {
+      background: rgba(56, 189, 248, 0.07);
+      border-color: #38bdf8;
+    }
+    .option-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .option-radio {
+      margin-top: 3px;
+      accent-color: #38bdf8;
+      cursor: pointer;
+    }
+    .option-info h3 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge-pill {
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 1px 7px;
+      border-radius: 9999px;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    .option-info p {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+    .btn-action-small {
+      background: #283038;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #eaeaea;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn-action-small:hover {
+      background: #333d47;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    .path-display-wrap {
+      margin-bottom: 20px;
+    }
+    .path-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #94a3b8;
+      margin-bottom: 6px;
+      display: block;
+    }
+    .path-input-group {
+      display: flex;
+      align-items: center;
+      background: #14171a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 4px 8px;
+    }
+    .path-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #7dd3fc;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.8rem;
+      outline: none;
+      padding: 6px 4px;
+    }
+    .btn-copy-path {
+      background: transparent;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+    }
+    .btn-copy-path:hover {
+      color: #eaeaea;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .footer-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 10px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      cursor: pointer;
+    }
+    .checkbox-label input {
+      accent-color: #38bdf8;
+    }
+    .btn-primary {
+      background: #f1f5f9;
+      color: #0f172a;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 22px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+    }
+    .btn-primary:hover {
+      background: #ffffff;
+      box-shadow: 0 0 16px rgba(255, 255, 255, 0.2);
+    }
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    /* Loading & Status Overlay */
+    .status-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(24, 28, 32, 0.96);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      transition: opacity 0.2s ease;
+    }
+    .status-overlay.hidden {
+      display: none;
+    }
+    .spinner {
+      width: 42px;
+      height: 42px;
+      border: 3px solid rgba(56, 189, 248, 0.2);
+      border-top-color: #38bdf8;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .status-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #f8fafc;
+      margin-bottom: 6px;
+    }
+    .status-desc {
+      font-size: 0.82rem;
+      color: #94a3b8;
+      max-width: 440px;
+      line-height: 1.5;
+    }
+    .status-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .log-details-box {
+      margin-top: 14px;
+      max-height: 140px;
+      overflow-y: auto;
+      background: #101316;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-family: monospace;
+      font-size: 0.72rem;
+      color: #f87171;
+      text-align: left;
+      width: 100%;
+      max-width: 520px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="setup-container">
+    <div class="brand-header">
+      <div class="brand-icon-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+          <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+          <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>Who Said Studio</h1>
+        <p>100% Offline Video Transcriber &amp; Diarization</p>
+      </div>
+    </div>
+
+    <h2 class="setup-title">Select Database Location</h2>
+    <p class="setup-desc">
+      Choose where Who Said should store your transcription history, speaker voice profiles, and captions database.
+    </p>
+
+    <div class="options-grid">
+      <!-- Option 1: Sample DB -->
+      <div class="option-card selected" id="cardSampleDb" onclick="selectOption('sample')">
+        <div class="option-left">
+          <input type="radio" name="dbOption" id="radioSample" class="option-radio" checked />
+          <div class="option-info">
+            <h3>Sample / Starter Database <span class="badge-pill">Recommended</span></h3>
+            <p>Pre-populated with 2-speaker sample demo data and voice profiles.</p>
+          </div>
+        </div>
+        <span class="badge-pill" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border-color: rgba(16, 185, 129, 0.3);">Bundled</span>
+      </div>
+
+      <!-- Option 2: Existing DB -->
+      <div class="option-card" id="cardExistingDb" onclick="selectOption('existing')">
+        <div class="option-left">
+          <input type="radio" name="dbOption" id="radioExisting" class="option-radio" />
+          <div class="option-info">
+            <h3>Select Existing Database File</h3>
+            <p>Connect to an existing .db or .sqlite file on your PC or external drive.</p>
+          </div>
+        </div>
+        <button type="button" class="btn-action-small" id="btnBrowseExisting">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+          Browse...
+        </button>
+      </div>
+
+      <!-- Option 3: Create New DB -->
+      <div class="option-card" id="cardNewDb" onclick="selectOption('new')">
+        <div class="option-left">
+          <input type="radio" name="dbOption" id="radioNew" class="option-radio" />
+          <div class="option-info">
+            <h3>Create New Database File</h3>
+            <p>Pick any folder to initialize a clean, empty database file.</p>
+          </div>
+        </div>
+        <button type="button" class="btn-action-small" id="btnBrowseNew">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          New File...
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Path Input Preview -->
+    <div class="path-display-wrap">
+      <span class="path-label">Target Database File Path</span>
+      <div class="path-input-group">
+        <input type="text" id="targetDbInput" class="path-input" spellcheck="false" readonly />
+        <button type="button" class="btn-copy-path" id="btnCopyPath" title="Copy Path">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="footer-actions">
+      <label class="checkbox-label">
+        <input type="checkbox" id="chkAlwaysAsk" />
+        Always show this database chooser on startup
+      </label>
+      <button type="button" class="btn-primary" id="btnLaunchApp">
+        <span>Launch Who Said</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Live Launching Overlay -->
+    <div class="status-overlay hidden" id="statusOverlay">
+      <div class="spinner" id="statusSpinner"></div>
+      <h3 class="status-title" id="statusTitle">Connecting Database...</h3>
+      <p class="status-desc" id="statusDesc">Initializing SQLite tables and starting local CPU speech engine...</p>
+      <div class="log-details-box hidden" id="logBox"></div>
+      <div class="status-actions hidden" id="statusErrorActions">
+        <button type="button" class="btn-action-small" id="btnRetry">Retry Connection</button>
+        <button type="button" class="btn-action-small" id="btnBackToSetup">Change Database</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentOption = 'sample';
+    let sampleDbPath = '';
+    let chosenDbPath = '';
+
+    const cardSample = document.getElementById('cardSampleDb');
+    const cardExisting = document.getElementById('cardExistingDb');
+    const cardNew = document.getElementById('cardNewDb');
+    const radioSample = document.getElementById('radioSample');
+    const radioExisting = document.getElementById('radioExisting');
+    const radioNew = document.getElementById('radioNew');
+    const targetDbInput = document.getElementById('targetDbInput');
+    const btnLaunch = document.getElementById('btnLaunchApp');
+    const chkAlwaysAsk = document.getElementById('chkAlwaysAsk');
+    const statusOverlay = document.getElementById('statusOverlay');
+    const statusTitle = document.getElementById('statusTitle');
+    const statusDesc = document.getElementById('statusDesc');
+    const statusSpinner = document.getElementById('statusSpinner');
+    const logBox = document.getElementById('logBox');
+    const statusErrorActions = document.getElementById('statusErrorActions');
+
+    async function init() {
+      if (window.electronAPI) {
+        if (window.electronAPI.getDefaultSampleDbPath) {
+          sampleDbPath = await window.electronAPI.getDefaultSampleDbPath();
+        }
+        if (window.electronAPI.getConfiguredDbPath) {
+          const cfg = await window.electronAPI.getConfiguredDbPath();
+          if (cfg && cfg.dbPath) {
+            chosenDbPath = cfg.dbPath;
+            currentOption = 'existing';
+            radioExisting.checked = true;
+            highlightCard('existing');
+          }
+          if (cfg && cfg.alwaysAsk) {
+            chkAlwaysAsk.checked = true;
+          }
+        }
+      }
+
+      if (!chosenDbPath) {
+        chosenDbPath = sampleDbPath || 'whosaid.db';
+      }
+      targetDbInput.value = chosenDbPath;
+
+      // Check query param for error state
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('mode') === 'connecting') {
+        showConnectingScreen('Starting Who Said...', 'Connecting to database and launching AI transcriber...');
+        attemptLaunch();
+      } else if (urlParams.get('error')) {
+        showErrorScreen('Backend Server Startup Issue', 'The local server timed out while initializing. You can retry or choose a different database file below.');
+      }
+    }
+
+    function highlightCard(opt) {
+      cardSample.classList.toggle('selected', opt === 'sample');
+      cardExisting.classList.toggle('selected', opt === 'existing');
+      cardNew.classList.toggle('selected', opt === 'new');
+      radioSample.checked = (opt === 'sample');
+      radioExisting.checked = (opt === 'existing');
+      radioNew.checked = (opt === 'new');
+    }
+
+    function selectOption(opt) {
+      currentOption = opt;
+      highlightCard(opt);
+      if (opt === 'sample') {
+        chosenDbPath = sampleDbPath || 'sample_whosaid.db';
+        targetDbInput.value = chosenDbPath;
+      }
+    }
+
+    document.getElementById('btnBrowseExisting').addEventListener('click', async (e) => {
+      e.stopPropagation();
+      selectOption('existing');
+      if (window.electronAPI && window.electronAPI.selectDbFileDialog) {
+        const file = await window.electronAPI.selectDbFileDialog();
+        if (file) {
+          chosenDbPath = file;
+          targetDbInput.value = file;
+        }
+      }
+    });
+
+    document.getElementById('btnBrowseNew').addEventListener('click', async (e) => {
+      e.stopPropagation();
+      selectOption('new');
+      if (window.electronAPI && window.electronAPI.createDbFileDialog) {
+        const file = await window.electronAPI.createDbFileDialog();
+        if (file) {
+          chosenDbPath = file;
+          targetDbInput.value = file;
+        }
+      }
+    });
+
+    document.getElementById('btnCopyPath').addEventListener('click', () => {
+      if (targetDbInput.value) {
+        navigator.clipboard.writeText(targetDbInput.value);
+      }
+    });
+
+    btnLaunch.addEventListener('click', () => {
+      attemptLaunch();
+    });
+
+    async function attemptLaunch() {
+      const finalPath = targetDbInput.value.trim() || sampleDbPath;
+      const alwaysAsk = chkAlwaysAsk.checked;
+
+      showConnectingScreen('Launching Who Said...', `Connecting to: ${finalPath.split(/[\\/]/).pop() || finalPath}`);
+
+      if (window.electronAPI && window.electronAPI.launchAppWithDb) {
+        const result = await window.electronAPI.launchAppWithDb(finalPath, alwaysAsk);
+        if (!result.success) {
+          showErrorScreen('Could not connect to backend server', result.error || 'The local server did not respond in time.');
+          if (result.log) {
+            logBox.textContent = result.log;
+            logBox.classList.remove('hidden');
+          }
+        }
+      }
+    }
+
+    function showConnectingScreen(title, desc) {
+      statusOverlay.classList.remove('hidden');
+      statusSpinner.style.display = 'block';
+      statusTitle.textContent = title;
+      statusDesc.textContent = desc;
+      logBox.classList.add('hidden');
+      statusErrorActions.classList.add('hidden');
+    }
+
+    function showErrorScreen(title, desc) {
+      statusOverlay.classList.remove('hidden');
+      statusSpinner.style.display = 'none';
+      statusTitle.textContent = title;
+      statusTitle.style.color = '#f87171';
+      statusDesc.textContent = desc;
+      statusErrorActions.classList.remove('hidden');
+    }
+
+    document.getElementById('btnRetry').addEventListener('click', () => {
+      attemptLaunch();
+    });
+
+    document.getElementById('btnBackToSetup').addEventListener('click', () => {
+      statusOverlay.classList.add('hidden');
+    });
+
+    init();
+  </script>
+</body>
+</html>

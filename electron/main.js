@@ -54,26 +54,73 @@ function loadDbConfig() {
     const filePath = getDbConfigFilePath();
     if (fs.existsSync(filePath)) {
       const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-      if (data && typeof data.dbPath === 'string') return data;
+      if (data && typeof data === 'object') {
+        return {
+          dbPath: data.dbPath || null,
+          alwaysAsk: Boolean(data.alwaysAsk)
+        };
+      }
     }
   } catch (err) {
     console.warn('[DbConfig] Error reading:', err);
   }
-  return { dbPath: null };
+  return { dbPath: null, alwaysAsk: false };
 }
 
-function saveDbConfig(dbPath) {
+function saveDbConfig(dbPath, alwaysAsk = false) {
   try {
     const filePath = getDbConfigFilePath();
     const cleanPath = (dbPath && typeof dbPath === 'string' && dbPath.trim()) ? dbPath.trim() : null;
-    const data = { dbPath: cleanPath };
+    const data = {
+      dbPath: cleanPath,
+      alwaysAsk: Boolean(alwaysAsk)
+    };
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
-    console.log('[DbConfig] Saved database path configuration:', cleanPath);
+    console.log('[DbConfig] Saved database path configuration:', data);
     return data;
   } catch (err) {
     console.warn('[DbConfig] Error saving:', err);
-    return { dbPath: null };
+    return { dbPath: null, alwaysAsk: false };
   }
+}
+
+// Locate or provide path to bundled sample / starter SQLite DB
+function getDefaultSampleDbPath() {
+  const candidates = [
+    path.join(PROJECT_ROOT, 'sample_whosaid.db'),
+    path.join(PROJECT_ROOT, 'storage', 'whosaid.db'),
+    path.join(PROJECT_ROOT, 'sample_data', 'sample_whosaid.db'),
+    path.join(app.getPath('userData'), 'sample_whosaid.db'),
+    path.join(app.getPath('userData'), 'storage', 'whosaid.db')
+  ];
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return c;
+  }
+  return path.join(app.getPath('userData'), 'storage', 'whosaid.db');
+}
+
+// Dynamically notify running backend to switch DB connection via API
+function switchBackendDb(dbPath) {
+  return new Promise((resolve) => {
+    const postData = JSON.stringify({ db_path: dbPath });
+    const req = http.request({
+      hostname: '127.0.0.1',
+      port: BACKEND_PORT,
+      path: '/api/backend/db-config',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData)
+      },
+      timeout: 3000
+    }, (res) => {
+      resolve(res.statusCode >= 200 && res.statusCode < 400);
+    });
+    req.on('error', () => resolve(false));
+    req.on('timeout', () => { req.destroy(); resolve(false); });
+    req.write(postData);
+    req.end();
+  });
 }
 
 // Check if Python backend is alive
@@ -95,10 +142,13 @@ function checkBackendHealthy() {
 }
 
 // Launch backend server (bundled binary or python script) and connect DB
-async function ensureBackendRunning() {
+async function ensureBackendRunning(customDbPath) {
   const isHealthy = await checkBackendHealthy();
   if (isHealthy) {
     console.log('[Backend] Local server already active on port 8000.');
+    if (customDbPath) {
+      await switchBackendDb(customDbPath);
+    }
     return true;
   }
 
@@ -111,7 +161,7 @@ async function ensureBackendRunning() {
   fs.mkdirSync(path.join(storageDir, 'audio'), { recursive: true });
 
   const dbConfig = loadDbConfig();
-  const configuredDbPath = dbConfig.dbPath ? dbConfig.dbPath.trim() : null;
+  const configuredDbPath = customDbPath || dbConfig.dbPath || null;
 
   // Use configured DB path if specified, otherwise default to storage/whosaid.db
   const targetDbPath = configuredDbPath || path.join(storageDir, 'whosaid.db');
@@ -121,6 +171,7 @@ async function ensureBackendRunning() {
   }
 
   const bundledDbCandidates = [
+    path.join(PROJECT_ROOT, 'sample_whosaid.db'),
     path.join(PROJECT_ROOT, 'storage', 'whosaid.db'),
     path.join(PROJECT_ROOT, 'whosaid-backend', 'storage', 'whosaid.db'),
     path.join(PROJECT_ROOT, 'dist_backend', 'whosaid-backend', 'storage', 'whosaid.db'),
@@ -146,7 +197,10 @@ async function ensureBackendRunning() {
     path.join(PROJECT_ROOT, 'whosaid-backend', 'whosaid-backend.exe'),
     path.join(PROJECT_ROOT, 'whosaid-backend.exe'),
     path.join(PROJECT_ROOT, 'dist_backend', 'whosaid-backend', 'whosaid-backend.exe'),
-    path.join(__dirname, '..', 'dist_backend', 'whosaid-backend', 'whosaid-backend.exe')
+    path.join(__dirname, '..', 'dist_backend', 'whosaid-backend', 'whosaid-backend.exe'),
+    path.join(path.dirname(app.getPath('exe')), 'resources', 'whosaid-backend', 'whosaid-backend.exe'),
+    path.join(path.dirname(app.getPath('exe')), 'whosaid-backend', 'whosaid-backend.exe'),
+    path.join(process.resourcesPath || '', 'whosaid-backend', 'whosaid-backend.exe')
   ];
 
   const backendExe = backendCandidates.find((cand) => fs.existsSync(cand));
@@ -167,6 +221,7 @@ async function ensureBackendRunning() {
   try {
     logStream = fs.createWriteStream(logFilePath, { flags: 'a' });
     logStream.write(`\n--- Launching backend at ${new Date().toISOString()} ---\n`);
+    logStream.write(`Configured DB: ${configuredDbPath || '(default)'}\n`);
   } catch (err) {
     console.warn('[Backend] Could not open log file:', err);
   }
@@ -209,12 +264,15 @@ async function ensureBackendRunning() {
 
   // Poll for readiness
   const start = Date.now();
-  const maxWaitMs = 45000;
+  const maxWaitMs = 60000;
   while (Date.now() - start < maxWaitMs) {
     await new Promise((r) => setTimeout(r, 600));
     const healthy = await checkBackendHealthy();
     if (healthy) {
       console.log('[Backend] Local backend server ready and healthy on port 8000!');
+      if (configuredDbPath) {
+        await switchBackendDb(configuredDbPath);
+      }
       return true;
     }
   }
@@ -330,8 +388,13 @@ function createMainWindow() {
   const menu = Menu.buildFromTemplate(menuTemplate);
   Menu.setApplicationMenu(menu);
 
-  // Load backend web app
-  mainWindow.loadURL(BACKEND_URL);
+  // Recovery hook: if loading localhost URL ever fails, fallback to local setup.html
+  mainWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription, validatedURL) => {
+    console.warn(`[Window] did-fail-load on ${validatedURL}: ${errorDescription} (${errorCode})`);
+    if (mainWindow && validatedURL && (validatedURL.includes('127.0.0.1') || validatedURL.includes('localhost'))) {
+      mainWindow.loadFile(path.join(__dirname, 'setup.html'), { query: { error: 'backend_timeout' } });
+    }
+  });
 
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -404,24 +467,88 @@ ipcMain.handle('dialog:createDbFile', async () => {
   return result.filePath;
 });
 
-ipcMain.handle('config:getDbPath', async () => {
-  return loadDbConfig().dbPath || null;
+ipcMain.handle('config:getDefaultSampleDbPath', () => {
+  return getDefaultSampleDbPath();
 });
 
-ipcMain.handle('config:setDbPath', async (_event, newDbPath) => {
-  return saveDbConfig(newDbPath);
+ipcMain.handle('config:getDbPath', () => {
+  return loadDbConfig();
+});
+
+ipcMain.handle('config:setDbPath', async (_event, newDbPath, alwaysAsk) => {
+  return saveDbConfig(newDbPath, alwaysAsk);
+});
+
+// Launch app with user-chosen database
+ipcMain.handle('app:launchWithDb', async (_event, dbPath, alwaysAsk) => {
+  try {
+    saveDbConfig(dbPath, alwaysAsk);
+
+    // Ensure target folder exists
+    const targetDir = path.dirname(dbPath);
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
+
+    // If new DB doesn't exist, seed it with sample tables
+    if (!fs.existsSync(dbPath)) {
+      const sample = getDefaultSampleDbPath();
+      if (fs.existsSync(sample)) {
+        try {
+          fs.copyFileSync(sample, dbPath);
+          console.log(`[Launch] Initialized DB from sample: ${sample} -> ${dbPath}`);
+        } catch (copyErr) {
+          console.warn('[Launch] Copy sample DB warning:', copyErr);
+        }
+      }
+    }
+
+    const ready = await ensureBackendRunning(dbPath);
+    if (!ready) {
+      let logSnippet = '';
+      try {
+        const logFilePath = path.join(app.getPath('userData'), 'backend.log');
+        if (fs.existsSync(logFilePath)) {
+          const content = fs.readFileSync(logFilePath, 'utf-8');
+          logSnippet = content.split('\n').slice(-25).join('\n');
+        }
+      } catch (_) {}
+      return {
+        success: false,
+        error: 'Backend server failed to respond on port 8000. Please check the log below.',
+        log: logSnippet
+      };
+    }
+
+    if (mainWindow) {
+      mainWindow.loadURL(BACKEND_URL);
+    }
+    return { success: true };
+  } catch (err) {
+    console.error('[Launch] Error:', err);
+    return { success: false, error: err.message };
+  }
 });
 
 // App Lifecycle
 app.whenReady().then(async () => {
-  await ensureBackendRunning();
   createMainWindow();
 
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createMainWindow();
-    }
-  });
+  const dbConfig = loadDbConfig();
+  // Prompt user on startup if no DB is configured, or if alwaysAsk is enabled, or if target DB doesn't exist
+  if (!dbConfig.dbPath || dbConfig.alwaysAsk || !fs.existsSync(dbConfig.dbPath)) {
+    console.log('[App] Showing database selection screen on startup...');
+    mainWindow.loadFile(path.join(__dirname, 'setup.html'));
+  } else {
+    // Show smooth connecting screen and spin up backend
+    mainWindow.loadFile(path.join(__dirname, 'setup.html'), { query: { mode: 'connecting' } });
+  }
+});
+
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createMainWindow();
+  }
 });
 
 app.on('window-all-closed', () => {

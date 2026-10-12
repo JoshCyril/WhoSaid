@@ -11,5 +11,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   selectDbFileDialog: () => ipcRenderer.invoke('dialog:selectDbFile'),
   createDbFileDialog: () => ipcRenderer.invoke('dialog:createDbFile'),
   getConfiguredDbPath: () => ipcRenderer.invoke('config:getDbPath'),
-  setConfiguredDbPath: (newDbPath) => ipcRenderer.invoke('config:setDbPath', newDbPath)
+  setConfiguredDbPath: (newDbPath, alwaysAsk) => ipcRenderer.invoke('config:setDbPath', newDbPath, alwaysAsk),
+  getDefaultSampleDbPath: () => ipcRenderer.invoke('config:getDefaultSampleDbPath'),
+  launchAppWithDb: (dbPath, alwaysAsk) => ipcRenderer.invoke('app:launchWithDb', dbPath, alwaysAsk)
 });

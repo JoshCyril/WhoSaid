@@ -62,6 +62,7 @@ You can download pre-compiled Windows executable binaries directly from [GitHub 
 
 - 📦 **[WhoSaid Setup 1.0.0.exe (Installer)](https://github.com/JoshCyril/WhoSaid/releases/download/v1.0.0-beta.1/WhoSaid.Setup.1.0.0.exe)** — Standard Windows installer.
 - 🚀 **[WhoSaid 1.0.0.exe (Portable)](https://github.com/JoshCyril/WhoSaid/releases/download/v1.0.0-beta.1/WhoSaid.1.0.0.exe)** — Zero-install standalone executable.
+- 🗄️ **[sample_whosaid.db (Starter Database)](https://github.com/JoshCyril/WhoSaid/releases/download/v1.0.0-beta.1/sample_whosaid.db)** — Bundled sample SQLite database with pre-loaded demo session & voice profiles.
 
 ---
 

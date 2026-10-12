@@ -63,6 +63,10 @@
       {
         "from": "run.py",
         "to": "run.py"
+      },
+      {
+        "from": "sample_whosaid.db",
+        "to": "sample_whosaid.db"
       }
     ]
   },
