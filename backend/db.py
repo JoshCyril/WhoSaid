@@ -316,6 +316,10 @@ def get_db_stats() -> Dict[str, Any]:
         "db_dir": os.path.abspath(DB_DIR),
         "db_exists": os.path.exists(DB_PATH),
         "file_size": file_size,
+        "db_size_bytes": file_size,
+        "jobs_count": tables_info.get("jobs", {}).get("count", 0),
+        "transcripts_count": tables_info.get("transcripts", {}).get("count", 0),
+        "profiles_count": tables_info.get("voice_profiles", {}).get("count", 0),
         "tables": tables_info
     }
 

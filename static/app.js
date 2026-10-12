@@ -24,8 +24,14 @@ class WhoSaidApp {
     // DOM Elements
     this.homeView = document.getElementById("homeView");
     this.workspaceView = document.getElementById("workspaceView");
+    this.backendSettingsView = document.getElementById("backendSettingsView");
     this.navHome = document.getElementById("navHome");
     this.navWorkspace = document.getElementById("navWorkspace");
+    this.navBackendSettings = document.getElementById("navBackendSettings");
+    this.currentDbTable = "jobs";
+    this.currentDbPage = 1;
+    this.currentDbTableData = null;
+    this.dbFilterQuery = "";
     this.navWorkspaceDot = document.getElementById("navWorkspaceDot");
     this.navLogo = document.getElementById("navLogo");
     this.btnHomeUpload = document.getElementById("btnHomeUpload");
@@ -247,6 +253,7 @@ class WhoSaidApp {
     this.initHomeMockupAvatars();
     this.checkResponsiveSidebar();
     this.initVsCodeExplorer();
+    this.initDbExplorer();
   }
 
   // --- Homepage Mockup Cameo Avatars (Bob & Ruby with Pastel Colors) ---
@@ -362,8 +369,10 @@ class WhoSaidApp {
   showHomeView() {
     if (this.homeView) this.homeView.classList.remove("hidden");
     if (this.workspaceView) this.workspaceView.classList.add("hidden");
+    if (this.backendSettingsView) this.backendSettingsView.classList.add("hidden");
     if (this.navHome) this.navHome.classList.add("active");
     if (this.navWorkspace) this.navWorkspace.classList.remove("active");
+    if (this.navBackendSettings) this.navBackendSettings.classList.remove("active");
     this.updateActivityBar("home");
 
     if (this.currentTranscript && this.btnHomeWorkspace) {
@@ -375,9 +384,23 @@ class WhoSaidApp {
   showWorkspaceView() {
     if (this.homeView) this.homeView.classList.add("hidden");
     if (this.workspaceView) this.workspaceView.classList.remove("hidden");
+    if (this.backendSettingsView) this.backendSettingsView.classList.add("hidden");
     if (this.navHome) this.navHome.classList.remove("active");
     if (this.navWorkspace) this.navWorkspace.classList.add("active");
+    if (this.navBackendSettings) this.navBackendSettings.classList.remove("active");
     this.updateActivityBar("workspace");
+  }
+
+  showBackendSettingsView() {
+    if (this.homeView) this.homeView.classList.add("hidden");
+    if (this.workspaceView) this.workspaceView.classList.add("hidden");
+    if (this.backendSettingsView) this.backendSettingsView.classList.remove("hidden");
+    if (this.navHome) this.navHome.classList.remove("active");
+    if (this.navWorkspace) this.navWorkspace.classList.remove("active");
+    if (this.navBackendSettings) this.navBackendSettings.classList.add("active");
+    this.updateActivityBar("backend");
+    this.loadDbStats();
+    this.loadDbTable(this.currentDbTable || "jobs", 1);
   }
 
   updateHistoryBadges(count) {
@@ -515,6 +538,9 @@ class WhoSaidApp {
           this.showToast("No transcript loaded yet. Pick a session or upload media.", "info");
         }
       });
+    }
+    if (this.navBackendSettings) {
+      this.navBackendSettings.addEventListener("click", () => this.showBackendSettingsView());
     }
 
     // Homepage CTA buttons
@@ -1452,27 +1478,30 @@ class WhoSaidApp {
         wordsHtml = this.escapeHtml(seg.text);
       }
 
-      const avatarHtml = this.getDicebearAvatarHtml(seg.speaker_label, seg.speaker_id, seg.speaker_color || '#f6c48f', 22, seg.speaker_avatar_seed);
+      const avatarHtml = this.getDicebearAvatarHtml(seg.speaker_label, seg.speaker_id, seg.speaker_color || '#f6c48f', 26, seg.speaker_avatar_seed);
       card.innerHTML = `
-        <div class="turn-row-left">
-          <div class="turn-avatar-slot">
-            ${avatarHtml}
-          </div>
-          <span class="turn-speaker-name" style="color: ${seg.speaker_color || '#f6c48f'}">${this.escapeHtml(seg.speaker_label)}</span>
-          <span class="turn-time-badge" title="Click to jump to turn">
-            ${this.formatTime(seg.start)}
-          </span>
+        <div class="turn-avatar-slot">
+          ${avatarHtml}
         </div>
-        <div class="turn-content" contenteditable="true" spellcheck="false" title="Click to edit text">
-          ${wordsHtml}
+        <div class="turn-body">
+          <div class="turn-meta-row">
+            <span class="turn-speaker-name" style="color: ${seg.speaker_color || '#f6c48f'}">${this.escapeHtml(seg.speaker_label)}</span>
+            <span class="turn-timestamp" title="Click to jump to turn">${this.formatTime(seg.start)} - ${this.formatTime(seg.end)}</span>
+          </div>
+          <div class="turn-content" contenteditable="true" spellcheck="false" title="Click to edit text">
+            ${wordsHtml}
+          </div>
         </div>
       `;
 
-      // Jump to turn on time badge click
-      card.querySelector(".turn-time-badge").addEventListener("click", () => {
-        this.mediaVideo.currentTime = seg.start;
-        this.mediaVideo.play();
-      });
+      // Jump to turn on timestamp click
+      const timeBadge = card.querySelector(".turn-timestamp");
+      if (timeBadge) {
+        timeBadge.addEventListener("click", () => {
+          this.mediaVideo.currentTime = seg.start;
+          this.mediaVideo.play();
+        });
+      }
 
       // Jump to specific word on click
       card.querySelectorAll(".word-span").forEach((span) => {
@@ -3506,6 +3535,501 @@ class WhoSaidApp {
       this.closeProgressModal();
       this.showToast(e.message || "Processing failed", "error");
     }
+  }
+
+  // ==========================================================================
+  // BACKEND SETTINGS & DATABASE EXPLORER
+  // ==========================================================================
+
+  formatBytes(bytes) {
+    if (!bytes || bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  }
+
+  initDbExplorer() {
+    // 1. Subtab Switching
+    const subtabs = document.querySelectorAll(".db-subtab");
+    subtabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        subtabs.forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+
+        const tabKey = tab.dataset.tab;
+        const dbTableContainer = document.getElementById("dbTableContainer");
+        const dbSqlContainer = document.getElementById("dbSqlContainer");
+        const dbSystemContainer = document.getElementById("dbSystemContainer");
+        const dbFilterWrap = document.getElementById("dbFilterWrap");
+
+        if (tabKey === "sql") {
+          if (dbTableContainer) dbTableContainer.classList.add("hidden");
+          if (dbSystemContainer) dbSystemContainer.classList.add("hidden");
+          if (dbSqlContainer) dbSqlContainer.classList.remove("hidden");
+          if (dbFilterWrap) dbFilterWrap.classList.add("hidden");
+        } else if (tabKey === "system") {
+          if (dbTableContainer) dbTableContainer.classList.add("hidden");
+          if (dbSqlContainer) dbSqlContainer.classList.add("hidden");
+          if (dbSystemContainer) dbSystemContainer.classList.remove("hidden");
+          if (dbFilterWrap) dbFilterWrap.classList.add("hidden");
+        } else {
+          if (dbSqlContainer) dbSqlContainer.classList.add("hidden");
+          if (dbSystemContainer) dbSystemContainer.classList.add("hidden");
+          if (dbTableContainer) dbTableContainer.classList.remove("hidden");
+          if (dbFilterWrap) dbFilterWrap.classList.remove("hidden");
+          this.currentDbTable = tabKey;
+          this.currentDbPage = 1;
+          const searchInput = document.getElementById("dbTableSearchInput");
+          if (searchInput) searchInput.value = "";
+          this.loadDbTable(tabKey, 1);
+        }
+      });
+    });
+
+    // 2. Quick KPI card clicks switch directly to table tabs
+    const kpiCardJobs = document.getElementById("kpiCardJobs");
+    if (kpiCardJobs) {
+      kpiCardJobs.addEventListener("click", () => {
+        const btn = document.querySelector('.db-subtab[data-tab="jobs"]');
+        if (btn) btn.click();
+      });
+      kpiCardJobs.style.cursor = "pointer";
+    }
+
+    const kpiCardTranscripts = document.getElementById("kpiCardTranscripts");
+    if (kpiCardTranscripts) {
+      kpiCardTranscripts.addEventListener("click", () => {
+        const btn = document.querySelector('.db-subtab[data-tab="transcripts"]');
+        if (btn) btn.click();
+      });
+      kpiCardTranscripts.style.cursor = "pointer";
+    }
+
+    const kpiCardProfiles = document.getElementById("kpiCardProfiles");
+    if (kpiCardProfiles) {
+      kpiCardProfiles.addEventListener("click", () => {
+        const btn = document.querySelector('.db-subtab[data-tab="voice_profiles"]');
+        if (btn) btn.click();
+      });
+      kpiCardProfiles.style.cursor = "pointer";
+    }
+
+    // 3. Refresh Action
+    const btnDbRefresh = document.getElementById("btnDbRefresh");
+    if (btnDbRefresh) {
+      btnDbRefresh.addEventListener("click", () => {
+        this.loadDbStats();
+        const activeSubtab = document.querySelector(".db-subtab.active");
+        const key = activeSubtab ? activeSubtab.dataset.tab : "jobs";
+        if (key === "sql") {
+          this.executeDbQuery();
+        } else if (key !== "system") {
+          this.loadDbTable(key, this.currentDbPage);
+        }
+        this.showToast("Database refreshed", "info");
+      });
+    }
+
+    // 4. Cache Cleanup Actions
+    const handleClean = async () => {
+      try {
+        const resp = await fetch("/api/backend/cleanup-cache", { method: "POST" });
+        if (!resp.ok) throw new Error("Cleanup failed");
+        const data = await resp.json();
+        this.showToast(`Cache purged: ${data.deleted_files || 0} temporary files removed`, "success");
+        this.loadDbStats();
+      } catch (e) {
+        this.showToast(e.message || "Failed to purge cache", "error");
+      }
+    };
+
+    const btnDbCleanCache = document.getElementById("btnDbCleanCache");
+    if (btnDbCleanCache) btnDbCleanCache.addEventListener("click", handleClean);
+
+    const btnSystemCleanMedia = document.getElementById("btnSystemCleanMedia");
+    if (btnSystemCleanMedia) btnSystemCleanMedia.addEventListener("click", handleClean);
+
+    // 5. Table Filter Search
+    const dbTableSearchInput = document.getElementById("dbTableSearchInput");
+    if (dbTableSearchInput) {
+      dbTableSearchInput.addEventListener("input", () => this.applyDbTableFilter());
+    }
+
+    // 6. Pagination Controls
+    const btnDbPrevPage = document.getElementById("btnDbPrevPage");
+    if (btnDbPrevPage) {
+      btnDbPrevPage.addEventListener("click", () => {
+        if (this.currentDbPage > 1) {
+          this.loadDbTable(this.currentDbTable, this.currentDbPage - 1);
+        }
+      });
+    }
+
+    const btnDbNextPage = document.getElementById("btnDbNextPage");
+    if (btnDbNextPage) {
+      btnDbNextPage.addEventListener("click", () => {
+        this.loadDbTable(this.currentDbTable, this.currentDbPage + 1);
+      });
+    }
+
+    // 7. SQL Console Actions & Chips
+    const btnRunSqlQuery = document.getElementById("btnRunSqlQuery");
+    if (btnRunSqlQuery) {
+      btnRunSqlQuery.addEventListener("click", () => this.executeDbQuery());
+    }
+
+    const sqlChips = document.querySelectorAll(".sql-chip");
+    sqlChips.forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const query = chip.dataset.query;
+        const input = document.getElementById("sqlQueryInput");
+        if (input && query) {
+          input.value = query;
+          this.executeDbQuery();
+        }
+      });
+    });
+
+    // 8. DB Detail Modal Close & Copy
+    const btnCloseDbDetailModal = document.getElementById("btnCloseDbDetailModal");
+    if (btnCloseDbDetailModal) btnCloseDbDetailModal.addEventListener("click", () => this.closeDbDetailModal());
+
+    const btnCloseDbDetailModalBottom = document.getElementById("btnCloseDbDetailModalBottom");
+    if (btnCloseDbDetailModalBottom) btnCloseDbDetailModalBottom.addEventListener("click", () => this.closeDbDetailModal());
+
+    const btnCopyDbDetailJson = document.getElementById("btnCopyDbDetailJson");
+    if (btnCopyDbDetailJson) {
+      btnCopyDbDetailJson.addEventListener("click", () => {
+        const pre = document.getElementById("dbDetailJsonPre");
+        if (pre && pre.textContent) {
+          navigator.clipboard.writeText(pre.textContent).then(() => {
+            this.showToast("Record JSON copied to clipboard", "success");
+          });
+        }
+      });
+    }
+  }
+
+  async loadDbStats() {
+    try {
+      const resp = await fetch("/api/db/stats");
+      if (!resp.ok) return;
+      const data = await resp.json();
+
+      const dbSizeBytes = data.file_size || data.db_size_bytes || 0;
+      const jobsCount = data.jobs_count ?? data.tables?.jobs?.count ?? 0;
+      const transcriptsCount = data.transcripts_count ?? data.tables?.transcripts?.count ?? 0;
+      const profilesCount = data.profiles_count ?? data.tables?.voice_profiles?.count ?? 0;
+
+      // KPI card updates
+      const kpiDbSize = document.getElementById("kpiDbSize");
+      if (kpiDbSize) kpiDbSize.textContent = this.formatBytes(dbSizeBytes);
+
+      const kpiDbPath = document.getElementById("kpiDbPath");
+      if (kpiDbPath) kpiDbPath.textContent = data.db_path || "whosaid.db";
+
+      const kpiJobsCount = document.getElementById("kpiJobsCount");
+      if (kpiJobsCount) kpiJobsCount.textContent = jobsCount.toLocaleString();
+
+      const kpiTranscriptsCount = document.getElementById("kpiTranscriptsCount");
+      if (kpiTranscriptsCount) kpiTranscriptsCount.textContent = transcriptsCount.toLocaleString();
+
+      const kpiProfilesCount = document.getElementById("kpiProfilesCount");
+      if (kpiProfilesCount) kpiProfilesCount.textContent = profilesCount.toLocaleString();
+
+      // Subtab badges
+      const tabCountJobs = document.getElementById("tabCountJobs");
+      if (tabCountJobs) tabCountJobs.textContent = data.jobs_count || 0;
+
+      const tabCountTranscripts = document.getElementById("tabCountTranscripts");
+      if (tabCountTranscripts) tabCountTranscripts.textContent = data.transcripts_count || 0;
+
+      const tabCountProfiles = document.getElementById("tabCountProfiles");
+      if (tabCountProfiles) tabCountProfiles.textContent = data.profiles_count || 0;
+
+      // System tab details
+      const sysDbPath = document.getElementById("sysDbPath");
+      if (sysDbPath) sysDbPath.textContent = data.db_path || "whosaid.db";
+
+      const sysDbSize = document.getElementById("sysDbSize");
+      if (sysDbSize) sysDbSize.textContent = this.formatBytes(data.db_size_bytes || 0);
+
+      const sysUploadsSize = document.getElementById("sysUploadsSize");
+      if (sysUploadsSize) sysUploadsSize.textContent = this.formatBytes(data.uploads_size || 0);
+
+      const sysAudioSize = document.getElementById("sysAudioSize");
+      if (sysAudioSize) sysAudioSize.textContent = this.formatBytes(data.audio_size || 0);
+
+      const sysServerPort = document.getElementById("sysServerPort");
+      if (sysServerPort) sysServerPort.textContent = `${data.server_port || 8000} (localhost)`;
+
+      const sysPlatform = document.getElementById("sysPlatform");
+      if (sysPlatform) sysPlatform.textContent = data.platform || "windows";
+
+      const sysFrozenMode = document.getElementById("sysFrozenMode");
+      if (sysFrozenMode) sysFrozenMode.textContent = data.frozen ? "Packaged Binary (.exe)" : "Python Source / Dev Mode";
+    } catch (e) {
+      console.error("Error loading DB stats:", e);
+    }
+  }
+
+  async loadDbTable(tableName, page = 1) {
+    this.currentDbTable = tableName;
+    this.currentDbPage = page;
+    const limit = 50;
+    const offset = (page - 1) * limit;
+
+    const tbody = document.getElementById("dbTableTbody");
+    const emptyNotice = document.getElementById("dbTableEmptyNotice");
+    if (tbody) tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:24px;color:#94a3b8;">Loading rows...</td></tr>`;
+    if (emptyNotice) emptyNotice.classList.add("hidden");
+
+    try {
+      const resp = await fetch(`/api/db/table/${tableName}?limit=${limit}&offset=${offset}`);
+      if (!resp.ok) {
+        const err = await resp.json();
+        throw new Error(err.detail || "Failed to load table data");
+      }
+      const data = await resp.json();
+      this.currentDbTableData = data;
+      this.renderDbTable(data);
+    } catch (e) {
+      if (tbody) tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:24px;color:#ef4444;">Error: ${this.escapeHtml(e.message)}</td></tr>`;
+      this.showToast(e.message || "Failed to load table rows", "error");
+    }
+  }
+
+  renderDbTable(data) {
+    const thead = document.getElementById("dbTableThead");
+    const tbody = document.getElementById("dbTableTbody");
+    const emptyNotice = document.getElementById("dbTableEmptyNotice");
+    const statusText = document.getElementById("dbTableStatusText");
+    const pageNum = document.getElementById("dbPageIndicator");
+    const btnPrev = document.getElementById("btnDbPrevPage");
+    const btnNext = document.getElementById("btnDbNextPage");
+
+    if (!thead || !tbody) return;
+
+    thead.innerHTML = "";
+    tbody.innerHTML = "";
+
+    const columns = data.columns || [];
+    const rows = data.rows || [];
+
+    // Header row
+    const headTr = document.createElement("tr");
+    columns.forEach((col) => {
+      const th = document.createElement("th");
+      th.textContent = col;
+      headTr.appendChild(th);
+    });
+    const thAction = document.createElement("th");
+    thAction.textContent = "Action";
+    thAction.style.width = "80px";
+    headTr.appendChild(thAction);
+    thead.appendChild(headTr);
+
+    // Empty state
+    if (rows.length === 0) {
+      if (emptyNotice) emptyNotice.classList.remove("hidden");
+    } else {
+      if (emptyNotice) emptyNotice.classList.add("hidden");
+    }
+
+    // Populate rows
+    rows.forEach((row) => {
+      const tr = document.createElement("tr");
+      tr.dataset.rowJson = JSON.stringify(row);
+
+      columns.forEach((col) => {
+        const td = document.createElement("td");
+        const val = row[col];
+        if (col === "id" || col.endsWith("_id") || col === "status") {
+          td.className = "cell-mono";
+        }
+        if (val === null || val === undefined) {
+          td.innerHTML = '<span style="color:#64748b;font-style:italic;">null</span>';
+        } else if (typeof val === "object") {
+          td.textContent = JSON.stringify(val);
+        } else {
+          td.textContent = String(val);
+        }
+        td.title = String(val ?? "");
+        tr.appendChild(td);
+      });
+
+      // Actions cell
+      const tdAction = document.createElement("td");
+      const btnInspect = document.createElement("button");
+      btnInspect.className = "btn-inspect-row";
+      btnInspect.textContent = "Inspect";
+      btnInspect.title = "View formatted JSON record";
+      btnInspect.addEventListener("click", () => this.openDbDetailModal(row));
+      tdAction.appendChild(btnInspect);
+      tr.appendChild(tdAction);
+
+      tbody.appendChild(tr);
+    });
+
+    // Update status and pagination
+    if (statusText) {
+      statusText.textContent = `Table: ${data.table} | Showing ${rows.length} rows (offset ${data.offset})`;
+    }
+    if (pageNum) {
+      pageNum.textContent = `Page ${this.currentDbPage}`;
+    }
+    if (btnPrev) {
+      btnPrev.disabled = this.currentDbPage <= 1;
+    }
+    if (btnNext) {
+      btnNext.disabled = rows.length < (data.limit || 50);
+    }
+  }
+
+  applyDbTableFilter() {
+    const searchInput = document.getElementById("dbTableSearchInput");
+    if (!searchInput) return;
+    const query = searchInput.value.toLowerCase().trim();
+    const rows = document.querySelectorAll("#dbTableTbody tr");
+    let matchCount = 0;
+
+    rows.forEach((tr) => {
+      const rowJson = tr.dataset.rowJson || "";
+      const matches = !query || rowJson.toLowerCase().includes(query);
+      tr.style.display = matches ? "" : "none";
+      if (matches) matchCount++;
+    });
+
+    const statusText = document.getElementById("dbTableStatusText");
+    if (statusText && this.currentDbTableData) {
+      if (query) {
+        statusText.textContent = `Filtered: ${matchCount} matching rows for "${query}"`;
+      } else {
+        statusText.textContent = `Table: ${this.currentDbTableData.table} | Showing ${this.currentDbTableData.rows.length} rows`;
+      }
+    }
+  }
+
+  async executeDbQuery() {
+    const sqlInput = document.getElementById("sqlQueryInput");
+    const status = document.getElementById("sqlExecutionStatus");
+    const thead = document.getElementById("sqlResultsThead");
+    const tbody = document.getElementById("sqlResultsTbody");
+    const emptyNotice = document.getElementById("sqlResultsEmpty");
+
+    if (!sqlInput) return;
+    const query = sqlInput.value.trim();
+    if (!query) {
+      this.showToast("Please enter a SQL query", "warning");
+      return;
+    }
+
+    if (status) {
+      status.textContent = "Executing query...";
+      status.style.color = "#38bdf8";
+    }
+
+    const startTime = performance.now();
+    try {
+      const resp = await fetch("/api/db/query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query })
+      });
+
+      const elapsed = (performance.now() - startTime).toFixed(1);
+
+      if (!resp.ok) {
+        const err = await resp.json();
+        throw new Error(err.detail || "Query execution failed");
+      }
+
+      const res = await resp.json();
+      if (thead) thead.innerHTML = "";
+      if (tbody) tbody.innerHTML = "";
+
+      const columns = res.columns || [];
+      const rows = res.rows || [];
+
+      if (columns.length > 0) {
+        const headTr = document.createElement("tr");
+        columns.forEach((c) => {
+          const th = document.createElement("th");
+          th.textContent = c;
+          headTr.appendChild(th);
+        });
+        const thAct = document.createElement("th");
+        thAct.textContent = "Action";
+        headTr.appendChild(thAct);
+        thead.appendChild(headTr);
+      }
+
+      if (rows.length === 0) {
+        if (emptyNotice) {
+          emptyNotice.textContent = `Query executed in ${elapsed}ms: 0 rows returned.`;
+          emptyNotice.classList.remove("hidden");
+        }
+      } else {
+        if (emptyNotice) emptyNotice.classList.add("hidden");
+        rows.forEach((row) => {
+          const tr = document.createElement("tr");
+          columns.forEach((c) => {
+            const td = document.createElement("td");
+            const val = row[c];
+            if (val === null || val === undefined) {
+              td.innerHTML = '<span style="color:#64748b;font-style:italic;">null</span>';
+            } else if (typeof val === "object") {
+              td.textContent = JSON.stringify(val);
+            } else {
+              td.textContent = String(val);
+            }
+            td.title = String(val ?? "");
+            tr.appendChild(td);
+          });
+          const tdAct = document.createElement("td");
+          const btn = document.createElement("button");
+          btn.className = "btn-inspect-row";
+          btn.textContent = "Inspect";
+          btn.addEventListener("click", () => this.openDbDetailModal(row));
+          tdAct.appendChild(btn);
+          tr.appendChild(tdAct);
+          tbody.appendChild(tr);
+        });
+      }
+
+      if (status) {
+        status.textContent = `Success: ${rows.length} rows in ${elapsed}ms`;
+        status.style.color = "#4ade80";
+      }
+    } catch (e) {
+      if (status) {
+        status.textContent = `Error: ${e.message}`;
+        status.style.color = "#ef4444";
+      }
+      if (emptyNotice) {
+        emptyNotice.textContent = `Error: ${e.message}`;
+        emptyNotice.classList.remove("hidden");
+      }
+      this.showToast(e.message || "Query failed", "error");
+    }
+  }
+
+  openDbDetailModal(rowData) {
+    const modal = document.getElementById("dbDetailModal");
+    const pre = document.getElementById("dbDetailJsonPre");
+    if (!modal || !pre) return;
+    try {
+      pre.textContent = JSON.stringify(rowData, null, 2);
+    } catch (e) {
+      pre.textContent = String(rowData);
+    }
+    modal.classList.remove("hidden");
+  }
+
+  closeDbDetailModal() {
+    const modal = document.getElementById("dbDetailModal");
+    if (modal) modal.classList.add("hidden");
   }
 }
 

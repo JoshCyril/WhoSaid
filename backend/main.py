@@ -13,7 +13,7 @@ warnings.filterwarnings("ignore", message='.*Field "model_size" has conflict wit
 
 from backend.db import (
     init_db, create_job, update_job, get_job, get_job_by_hash_and_model, get_latest_completed_job,
-    save_transcript, get_transcript_by_job_id, update_transcript_content,
+    save_transcript, get_transcript, get_transcript_by_job_id, update_transcript_content,
     get_all_voice_profiles, save_voice_profile, delete_voice_profile,
     get_transcription_history, delete_job_and_transcript,
     get_db_stats, get_table_rows, run_readonly_query, DB_PATH
@@ -34,6 +34,8 @@ if getattr(sys, "frozen", False):
 else:
     APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     ROOT_DIR = APP_DIR
+
+BASE_DIR = ROOT_DIR
 
 STORAGE_DIR = os.environ.get("WHOSAID_STORAGE_DIR") or os.path.join(ROOT_DIR, "storage")
 UPLOADS_DIR = os.path.join(STORAGE_DIR, "uploads")
@@ -837,6 +839,65 @@ async def stream_audio_file(job_id: str):
     if not audio_path or not os.path.exists(audio_path):
         raise HTTPException(status_code=404, detail="Audio file not found")
     return FileResponse(audio_path, media_type="audio/wav")
+
+# --- Database & Backend Settings Endpoints ---
+
+@app.get("/api/db/stats")
+async def api_db_stats():
+    stats = get_db_stats()
+    def folder_size(path):
+        if not os.path.exists(path):
+            return 0
+        total = 0
+        for dirpath, _, filenames in os.walk(path):
+            for f in filenames:
+                fp = os.path.join(dirpath, f)
+                total += os.path.getsize(fp) if os.path.exists(fp) else 0
+        return total
+
+    stats["uploads_size"] = folder_size(UPLOADS_DIR)
+    stats["audio_size"] = folder_size(AUDIO_DIR)
+    stats["server_port"] = 8000
+    stats["app_version"] = "1.0.0"
+    stats["platform"] = sys.platform
+    stats["frozen"] = getattr(sys, "frozen", False)
+    return stats
+
+@app.get("/api/db/table/{table_name}")
+async def api_db_table(table_name: str, limit: int = 100, offset: int = 0):
+    try:
+        return get_table_rows(table_name, limit=limit, offset=offset)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {e}")
+
+@app.post("/api/db/query")
+async def api_db_query(request: Request):
+    try:
+        data = await request.json()
+        query = data.get("query", "").strip()
+        if not query:
+            raise HTTPException(status_code=400, detail="Query cannot be empty")
+        return run_readonly_query(query)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Query error: {e}")
+
+@app.post("/api/backend/cleanup-cache")
+async def api_backend_cleanup():
+    try:
+        deleted = cleanup_old_media([UPLOADS_DIR, AUDIO_DIR], max_age_seconds=0)
+        return {"status": "ok", "deleted_files": deleted}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Cleanup error: {e}")
+
+@app.get("/api/db/download")
+async def api_db_download():
+    if not os.path.exists(DB_PATH):
+        raise HTTPException(status_code=404, detail="Database file not found")
+    return FileResponse(DB_PATH, media_type="application/x-sqlite3", filename="whosaid.db")
 
 @app.get("/favicon.ico")
 async def get_favicon():

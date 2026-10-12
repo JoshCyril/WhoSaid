@@ -49,6 +49,14 @@
             Workspace
             <span id="navWorkspaceDot" class="nav-dot hidden"></span>
           </button>
+          <button id="navBackendSettings" class="nav-tab" title="Backend Settings & Database Explorer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+              <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+              <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+            </svg>
+            Backend &amp; DB
+          </button>
         </nav>
       </div>
 
@@ -776,6 +784,220 @@
 
       </section>
 
+      <!-- Backend & Database Settings View -->
+      <section id="backendSettingsView" class="backend-settings-view hidden">
+        <div class="db-view-header">
+          <div class="db-title-group">
+            <div class="db-badge-pill">
+              <span class="db-live-dot"></span> SQLite 3 Engine
+            </div>
+            <h2 class="db-main-title">Backend &amp; Database Explorer</h2>
+            <p class="db-subtitle">Directly inspect tables, storage utilization, and run read-only queries against local SQLite database.</p>
+          </div>
+          <div class="db-header-actions">
+            <button id="btnDbRefresh" class="btn btn-secondary btn-sm" title="Refresh stats & active table">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+              Refresh
+            </button>
+            <button id="btnDbCleanCache" class="btn btn-secondary btn-sm" title="Clean temp audio & uploads cache">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              Purge Cache
+            </button>
+            <a id="btnDbDownload" href="/api/db/download" download="whosaid.db" class="btn btn-primary btn-sm" title="Download SQLite database file">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Download .db
+            </a>
+          </div>
+        </div>
+
+        <!-- KPI Metric Cards Grid -->
+        <div class="db-kpi-grid">
+          <div class="db-kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">Database File Size</span>
+              <span class="kpi-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+              </span>
+            </div>
+            <div class="kpi-value" id="kpiDbSize">0 KB</div>
+            <div class="kpi-sub" id="kpiDbPath">whosaid.db</div>
+          </div>
+
+          <div class="db-kpi-card" id="kpiCardJobs">
+            <div class="kpi-top">
+              <span class="kpi-label">Jobs Processed</span>
+              <span class="kpi-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              </span>
+            </div>
+            <div class="kpi-value" id="kpiJobsCount">0</div>
+            <div class="kpi-sub">Transcription sessions</div>
+          </div>
+
+          <div class="db-kpi-card" id="kpiCardTranscripts">
+            <div class="kpi-top">
+              <span class="kpi-label">Transcripts Stored</span>
+              <span class="kpi-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              </span>
+            </div>
+            <div class="kpi-value" id="kpiTranscriptsCount">0</div>
+            <div class="kpi-sub">Segment &amp; word datasets</div>
+          </div>
+
+          <div class="db-kpi-card" id="kpiCardProfiles">
+            <div class="kpi-top">
+              <span class="kpi-label">Voice Profiles</span>
+              <span class="kpi-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              </span>
+            </div>
+            <div class="kpi-value" id="kpiProfilesCount">0</div>
+            <div class="kpi-sub">Enrolled speaker vectors</div>
+          </div>
+        </div>
+
+        <!-- Database Subtabs Navigation -->
+        <div class="db-subnav-strip">
+          <div class="db-tabs-left">
+            <button class="db-subtab active" data-tab="jobs">
+              <span class="subtab-dot"></span>
+              Jobs Table (<span id="tabCountJobs">0</span>)
+            </button>
+            <button class="db-subtab" data-tab="transcripts">
+              <span class="subtab-dot"></span>
+              Transcripts Table (<span id="tabCountTranscripts">0</span>)
+            </button>
+            <button class="db-subtab" data-tab="voice_profiles">
+              <span class="subtab-dot"></span>
+              Voice Profiles (<span id="tabCountProfiles">0</span>)
+            </button>
+            <button class="db-subtab" data-tab="sql">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+              SQL Console
+            </button>
+            <button class="db-subtab" data-tab="system">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+              Storage &amp; Host
+            </button>
+          </div>
+          <div class="db-filter-wrap" id="dbFilterWrap">
+            <input type="text" id="dbTableSearchInput" class="form-input form-input-sm db-search-field" placeholder="Search table rows..." spellcheck="false" />
+          </div>
+        </div>
+
+        <!-- Tab 1-3 Container: Table Viewer -->
+        <div id="dbTableContainer" class="db-tab-content active-content">
+          <div class="db-table-meta-bar">
+            <span id="dbTableStatusText" class="db-status-text">Showing rows for table: jobs</span>
+            <div class="db-pagination-controls">
+              <button id="btnDbPrevPage" class="btn btn-secondary btn-xs" disabled>&larr; Prev</button>
+              <span id="dbPageIndicator" class="db-page-num">Page 1</span>
+              <button id="btnDbNextPage" class="btn btn-secondary btn-xs">Next &rarr;</button>
+            </div>
+          </div>
+          <div class="db-table-scroll-wrapper">
+            <table class="db-table-grid" id="dbMainTable">
+              <thead id="dbTableThead">
+                <!-- Dynamically populated th -->
+              </thead>
+              <tbody id="dbTableTbody">
+                <!-- Dynamically populated tr -->
+              </tbody>
+            </table>
+            <div id="dbTableEmptyNotice" class="db-empty-notice hidden">No records found.</div>
+          </div>
+        </div>
+
+        <!-- Tab 4: SQL Console -->
+        <div id="dbSqlContainer" class="db-tab-content hidden">
+          <div class="sql-console-panel">
+            <div class="sql-console-header">
+              <div class="sql-help-text">
+                <strong>Read-only SQLite Console:</strong> Run <code>SELECT</code> or <code>PRAGMA</code> queries safely.
+              </div>
+              <div class="sql-quick-chips">
+                <button class="sql-chip" data-query="SELECT id, filename, status, created_at FROM jobs ORDER BY created_at DESC LIMIT 10;">Recent Jobs</button>
+                <button class="sql-chip" data-query="SELECT id, job_id, created_at FROM transcripts ORDER BY created_at DESC LIMIT 10;">Recent Transcripts</button>
+                <button class="sql-chip" data-query="SELECT id, speaker_id, name, created_at FROM voice_profiles;">All Voice Profiles</button>
+                <button class="sql-chip" data-query="PRAGMA table_info(jobs);">Jobs Schema</button>
+              </div>
+            </div>
+            <div class="sql-input-area">
+              <textarea id="sqlQueryInput" class="sql-textarea" rows="4" placeholder="Enter SQL SELECT statement... e.g. SELECT * FROM jobs ORDER BY created_at DESC LIMIT 20;"></textarea>
+              <div class="sql-actions-bar">
+                <span id="sqlExecutionStatus" class="sql-status-indicator">Ready</span>
+                <button id="btnRunSqlQuery" class="btn btn-primary btn-sm">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                  Execute Query
+                </button>
+              </div>
+            </div>
+            <div class="sql-results-panel">
+              <div class="db-table-scroll-wrapper">
+                <table class="db-table-grid" id="sqlResultsTable">
+                  <thead id="sqlResultsThead"></thead>
+                  <tbody id="sqlResultsTbody"></tbody>
+                </table>
+                <div id="sqlResultsEmpty" class="db-empty-notice">Execute a query above to see live rows.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 5: Storage & System View -->
+        <div id="dbSystemContainer" class="db-tab-content hidden">
+          <div class="db-system-grid">
+            <div class="system-card">
+              <h3 class="system-card-title">Database File Location</h3>
+              <div class="system-path-box" id="sysDbPath">...</div>
+              <div class="system-stat-row">
+                <span>File Size:</span>
+                <strong id="sysDbSize">0 KB</strong>
+              </div>
+            </div>
+
+            <div class="system-card">
+              <h3 class="system-card-title">Media Storage Utilization</h3>
+              <div class="system-stat-row">
+                <span>Uploads Cache Folder:</span>
+                <strong id="sysUploadsSize">0 MB</strong>
+              </div>
+              <div class="system-stat-row">
+                <span>Extracted 16kHz Audio Folder:</span>
+                <strong id="sysAudioSize">0 MB</strong>
+              </div>
+              <div class="system-actions mt-3">
+                <button id="btnSystemCleanMedia" class="btn btn-secondary btn-sm">
+                  Purge Unused Temp Files
+                </button>
+              </div>
+            </div>
+
+            <div class="system-card">
+              <h3 class="system-card-title">Runtime &amp; Server Environment</h3>
+              <div class="system-stat-row">
+                <span>FastAPI Port:</span>
+                <strong id="sysServerPort">8000 (localhost)</strong>
+              </div>
+              <div class="system-stat-row">
+                <span>Platform:</span>
+                <strong id="sysPlatform">windows</strong>
+              </div>
+              <div class="system-stat-row">
+                <span>Execution Mode:</span>
+                <strong id="sysFrozenMode">Development / Standalone</strong>
+              </div>
+              <div class="system-stat-row">
+                <span>App Version:</span>
+                <strong>1.0.0</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
         </main>
       </div><!-- /.workbench-main-viewport -->
     </div><!-- /.app-workbench-layout -->
@@ -1326,6 +1548,28 @@
         </div>
         <div class="modal-footer">
           <button id="btnCloseFolderBottom" class="btn btn-secondary">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DB Row JSON Detail Modal -->
+    <div id="dbDetailModal" class="modal-backdrop hidden">
+      <div class="modal-dialog modal-dialog-lg">
+        <div class="modal-header">
+          <div class="title-with-badge">
+            <h3 class="modal-title">Database Record Detail</h3>
+            <span class="badge" id="dbDetailModalBadge">ROW</span>
+          </div>
+          <button id="btnCloseDbDetailModal" class="btn-close" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="db-detail-pre-wrap">
+            <pre id="dbDetailJsonPre" class="db-detail-pre"></pre>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btnCopyDbDetailJson" class="btn btn-secondary btn-sm">Copy JSON</button>
+          <button id="btnCloseDbDetailModalBottom" class="btn btn-primary btn-sm">Close</button>
         </div>
       </div>
     </div>
