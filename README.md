@@ -15,11 +15,21 @@ Everything runs locally on your CPU with **zero cloud calls**.
 ## Screenshots
 
 <p align="center">
-  <img src="static/screenshots/01_hero.png" alt="Who Said Home Explorer" width="800" />
+  <img src="static/screenshots/01_hero.png" alt="Who Said Home Overview & Explorer" width="850" />
+  <br>
+  <em>Home Overview with local folder explorer, activity bar, and recent transcriptions with DiceBear avatars</em>
 </p>
 
 <p align="center">
-  <img src="static/screenshots/02_workspace.png" alt="Who Said Workspace Player" width="800" />
+  <img src="static/screenshots/02_workspace.png" alt="Who Said Multi-Tab Workspace Player" width="850" />
+  <br>
+  <em>Multi-tab workspace with VS Code style tabs, synced OPEN EDITORS panel, video playback, and right-panel controls</em>
+</p>
+
+<p align="center">
+  <img src="static/screenshots/03_export_menu.png" alt="Who Said Subtitle & Script Exports" width="850" />
+  <br>
+  <em>Clean action controls toolbar with one-click export to SubRip (.srt), WebVTT (.vtt), full JSON, and plain text dialogue</em>
 </p>
 
 ---
@@ -27,6 +37,7 @@ Everything runs locally on your CPU with **zero cloud calls**.
 ## Features
 
 - **Universal Media Ingestion**: Supports `.mp4`, `.mkv`, `.mov`, `.webm`, `.mp3`, `.wav`. Extracts 16kHz mono PCM audio via bundled `imageio-ffmpeg`.
+- **VS Code Style Multi-Tab Workspace**: Open, switch between, and close multiple transcription sessions with editor tabs and a synchronized OPEN EDITORS panel.
 - **Word-Level Transcription**: Faster-Whisper (CTranslate2, int8 quantized) provides word-level timestamps and speech recognition on CPU.
 - **Speaker Diarization**: Offline diarization powered by `sherpa-onnx` (Pyannote ONNX segmentation + CAM++ 3D-Speaker ONNX embeddings).
 - **Voice Profiles & Auto-Matching**: Enrolls speaker vocal embeddings (192-dimensional vectors). Automatically matches recurring speakers in subsequent files using cosine similarity (falling back to "Speaker N" if below threshold).

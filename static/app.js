@@ -761,20 +761,22 @@ class WhoSaidApp {
       this.mergeTargetSelect.addEventListener("change", () => this.updateMergePreview());
     }
 
-    // Export Dropdown
-    this.btnExportMenu.addEventListener("click", (e) => {
-      e.stopPropagation();
-      this.exportMenu.classList.toggle("hidden");
-    });
-    document.addEventListener("click", () => this.exportMenu.classList.add("hidden"));
-    this.exportMenu.querySelectorAll(".dropdown-item").forEach((btn) => {
-      btn.addEventListener("click", (e) => {
+    // Legacy Export Dropdown (Guarded)
+    if (this.btnExportMenu && this.exportMenu) {
+      this.btnExportMenu.addEventListener("click", (e) => {
         e.stopPropagation();
-        const fmt = btn.getAttribute("data-format");
-        this.triggerExport(fmt);
-        this.exportMenu.classList.add("hidden");
+        this.exportMenu.classList.toggle("hidden");
       });
-    });
+      document.addEventListener("click", () => this.exportMenu.classList.add("hidden"));
+      this.exportMenu.querySelectorAll(".dropdown-item").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const fmt = btn.getAttribute("data-format");
+          this.triggerExport(fmt);
+          this.exportMenu.classList.add("hidden");
+        });
+      });
+    }
 
     // Player & Waveform controls
     this.btnPlayPause.addEventListener("click", () => this.togglePlayback());
