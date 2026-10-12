@@ -1224,11 +1224,12 @@ html, body {
 .workspace-view {
   height: calc(100vh - 56px);
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
-  gap: 16px;
-  padding: 16px 20px;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+  gap: 0;
+  padding: 0;
   overflow: hidden;
   transition: grid-template-columns 0.25s ease;
+  background: #181b20;
 }
 
 .workspace-view.sidebar-collapsed {
@@ -1256,35 +1257,35 @@ html, body {
     bottom: 0;
     width: 360px;
     max-width: 85vw;
-    background: #2e2e2e;
-    border-left: 1px solid #474747;
+    background: #181b20;
+    border-left: 1px solid #3c3c3c;
     z-index: 100;
     box-shadow: -8px 0 24px rgba(0, 0, 0, 0.6);
-    padding: 16px;
+    padding: 0;
   }
 }
 
 .workspace-left {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 0;
   min-width: 0;
   height: 100%;
+  border-right: 1px solid #3c3c3c;
+  overflow: hidden;
+  background: #121417;
 }
 
 .workspace-right {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 0;
   min-width: 0;
   height: 100%;
   overflow: hidden;
+  background: #181b20;
 }
 
-/* ==========================================================================
-   VIDEO PLAYER STAGE & CONTROLS
-   All dark black surfaces replaced with #2e2e2e
-   ========================================================================== */
 /* ==========================================================================
    WORKSPACE EDITOR GROUP & TABS (VS Code Multi-Tab Architecture)
    ========================================================================== */
@@ -1293,22 +1294,23 @@ html, body {
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  border-radius: var(--radius-xl);
-  overflow: visible;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+  border-radius: 0;
+  border: none;
+  overflow: hidden;
+  box-shadow: none;
 }
 
 .workspace-tabs-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #1c2024;
-  border: 1px solid #3c3c3c;
-  border-bottom: 1px solid #282c32;
-  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  background: #181b1f;
+  border: none;
+  border-bottom: 1px solid #3c3c3c;
+  border-radius: 0;
   min-height: 38px;
   max-height: 38px;
-  padding: 0 6px;
+  padding: 0 4px;
   overflow: hidden;
   user-select: none;
   z-index: 5;
@@ -1488,11 +1490,10 @@ html, body {
   display: flex;
   flex-direction: column;
   min-height: 340px;
-  background: #2e2e2e;
-  border: 1px solid #444444;
-  border-top: none;
-  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-  overflow: visible !important;
+  background: #121417;
+  border: none;
+  border-radius: 0;
+  overflow: hidden;
   position: relative;
 }
 
@@ -1501,9 +1502,10 @@ html, body {
   display: flex;
   flex-direction: column;
   position: relative;
-  background: #2e2e2e;
-  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-  overflow: visible !important;
+  background: #121417;
+  border: none;
+  border-radius: 0;
+  overflow: hidden;
 }
 
 /* ==========================================================================
@@ -1514,9 +1516,10 @@ html, body {
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  padding: 0 0 2px 0;
-  background: transparent;
-  min-height: 38px;
+  padding: 6px 10px;
+  background: #181b20;
+  border-bottom: 1px solid #3c3c3c;
+  min-height: 42px;
 }
 
 .right-toolbar-pills {
@@ -1581,18 +1584,18 @@ html, body {
   background: rgba(255, 255, 255, 0.15);
 }
 
-/* Video Canvas Stage */
+/* Video Canvas Stage - Anchored Top-Left */
 .video-stage {
   flex: 1;
   position: relative;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #2e2e2e;
-  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  align-items: flex-start;
+  justify-content: flex-start;
+  background: #121417;
+  border-radius: 0;
   overflow: hidden;
   cursor: pointer;
-  min-height: 420px;
+  min-height: 380px;
 }
 
 #mediaVideo {
@@ -1601,7 +1604,8 @@ html, body {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  background: #2e2e2e;
+  object-position: top left;
+  background: #121417;
 }
 
 /* Expired Media Banner */
@@ -2024,17 +2028,18 @@ html, body {
    DEDICATED SUBTITLE BANNER
    ========================================================================== */
 .subtitle-banner {
-  background: #2e2e2e;
-  border: 1px solid #444444;
-  border-radius: var(--radius-lg);
-  padding: 14px 20px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  background: #181c21;
+  border: none;
+  border-top: 1px solid #3c3c3c;
+  border-radius: 0;
+  padding: 10px 16px;
+  box-shadow: none;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: 74px;
+  min-height: 58px;
   flex-shrink: 0;
-  margin-top: 14px;
+  margin-top: 0;
 }
 
 .caption-dialogue-row {
@@ -2096,14 +2101,15 @@ html, body {
    SPEAKERS PANEL & AVATAR GRID
    ========================================================================== */
 .speakers-panel {
-  background: #2e2e2e;
-  border: 1px solid #444444;
-  border-radius: var(--radius-lg);
-  padding: 14px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #3c3c3c;
+  border-radius: 0;
+  padding: 10px 14px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  box-shadow: var(--shadow-2xs);
+  gap: 8px;
+  box-shadow: none;
   flex-shrink: 0;
 }
 
@@ -2215,22 +2221,22 @@ html, body {
    ========================================================================== */
 .transcript-panel {
   flex: 1;
-  background: #2e2e2e;
-  border: 1px solid #444444;
-  border-radius: var(--radius-lg);
+  background: transparent;
+  border: none;
+  border-radius: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: var(--shadow-2xs);
+  box-shadow: none;
 }
 
 .transcript-header {
-  padding: 12px 16px;
-  border-bottom: 1px solid #444444;
+  padding: 8px 14px;
+  border-bottom: 1px solid #3c3c3c;
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #2e2e2e;
+  background: transparent;
 }
 
 /* Shadcn Input Component for Search */
@@ -4057,6 +4063,126 @@ html, body {
   font-size: 11px;
   color: #9ca3af;
   padding: 8px 12px;
+}
+
+/* File Properties Viewer in Explorer */
+.explorer-properties-body {
+  padding: 6px 10px 10px 10px;
+}
+
+.prop-inspector-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.prop-file-header-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.prop-icon {
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.prop-filename {
+  font-size: 12px;
+  font-weight: 600;
+  color: #f1f5f9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.prop-grid-table {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 11px;
+}
+
+.prop-table-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.prop-table-row.prop-row-location {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.prop-key {
+  color: #94a3b8;
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 9.5px;
+  letter-spacing: 0.03em;
+}
+
+.prop-value {
+  color: #e2e8f0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.prop-status-tag {
+  font-family: inherit;
+  font-weight: 500;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  font-size: 10px;
+}
+
+.prop-status-tag.status-cached {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.prop-val-path {
+  font-size: 10px;
+  color: #94a3b8;
+  word-break: break-all;
+  line-height: 1.3;
+  max-height: 48px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.prop-footer-actions {
+  margin-top: 4px;
+}
+
+.prop-footer-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 11.5px;
+  height: 28px;
+  width: 100%;
+}
+
+.prop-footer-actions svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
 }
 
 /* 3. VS Code Resizer */

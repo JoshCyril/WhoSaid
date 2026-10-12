@@ -284,6 +284,58 @@
           </div>
         </div>
 
+        <!-- Section: File Properties Window (VS Code Style Property Viewer) -->
+        <div class="explorer-section" id="explorerPropertiesSection">
+          <div class="section-accordion-header" id="headerProperties">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="accordion-chevron">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+            <span class="accordion-title">PROPERTIES</span>
+            <div class="accordion-actions">
+              <button id="btnClearProperties" class="accordion-mini-btn hidden" title="Clear selection">&times;</button>
+            </div>
+          </div>
+          <div class="accordion-body explorer-properties-body" id="bodyProperties">
+            <div id="propEmptyNotice" class="tree-empty-hint">
+              Select a file in the explorer to view properties
+            </div>
+            <div id="propDetailsCard" class="prop-inspector-card hidden">
+              <div class="prop-file-header-row">
+                <span class="prop-icon" id="propFileIcon">🎬</span>
+                <span class="prop-filename" id="propFileName" title="">filename.mp4</span>
+              </div>
+              <div class="prop-grid-table">
+                <div class="prop-table-row">
+                  <span class="prop-key">Size</span>
+                  <span class="prop-value" id="propFileSize">--</span>
+                </div>
+                <div class="prop-table-row">
+                  <span class="prop-key">Duration</span>
+                  <span class="prop-value" id="propFileDuration">--</span>
+                </div>
+                <div class="prop-table-row">
+                  <span class="prop-key">Format</span>
+                  <span class="prop-value" id="propFileFormat">--</span>
+                </div>
+                <div class="prop-table-row">
+                  <span class="prop-key">Status</span>
+                  <span class="prop-value prop-status-tag" id="propFileStatus">--</span>
+                </div>
+                <div class="prop-table-row prop-row-location">
+                  <span class="prop-key">Location</span>
+                  <span class="prop-value prop-val-path" id="propFilePath" title="">--</span>
+                </div>
+              </div>
+              <div class="prop-footer-actions">
+                <button id="btnPropAction" class="btn btn-sm btn-primary btn-block">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-2xs"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                  <span id="btnPropActionText">Open in Workspace</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </aside>
 
       <!-- Resizer Handle -->

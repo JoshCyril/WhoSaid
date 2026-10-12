@@ -70,23 +70,11 @@ app.add_middleware(
 active_connections: Dict[str, List[WebSocket]] = {}
 MAIN_LOOP: Optional[asyncio.AbstractEventLoop] = None
 
-async def periodic_cleanup_task():
-    """Removes uploaded videos and audio older than 1 hour periodically."""
-    while True:
-        try:
-            cleanup_old_media([UPLOADS_DIR, AUDIO_DIR], max_age_seconds=3600)
-        except Exception as e:
-            print(f"[Cleanup Warning] {e}")
-        await asyncio.sleep(600)  # Check every 10 minutes
-
 @app.on_event("startup")
 async def on_app_startup():
     global MAIN_LOOP
     MAIN_LOOP = asyncio.get_running_loop()
-    # Initial 1-hour media cleanup
-    cleanup_old_media([UPLOADS_DIR, AUDIO_DIR], max_age_seconds=3600)
-    # Launch background cleanup task
-    asyncio.create_task(periodic_cleanup_task())
+    # Permanent storage policy: all media, audio, and database records are kept indefinitely until manually deleted.
 
 async def broadcast_progress(job_id: str, data: Dict[str, Any]):
     if job_id in active_connections:
@@ -210,9 +198,6 @@ async def upload_file(
     if ext not in valid_exts:
         raise HTTPException(status_code=400, detail=f"Unsupported format {ext}. Supported: mp4, mkv, mov, webm, mp3, wav.")
 
-    # Periodic cleanup of media older than 1 hour
-    cleanup_old_media([UPLOADS_DIR, AUDIO_DIR], max_age_seconds=3600)
-
     # Save to temp location to compute hash
     temp_path = os.path.join(UPLOADS_DIR, f"temp_{file.filename}")
     with open(temp_path, "wb") as f:
@@ -220,12 +205,15 @@ async def upload_file(
 
     file_hash = compute_file_hash(temp_path)
 
-    # Check cache (check hash and model and language)
+    # Check cache (check content hash and model and language)
     cached_job = get_job_by_hash_and_model(file_hash, model_size)
     if cached_job and cached_job.get("language_mode", "en") == language_mode:
         transcript = get_transcript_by_job_id(cached_job["id"])
         if transcript:
             os.remove(temp_path)
+            # Track renamed file: update filename if different
+            if cached_job.get("filename") != file.filename:
+                update_job(cached_job["id"], filename=file.filename)
             return JSONResponse({
                 "job_id": cached_job["id"],
                 "transcript_id": transcript["id"],
@@ -323,12 +311,16 @@ async def process_local_path(request: Request):
         raise HTTPException(status_code=400, detail=f"Unsupported format {ext}. Supported: mp4, mkv, mov, webm, mp3, wav.")
 
     file_hash = compute_file_hash(file_path)
+    filename = os.path.basename(file_path)
 
-    # Check cache
+    # Check cache by content hash
     cached_job = get_job_by_hash_and_model(file_hash, model_size)
     if cached_job and cached_job.get("language_mode", "en") == language_mode:
         transcript = get_transcript_by_job_id(cached_job["id"])
         if transcript:
+            # If filename or location changed on disk, update job record to track new filename & path
+            if cached_job.get("filename") != filename or cached_job.get("file_path") != file_path:
+                update_job(cached_job["id"], filename=filename, file_path=file_path)
             return JSONResponse({
                 "job_id": cached_job["id"],
                 "transcript_id": transcript["id"],
@@ -467,6 +459,49 @@ async def scan_filesystem_folder(folder_path: Optional[str] = None):
         "root": tree,
         "folder_path": target_dir,
         "folder_name": os.path.basename(target_dir) or target_dir
+    })
+
+@app.get("/api/fs/file-properties")
+async def get_file_properties(file_path: str):
+    if not file_path or not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    stat = os.stat(file_path)
+    size = stat.st_size
+    mtime = stat.st_mtime
+    ext = os.path.splitext(file_path)[1].lower()
+    filename = os.path.basename(file_path)
+    
+    # Check if cached in DB
+    job = None
+    transcript_id = None
+    try:
+        from backend.db import get_connection
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, filename, file_hash, model_size, duration, status FROM jobs WHERE file_path = ? OR filename = ?", (file_path, filename))
+        row = cursor.fetchone()
+        if row:
+            job = dict(row)
+            cursor.execute("SELECT id FROM transcripts WHERE job_id = ?", (job["id"],))
+            tr = cursor.fetchone()
+            if tr:
+                transcript_id = tr["id"]
+        conn.close()
+    except Exception as e:
+        pass
+
+    return JSONResponse({
+        "name": filename,
+        "path": file_path,
+        "size": size,
+        "ext": ext,
+        "mtime": mtime,
+        "duration": job.get("duration") if job else None,
+        "model_size": job.get("model_size") if job else None,
+        "cached": bool(transcript_id),
+        "transcript_id": transcript_id,
+        "job_id": job.get("id") if job else None
     })
 
 # --- History Endpoints ---

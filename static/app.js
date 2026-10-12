@@ -233,6 +233,23 @@ class WhoSaidApp {
     this.noOpenEditors = document.getElementById("noOpenEditors");
     this.bodyOpenEditors = document.getElementById("bodyOpenEditors");
 
+    // Explorer Properties Window
+    this.headerProperties = document.getElementById("headerProperties");
+    this.bodyProperties = document.getElementById("bodyProperties");
+    this.propEmptyNotice = document.getElementById("propEmptyNotice");
+    this.propDetailsCard = document.getElementById("propDetailsCard");
+    this.propFileIcon = document.getElementById("propFileIcon");
+    this.propFileName = document.getElementById("propFileName");
+    this.propFileSize = document.getElementById("propFileSize");
+    this.propFileDuration = document.getElementById("propFileDuration");
+    this.propFileFormat = document.getElementById("propFileFormat");
+    this.propFileStatus = document.getElementById("propFileStatus");
+    this.propFilePath = document.getElementById("propFilePath");
+    this.btnPropAction = document.getElementById("btnPropAction");
+    this.btnPropActionText = document.getElementById("btnPropActionText");
+    this.btnClearProperties = document.getElementById("btnClearProperties");
+    this.selectedPropertyItem = null;
+
     // Transcribe Path Modal
     this.transcribePathModal = document.getElementById("transcribePathModal");
     this.btnCloseTranscribePathModal = document.getElementById("btnCloseTranscribePathModal");
@@ -3226,6 +3243,32 @@ class WhoSaidApp {
       });
     }
 
+    // Properties Accordion & Actions
+    if (this.headerProperties) {
+      this.headerProperties.addEventListener("click", (e) => {
+        if (e.target.closest("#btnClearProperties")) return;
+        this.headerProperties.classList.toggle("collapsed");
+      });
+    }
+    if (this.btnClearProperties) {
+      this.btnClearProperties.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.clearFileProperties();
+      });
+    }
+    if (this.btnPropAction) {
+      this.btnPropAction.addEventListener("click", () => {
+        if (!this.selectedPropertyItem) return;
+        const item = this.selectedPropertyItem;
+        if (item.cached_job && item.cached_job.transcript_id) {
+          this.loadTranscript(item.cached_job.transcript_id);
+          this.highlightActiveTreeFile(item.path);
+        } else if (item.is_media) {
+          this.openTranscribePathModal(item);
+        }
+      });
+    }
+
     // Sidebar Resizer Handle
     this.initSidebarResizer();
 
@@ -3581,17 +3624,29 @@ class WhoSaidApp {
             return;
           }
 
+          // Always display properties in Properties Window
+          this.displayFileProperties(item);
+
+          // If clicked specifically on the action pill, execute immediately
+          if (e.target.closest(".tree-action-pill")) {
+            if (item.is_media) {
+              if (item.cached_job && item.cached_job.transcript_id) {
+                this.loadTranscript(item.cached_job.transcript_id);
+              } else {
+                this.openTranscribePathModal(item);
+              }
+            }
+          }
+        });
+
+        // Double click to open/transcribe immediately
+        row.addEventListener("dblclick", () => {
           if (item.is_media) {
             if (item.cached_job && item.cached_job.transcript_id) {
-              // Direct instant load from cache
               this.loadTranscript(item.cached_job.transcript_id);
-              this.highlightActiveTreeFile(item.path);
             } else {
-              // Open modal to transcribe
               this.openTranscribePathModal(item);
             }
-          } else {
-            this.showToast(`Selected: ${item.name}`, "info");
           }
         });
 
@@ -3606,6 +3661,95 @@ class WhoSaidApp {
     this.explorerTreeView.querySelectorAll(".tree-node.file-node").forEach((node) => {
       node.classList.toggle("active-file", node.dataset.path === filePath);
     });
+  }
+
+  displayFileProperties(item) {
+    if (!item || !this.propDetailsCard) return;
+    this.selectedPropertyItem = item;
+
+    if (this.propEmptyNotice) this.propEmptyNotice.classList.add("hidden");
+    if (this.propDetailsCard) this.propDetailsCard.classList.remove("hidden");
+    if (this.btnClearProperties) this.btnClearProperties.classList.remove("hidden");
+
+    // File icon
+    let icon = "📄";
+    if (item.is_media) {
+      const ext = (item.ext || "").toLowerCase();
+      icon = [".mp3", ".wav"].includes(ext) ? "🎵" : "🎬";
+    } else if (item.is_subtitle) {
+      icon = "💬";
+    }
+    if (this.propFileIcon) this.propFileIcon.textContent = icon;
+    if (this.propFileName) {
+      this.propFileName.textContent = item.name || "File";
+      this.propFileName.title = item.name || "";
+    }
+    if (this.propFileSize) this.propFileSize.textContent = this.formatFileSize(item.size || 0);
+    if (this.propFilePath) {
+      this.propFilePath.textContent = item.path || "--";
+      this.propFilePath.title = item.path || "";
+    }
+    if (this.propFileFormat) {
+      const ext = (item.ext || "").replace(".", "").toUpperCase();
+      this.propFileFormat.textContent = ext ? `${ext} File` : "File";
+    }
+
+    const isCached = Boolean(item.cached_job && item.cached_job.transcript_id);
+    if (this.propFileStatus) {
+      this.propFileStatus.textContent = isCached ? "Transcribed (Ready)" : (item.is_media ? "Not Transcribed" : "File");
+      this.propFileStatus.className = `prop-value prop-status-tag ${isCached ? "status-cached" : ""}`;
+    }
+
+    if (this.propFileDuration) {
+      if (item.duration) {
+        this.propFileDuration.textContent = this.formatTime(item.duration);
+      } else if (item.cached_job?.duration) {
+        this.propFileDuration.textContent = this.formatTime(item.cached_job.duration);
+      } else {
+        this.propFileDuration.textContent = item.is_media ? "--:--" : "N/A";
+      }
+    }
+
+    if (this.btnPropActionText) {
+      this.btnPropActionText.textContent = isCached ? "Open in Workspace" : (item.is_media ? "Transcribe Media" : "Open");
+    }
+
+    this.highlightActiveTreeFile(item.path);
+
+    // Asynchronously fetch extra properties from backend
+    if (item.path) {
+      fetch(`/api/fs/file-properties?file_path=${encodeURIComponent(item.path)}`)
+        .then((r) => r.ok ? r.json() : null)
+        .then((props) => {
+          if (props && this.selectedPropertyItem?.path === item.path) {
+            if (props.duration && this.propFileDuration) {
+              this.propFileDuration.textContent = this.formatTime(props.duration);
+            }
+            if (props.cached && props.transcript_id) {
+              item.cached_job = {
+                transcript_id: props.transcript_id,
+                job_id: props.job_id,
+                model_size: props.model_size
+              };
+              if (this.propFileStatus) {
+                this.propFileStatus.textContent = "Transcribed (Ready)";
+                this.propFileStatus.className = "prop-value prop-status-tag status-cached";
+              }
+              if (this.btnPropActionText) {
+                this.btnPropActionText.textContent = "Open in Workspace";
+              }
+            }
+          }
+        })
+        .catch(() => {});
+    }
+  }
+
+  clearFileProperties() {
+    this.selectedPropertyItem = null;
+    if (this.propEmptyNotice) this.propEmptyNotice.classList.remove("hidden");
+    if (this.propDetailsCard) this.propDetailsCard.classList.add("hidden");
+    if (this.btnClearProperties) this.btnClearProperties.classList.add("hidden");
   }
 
   updateOpenEditors() {
