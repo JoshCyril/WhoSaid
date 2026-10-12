@@ -1,6 +1,22 @@
+import os
+import sys
 import numpy as np
 from typing import List, Dict, Any, Optional, Callable
 import faster_whisper
+
+if getattr(sys, "frozen", False):
+    APP_DIR = getattr(sys, "_MEIPASS", os.path.dirname(sys.executable))
+    ROOT_DIR = os.path.dirname(sys.executable)
+else:
+    APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ROOT_DIR = APP_DIR
+
+_model_candidates = [
+    os.environ.get("WHOSAID_MODELS_DIR"),
+    os.path.join(ROOT_DIR, "models"),
+    os.path.join(APP_DIR, "models")
+]
+MODELS_DIR = next((p for p in _model_candidates if p and os.path.exists(p)), os.path.join(ROOT_DIR, "models"))
 
 
 class TranscriberService:
@@ -13,8 +29,13 @@ class TranscriberService:
             model_size = "base"
         if model_size not in cls._models:
             print(f"[Transcriber] Loading faster-whisper model '{model_size}' on CPU (int8)...")
+            
+            # Check if an offline unpacked model directory exists in MODELS_DIR
+            local_candidate = os.path.join(MODELS_DIR, model_size)
+            model_source = local_candidate if os.path.isdir(local_candidate) else model_size
+            
             cls._models[model_size] = faster_whisper.WhisperModel(
-                model_size,
+                model_source,
                 device="cpu",
                 compute_type="int8",
                 cpu_threads=4

@@ -21,7 +21,7 @@ from backend.db import (
     get_db_path, get_default_db_path, set_db_path
 )
 from backend.audio import (
-    extract_audio_16k, compute_file_hash, generate_waveform_peaks
+    extract_audio_16k, compute_file_hash, generate_waveform_peaks, load_audio_samples
 )
 from backend.cleanup import cleanup_old_media
 from backend.diarizer import DiarizerService
