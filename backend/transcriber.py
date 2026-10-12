@@ -19,6 +19,46 @@ _model_candidates = [
 MODELS_DIR = next((p for p in _model_candidates if p and os.path.exists(p)), os.path.join(ROOT_DIR, "models"))
 
 
+def find_local_whisper_model(model_size: str, search_dir: str) -> Optional[str]:
+    """Finds a local directory for the given whisper model size."""
+    if not os.path.exists(search_dir):
+        return None
+        
+    candidates = [
+        os.path.join(search_dir, model_size),
+        os.path.join(search_dir, f"whisper-{model_size}"),
+        os.path.join(search_dir, f"faster-whisper-{model_size}"),
+        os.path.join(search_dir, f"models--Systran--faster-whisper-{model_size}"),
+    ]
+    for cand in candidates:
+        if os.path.isdir(cand):
+            # Check if directory directly contains model files
+            if any(os.path.exists(os.path.join(cand, f)) for f in ["model.bin", "model.safetensors"]):
+                return cand
+            # Check snapshots subdirectory (Hugging Face hub format)
+            snaps_dir = os.path.join(cand, "snapshots")
+            if os.path.isdir(snaps_dir):
+                for snap in os.listdir(snaps_dir):
+                    sub = os.path.join(snaps_dir, snap)
+                    if os.path.isdir(sub) and any(os.path.exists(os.path.join(sub, f)) for f in ["model.bin", "model.safetensors"]):
+                        return sub
+    return None
+
+
+def get_whisper_models_status() -> Dict[str, Any]:
+    """Returns local installation status and Hugging Face links for all supported Whisper model sizes."""
+    sizes = ["tiny", "base", "small", "medium"]
+    status = {}
+    for s in sizes:
+        local_path = find_local_whisper_model(s, MODELS_DIR)
+        status[s] = {
+            "installed_locally": local_path is not None,
+            "path": local_path,
+            "hf_url": f"https://huggingface.co/Systran/faster-whisper-{s}"
+        }
+    return status
+
+
 class TranscriberService:
     _models: Dict[str, faster_whisper.WhisperModel] = {}
 
@@ -28,18 +68,42 @@ class TranscriberService:
         if model_size not in valid_sizes:
             model_size = "base"
         if model_size not in cls._models:
-            print(f"[Transcriber] Loading faster-whisper model '{model_size}' on CPU (int8)...")
+            print(f"[Transcriber] Resolving faster-whisper model '{model_size}' on CPU (int8)...")
             
-            # Check if an offline unpacked model directory exists in MODELS_DIR
-            local_candidate = os.path.join(MODELS_DIR, model_size)
-            model_source = local_candidate if os.path.isdir(local_candidate) else model_size
+            # 1. Search in configured MODELS_DIR
+            local_path = find_local_whisper_model(model_size, MODELS_DIR)
             
-            cls._models[model_size] = faster_whisper.WhisperModel(
-                model_source,
-                device="cpu",
-                compute_type="int8",
-                cpu_threads=4
-            )
+            # 2. Check standard user huggingface cache
+            if not local_path:
+                hf_cache = os.path.expanduser("~/.cache/huggingface/hub")
+                local_path = find_local_whisper_model(model_size, hf_cache)
+                
+            model_source = local_path
+            if not model_source:
+                # If requested model (e.g. small/medium) is not present locally, fallback to bundled base
+                bundled_base = find_local_whisper_model("base", MODELS_DIR)
+                if bundled_base and model_size != "base":
+                    print(f"[Transcriber] Model '{model_size}' not found in local models directory. Falling back to bundled 'base' model.")
+                    return cls.get_model("base")
+                raise FileNotFoundError(
+                    f"Local model '{model_size}' was not found in '{MODELS_DIR}'. "
+                    f"Please select 'base' or 'tiny' (bundled 100% offline inside the application) or place the '{model_size}' files in '{os.path.join(MODELS_DIR, model_size)}'."
+                )
+
+            print(f"[Transcriber] Loading 100% offline Whisper model '{model_size}' from: {model_source}")
+            try:
+                cls._models[model_size] = faster_whisper.WhisperModel(
+                    model_source,
+                    device="cpu",
+                    compute_type="int8",
+                    cpu_threads=4,
+                    local_files_only=True
+                )
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed to load offline model from '{model_source}': {e}. "
+                    f"Ensure model.bin and config.json are present."
+                ) from e
         return cls._models[model_size]
 
     @classmethod

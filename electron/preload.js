@@ -13,5 +13,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getConfiguredDbPath: () => ipcRenderer.invoke('config:getDbPath'),
   setConfiguredDbPath: (newDbPath, alwaysAsk) => ipcRenderer.invoke('config:setDbPath', newDbPath, alwaysAsk),
   getDefaultSampleDbPath: () => ipcRenderer.invoke('config:getDefaultSampleDbPath'),
-  launchAppWithDb: (dbPath, alwaysAsk) => ipcRenderer.invoke('app:launchWithDb', dbPath, alwaysAsk)
+  launchAppWithDb: (dbPath, alwaysAsk) => ipcRenderer.invoke('app:launchWithDb', dbPath, alwaysAsk),
+  // Models folder & external browser links
+  openExternal: (url) => ipcRenderer.invoke('shell:openExternal', url),
+  openModelsFolder: () => ipcRenderer.invoke('fs:openModelsFolder'),
+  getModelsDir: () => ipcRenderer.invoke('config:getModelsDir')
 });

@@ -4284,8 +4284,70 @@ class WhoSaidApp {
 
       const sysFrozenMode = document.getElementById("sysFrozenMode");
       if (sysFrozenMode) sysFrozenMode.textContent = data.frozen ? "Packaged Binary (.exe)" : "Python Source / Dev Mode";
+
+      await this.loadModelsInfo();
     } catch (e) {
       console.error("Error loading DB stats:", e);
+    }
+  }
+
+  async loadModelsInfo() {
+    try {
+      const resp = await fetch("/api/backend/models-info");
+      if (!resp.ok) return;
+      const data = await resp.json();
+
+      const badgeBase = document.getElementById("badgeModelBase");
+      const badgeTiny = document.getElementById("badgeModelTiny");
+      const badgeSmall = document.getElementById("badgeModelSmall");
+      const badgeMedium = document.getElementById("badgeModelMedium");
+
+      const w = data.whisper_models || {};
+      if (badgeBase) {
+        badgeBase.textContent = w.base?.installed_locally ? "Installed (Offline)" : "Available";
+        badgeBase.className = `model-badge ${w.base?.installed_locally ? "installed" : ""}`;
+      }
+      if (badgeTiny) {
+        badgeTiny.textContent = w.tiny?.installed_locally ? "Installed (Offline)" : "Available";
+        badgeTiny.className = `model-badge ${w.tiny?.installed_locally ? "installed" : ""}`;
+      }
+      if (badgeSmall) {
+        badgeSmall.textContent = w.small?.installed_locally ? "Installed (Offline)" : "Optional (HF)";
+        badgeSmall.className = `model-badge ${w.small?.installed_locally ? "installed" : "optional"}`;
+      }
+      if (badgeMedium) {
+        badgeMedium.textContent = w.medium?.installed_locally ? "Installed (Offline)" : "Optional (HF)";
+        badgeMedium.className = `model-badge ${w.medium?.installed_locally ? "installed" : "optional"}`;
+      }
+
+      const btnOpenModelsFolder = document.getElementById("btnOpenModelsFolder");
+      if (btnOpenModelsFolder && !btnOpenModelsFolder._bound) {
+        btnOpenModelsFolder._bound = true;
+        btnOpenModelsFolder.addEventListener("click", () => {
+          if (window.electronAPI && window.electronAPI.openModelsFolder) {
+            window.electronAPI.openModelsFolder();
+          } else {
+            this.showToast(`Models directory: ${data.models_dir}`, "info");
+          }
+        });
+      }
+
+      document.querySelectorAll(".link-external-hf").forEach(link => {
+        if (!link._bound) {
+          link._bound = true;
+          link.addEventListener("click", (e) => {
+            e.preventDefault();
+            const url = link.getAttribute("data-url") || link.href;
+            if (window.electronAPI && window.electronAPI.openExternal) {
+              window.electronAPI.openExternal(url);
+            } else {
+              window.open(url, "_blank");
+            }
+          });
+        }
+      });
+    } catch (e) {
+      console.warn("Could not load models info:", e);
     }
   }
 

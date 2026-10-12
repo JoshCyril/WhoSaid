@@ -931,6 +931,56 @@
           </div>
         </div>
 
+        <!-- AI Models & Offline Speech Engine Status -->
+        <div class="db-config-banner models-config-banner" id="modelsConfigBanner" style="margin-top: 14px;">
+          <div class="db-config-top">
+            <div class="db-config-title-group">
+              <div class="db-config-icon-wrap" style="color: #60a5fa; background: rgba(96, 165, 250, 0.1);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+                  <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </div>
+              <div class="db-config-text">
+                <div class="db-config-label-row">
+                  <span class="db-config-heading">AI Models & Offline Speech Engine</span>
+                  <span id="modelsOfflineStatusBadge" class="db-type-badge default" style="border-color: rgba(34, 197, 94, 0.4); color: #4ade80;">100% Offline Ready</span>
+                </div>
+                <p class="db-config-desc">Bundled with <strong>base</strong> and <strong>tiny</strong> Faster-Whisper models, plus Pyannote diarization & CAM++ voice embeddings. Larger models (small, medium) can be downloaded from Hugging Face and placed in your models folder.</p>
+              </div>
+            </div>
+            <div class="db-config-buttons">
+              <button id="btnOpenModelsFolder" class="btn btn-secondary btn-sm" title="Open local AI models directory in Windows Explorer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                Open Models Folder
+              </button>
+            </div>
+          </div>
+
+          <div class="models-status-table-wrap">
+            <div class="model-item-row">
+              <span class="model-name">Whisper Base</span>
+              <span class="model-badge installed" id="badgeModelBase">Installed (Offline)</span>
+              <span class="model-desc">General accuracy, ~145 MB</span>
+            </div>
+            <div class="model-item-row">
+              <span class="model-name">Whisper Tiny</span>
+              <span class="model-badge installed" id="badgeModelTiny">Installed (Offline)</span>
+              <span class="model-desc">Ultra-fast, ~75 MB</span>
+            </div>
+            <div class="model-item-row">
+              <span class="model-name">Whisper Small</span>
+              <span class="model-badge optional" id="badgeModelSmall">Optional</span>
+              <a href="https://huggingface.co/Systran/faster-whisper-small" target="_blank" class="model-link link-external-hf" data-url="https://huggingface.co/Systran/faster-whisper-small">Download from Hugging Face ↗</a>
+            </div>
+            <div class="model-item-row">
+              <span class="model-name">Whisper Medium</span>
+              <span class="model-badge optional" id="badgeModelMedium">Optional</span>
+              <a href="https://huggingface.co/Systran/faster-whisper-medium" target="_blank" class="model-link link-external-hf" data-url="https://huggingface.co/Systran/faster-whisper-medium">Download from Hugging Face ↗</a>
+            </div>
+          </div>
+        </div>
+
         <!-- KPI Metric Cards Grid -->
         <div class="db-kpi-grid">
           <div class="db-kpi-card">
@@ -1191,28 +1241,28 @@
                 <input type="radio" name="pathModelSize" value="tiny">
                 <div class="pill-content">
                   <span class="pill-name">Tiny</span>
-                  <span class="pill-desc">Ultra Fast (~10x)</span>
+                  <span class="pill-desc">Ultra Fast (Offline Bundled)</span>
                 </div>
               </label>
               <label class="model-pill">
                 <input type="radio" name="pathModelSize" value="base" checked>
                 <div class="pill-content">
                   <span class="pill-name">Base</span>
-                  <span class="pill-desc">Balanced (Default)</span>
+                  <span class="pill-desc">Balanced (Offline Bundled)</span>
                 </div>
               </label>
               <label class="model-pill">
                 <input type="radio" name="pathModelSize" value="small">
                 <div class="pill-content">
                   <span class="pill-name">Small</span>
-                  <span class="pill-desc">High Accuracy</span>
+                  <span class="pill-desc">High Accuracy (Custom)</span>
                 </div>
               </label>
               <label class="model-pill">
                 <input type="radio" name="pathModelSize" value="medium">
                 <div class="pill-content">
                   <span class="pill-name">Medium</span>
-                  <span class="pill-desc">Maximum Quality</span>
+                  <span class="pill-desc">Max Quality (Custom)</span>
                 </div>
               </label>
             </div>
@@ -1288,28 +1338,28 @@
                 <input type="radio" name="modelSize" value="tiny">
                 <div class="pill-content">
                   <span class="pill-name">Tiny</span>
-                  <span class="pill-desc">Ultra Fast (~10x)</span>
+                  <span class="pill-desc">Ultra Fast (Offline Bundled)</span>
                 </div>
               </label>
               <label class="model-pill">
                 <input type="radio" name="modelSize" value="base" checked>
                 <div class="pill-content">
                   <span class="pill-name">Base</span>
-                  <span class="pill-desc">Balanced (Default)</span>
+                  <span class="pill-desc">Balanced (Offline Bundled)</span>
                 </div>
               </label>
               <label class="model-pill">
                 <input type="radio" name="modelSize" value="small">
                 <div class="pill-content">
                   <span class="pill-name">Small</span>
-                  <span class="pill-desc">High Accuracy</span>
+                  <span class="pill-desc">High Accuracy (Custom)</span>
                 </div>
               </label>
               <label class="model-pill">
                 <input type="radio" name="modelSize" value="medium">
                 <div class="pill-content">
                   <span class="pill-name">Medium</span>
-                  <span class="pill-desc">Maximum Quality</span>
+                  <span class="pill-desc">Max Quality (Custom)</span>
                 </div>
               </label>
             </div>

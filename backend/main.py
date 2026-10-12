@@ -25,7 +25,7 @@ from backend.audio import (
 )
 from backend.cleanup import cleanup_old_media
 from backend.diarizer import DiarizerService
-from backend.transcriber import TranscriberService
+from backend.transcriber import TranscriberService, get_whisper_models_status, MODELS_DIR
 from backend.exporter import export_srt, export_vtt, export_json, export_txt
 
 
@@ -977,6 +977,23 @@ async def api_db_download():
         raise HTTPException(status_code=404, detail="Database file not found")
     filename = os.path.basename(active_path) or "whosaid.db"
     return FileResponse(active_path, media_type="application/x-sqlite3", filename=filename)
+
+@app.get("/api/backend/models-info")
+async def api_get_models_info():
+    seg_exists = os.path.exists(os.path.join(MODELS_DIR, "model.onnx"))
+    emb_exists = os.path.exists(os.path.join(MODELS_DIR, "3dspeaker_speech_campplus_sv_zh_en_16k-common_advanced.onnx"))
+    whisper_status = get_whisper_models_status()
+    return JSONResponse({
+        "models_dir": MODELS_DIR,
+        "exists": os.path.exists(MODELS_DIR),
+        "diarization": {
+            "segmentation_model": seg_exists,
+            "embedding_model": emb_exists,
+            "ready": seg_exists and emb_exists
+        },
+        "whisper_models": whisper_status,
+        "offline_ready": (seg_exists and emb_exists and whisper_status.get("base", {}).get("installed_locally", False))
+    })
 
 @app.get("/favicon.ico")
 async def get_favicon():

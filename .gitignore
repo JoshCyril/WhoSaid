@@ -42,11 +42,15 @@ storage/audio/*
 !storage/audio/.gitkeep
 *.log
 
-# Caches
+# Caches and large model weights (packaged directly into release binaries)
 .cache/
 */.cache/
 models/.cache/
 sample_data/.cache/
+models/base/
+models/tiny/
+models/small/
+models/medium/
 
 # Agent / Scratch / Dev artifacts
 scratch/

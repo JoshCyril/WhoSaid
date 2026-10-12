@@ -434,6 +434,41 @@ ipcMain.handle('fs:saveRecentFolder', async (_event, folderPath) => {
 
 ipcMain.handle('app:getVersion', () => '1.0.0');
 
+// Open links safely in default OS browser
+ipcMain.handle('shell:openExternal', async (_event, url) => {
+  if (url && (url.startsWith('https://') || url.startsWith('http://'))) {
+    shell.openExternal(url);
+    return true;
+  }
+  return false;
+});
+
+// Locate and open the local AI models directory
+ipcMain.handle('fs:openModelsFolder', async () => {
+  const modelsCandidates = [
+    path.join(PROJECT_ROOT, 'models'),
+    path.join(PROJECT_ROOT, 'whosaid-backend', 'models'),
+    path.join(path.dirname(app.getPath('exe')), 'resources', 'models'),
+    path.join(process.resourcesPath || '', 'models')
+  ];
+  const targetDir = modelsCandidates.find(d => fs.existsSync(d)) || path.join(PROJECT_ROOT, 'models');
+  if (!fs.existsSync(targetDir)) {
+    fs.mkdirSync(targetDir, { recursive: true });
+  }
+  shell.openPath(targetDir);
+  return targetDir;
+});
+
+ipcMain.handle('config:getModelsDir', () => {
+  const modelsCandidates = [
+    path.join(PROJECT_ROOT, 'models'),
+    path.join(PROJECT_ROOT, 'whosaid-backend', 'models'),
+    path.join(path.dirname(app.getPath('exe')), 'resources', 'models'),
+    path.join(process.resourcesPath || '', 'models')
+  ];
+  return modelsCandidates.find(d => fs.existsSync(d)) || path.join(PROJECT_ROOT, 'models');
+});
+
 // Database File Picker & Configuration IPCs
 ipcMain.handle('dialog:selectDbFile', async () => {
   if (!mainWindow) return null;
