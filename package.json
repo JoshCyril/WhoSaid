@@ -1,0 +1,86 @@
+{
+  "name": "whosaid",
+  "version": "1.0.0",
+  "description": "Who Said - Local Video Transcriber & Speaker Captions",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "electron": "electron .",
+    "build:backend": "python build_backend.py",
+    "build": "npm run build:backend && electron-builder --win",
+    "build:dir": "npm run build:backend && electron-builder --win --dir",
+    "build:portable": "npm run build:backend && electron-builder --win portable",
+    "pack": "electron-builder --win"
+  },
+  "build": {
+    "appId": "com.whosaid.desktop",
+    "productName": "WhoSaid",
+    "asar": true,
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "files": [
+      "electron/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "dist_backend/whosaid-backend",
+        "to": "whosaid-backend"
+      },
+      {
+        "from": "storage",
+        "to": "storage"
+      },
+      {
+        "from": "backend",
+        "to": "backend"
+      },
+      {
+        "from": "models",
+        "to": "models"
+      },
+      {
+        "from": "static",
+        "to": "static"
+      },
+      {
+        "from": "sample_data",
+        "to": "sample_data"
+      },
+      {
+        "from": "run.py",
+        "to": "run.py"
+      }
+    ]
+  },
+  "keywords": [
+    "transcription",
+    "speech-to-text",
+    "diarization",
+    "whisper",
+    "faster-whisper",
+    "sherpa-onnx",
+    "offline-ai",
+    "subtitles",
+    "captions",
+    "electron"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^44.7.0",
+    "electron-builder": "^26.15.3"
+  }
+}

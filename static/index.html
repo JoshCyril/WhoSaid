@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Who Said - Local Video Transcriber & Speaker Captions</title>
+  <!-- Google Fonts: Geist & Geist Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Offline WaveSurfer Libs -->
+  <script src="/static/libs/wavesurfer.min.js"></script>
+  <script src="/static/libs/regions.min.js"></script>
+  <!-- Local DiceBear Cameo Engine (100% Offline from cameo.min.json) -->
+  <script src="/static/libs/cameo.js"></script>
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="/static/app.css?v=shadcn_graphite2">
+</head>
+<body class="style-vega">
+  <div id="app" class="app-container">
+    
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="brand-logo" id="navLogo" role="button" title="Go to Homepage">
+          <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v20M17 5v14M7 5v14M22 10v4M2 10v4" />
+          </svg>
+          <div class="brand-info">
+            <h1 class="brand-title">Who Said</h1>
+            <span class="brand-badge">Local CPU</span>
+          </div>
+        </div>
+
+        <nav class="header-nav">
+          <button id="navHome" class="nav-tab active" title="Go to Homepage">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            Home
+          </button>
+          <button id="navWorkspace" class="nav-tab" title="View Active Workspace">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            Workspace
+            <span id="navWorkspaceDot" class="nav-dot hidden"></span>
+          </button>
+        </nav>
+      </div>
+
+      <div class="header-center">
+        <div id="activeFileIndicator" class="active-file-indicator hidden">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="file-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l-4 4l6 6l4-16l-18 7l8 2l2 7z" />
+          </svg>
+          <span id="activeFileName" class="file-name">demo_file.mp4</span>
+          <span id="activeModelBadge" class="model-badge">base</span>
+          <button id="btnWorkspaceDeleteSession" class="btn btn-sm btn-action-pill btn-action-danger btn-workspace-delete" title="Delete current session from history">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            Delete
+          </button>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <button id="btnHeaderOpenFolder" class="btn btn-secondary" title="Open Folder (Ctrl+O)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+          Open Folder
+        </button>
+
+        <button id="btnNewUpload" class="btn btn-primary" title="Upload a video or audio file">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          Upload Media
+        </button>
+
+        <!-- Minimal More Actions Dropdown -->
+        <div class="nav-dropdown-wrapper">
+          <button id="btnNavMore" class="btn btn-secondary btn-icon" title="Tools & Sessions">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon">
+              <circle cx="12" cy="12" r="1.5"></circle>
+              <circle cx="12" cy="5" r="1.5"></circle>
+              <circle cx="12" cy="19" r="1.5"></circle>
+            </svg>
+          </button>
+          <div id="navMoreMenu" class="dropdown-menu nav-more-menu hidden">
+            <button id="btnTryDemo" class="dropdown-item">
+              <div class="dropdown-item-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                <span>Try Demo Session</span>
+              </div>
+            </button>
+            <button id="btnManageProfiles" class="dropdown-item">
+              <div class="dropdown-item-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <span>Voice Profiles (<span id="profileCountBadge">0</span>)</span>
+              </div>
+            </button>
+            <button id="btnHistory" class="dropdown-item">
+              <div class="dropdown-item-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span>History (<span id="headerHistoryCountBadge">0</span>)</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workbench Layout (VS Code Architecture) -->
+    <div class="app-workbench-layout" id="appWorkbenchLayout">
+      
+      <!-- VS Code Activity Bar (Far Left Strip) -->
+      <aside class="vscode-activity-bar" id="vscodeActivityBar">
+        <div class="activity-bar-top">
+          <button class="activity-bar-item active" id="actBarExplorer" title="Explorer (Ctrl+Shift+E / Ctrl+B)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon">
+              <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z"></path>
+            </svg>
+            <span class="activity-active-indicator"></span>
+          </button>
+          <button class="activity-bar-item" id="actBarHome" title="Home (Overview & Recent)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+          </button>
+          <button class="activity-bar-item" id="actBarWorkspace" title="Active Media Studio">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            <span id="actBarWorkspaceDot" class="activity-dot hidden"></span>
+          </button>
+          <button class="activity-bar-item" id="actBarProfiles" title="Voice Profiles">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon">
+              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </button>
+          <button class="activity-bar-item" id="actBarHistory" title="History">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </button>
+        </div>
+        <div class="activity-bar-bottom">
+          <div class="activity-bar-badge" title="100% Offline CPU Speech Processing">
+            <span class="cpu-dot"></span>
+            <span class="cpu-text">CPU</span>
+          </div>
+          <button class="activity-bar-item" id="actBarToggleSidebar" title="Toggle Explorer Sidebar (Ctrl+B)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon">
+              <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+              <path d="M9 3v18"></path>
+            </svg>
+          </button>
+        </div>
+      </aside>
+
+      <!-- VS Code Explorer Sidebar -->
+      <aside class="vscode-explorer-sidebar" id="vscodeExplorerSidebar">
+        <!-- Explorer Header -->
+        <div class="explorer-header">
+          <div class="explorer-title-wrap">
+            <span class="explorer-title">EXPLORER</span>
+          </div>
+          <div class="explorer-actions">
+            <button id="btnExplorerOpenFolder" class="explorer-action-btn" title="Open Folder (Ctrl+O)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                <line x1="12" y1="11" x2="12" y2="17"></line>
+                <line x1="9" y1="14" x2="15" y2="14"></line>
+              </svg>
+            </button>
+            <button id="btnExplorerRefresh" class="explorer-action-btn" title="Refresh Explorer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+              </svg>
+            </button>
+            <button id="btnExplorerCollapseAll" class="explorer-action-btn" title="Collapse All Folders">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs">
+                <polyline points="4 14 10 14 10 20"></polyline>
+                <polyline points="20 10 14 10 14 4"></polyline>
+                <line x1="14" y1="10" x2="21" y2="3"></line>
+                <line x1="3" y1="21" x2="10" y2="14"></line>
+              </svg>
+            </button>
+            <button id="btnExplorerFilterMedia" class="explorer-action-btn" title="Toggle Media Files Only">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Input -->
+        <div class="explorer-filter-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="filter-icon">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="explorerSearchInput" class="explorer-filter-input" placeholder="Filter files by name...">
+          <button id="btnClearExplorerFilter" class="filter-clear-btn hidden" title="Clear filter">&times;</button>
+        </div>
+
+        <!-- Section: Open Editors / Active File (VS Code Style) -->
+        <div class="explorer-section" id="explorerOpenEditorsSection">
+          <div class="section-accordion-header" id="headerOpenEditors">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="accordion-chevron">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+            <span class="accordion-title">OPEN EDITORS</span>
+          </div>
+          <div class="accordion-body" id="bodyOpenEditors">
+            <div id="openEditorsItem" class="tree-item file-item active hidden">
+              <span class="file-icon-wrap" id="openEditorIcon">🎬</span>
+              <span class="item-name" id="openEditorName">demo.mp4</span>
+              <span class="active-dot">●</span>
+            </div>
+            <div id="noOpenEditors" class="tree-empty-hint">No active session</div>
+          </div>
+        </div>
+
+        <!-- Section: Folder Tree (VS Code Style) -->
+        <div class="explorer-section flex-1" id="explorerFolderSection">
+          <div class="section-accordion-header" id="headerFolderTree">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="accordion-chevron">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+            <span class="accordion-title" id="explorerRootFolderName">NO FOLDER OPENED</span>
+            <div class="accordion-actions" id="folderAccordionActions">
+              <button id="btnChangeFolder" class="accordion-mini-btn" title="Change Folder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-2xs"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tree Body: Folder Tree or Empty State -->
+          <div class="accordion-body explorer-tree-container" id="bodyFolderTree">
+            <!-- Empty State when no folder opened -->
+            <div id="explorerEmptyState" class="explorer-empty-view">
+              <div class="empty-folder-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </div>
+              <p class="empty-title">You have not yet opened a folder.</p>
+              <p class="empty-desc">Open a folder containing video or audio files to transcribe and browse them like in VS Code.</p>
+              <button id="btnEmptyOpenFolder" class="btn btn-primary btn-sm btn-block">
+                Open Folder
+              </button>
+              <button id="btnEmptyOpenSample" class="btn btn-secondary btn-sm btn-block mt-2">
+                Open Sample Demo Folder
+              </button>
+
+              <div id="recentFoldersWrap" class="recent-folders-section hidden">
+                <span class="recent-folders-label">Recent Folders</span>
+                <div id="recentFoldersList" class="recent-folders-list"></div>
+              </div>
+            </div>
+
+            <!-- Populated Tree View -->
+            <div id="explorerTreeView" class="vscode-tree-root hidden"></div>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- Resizer Handle -->
+      <div class="vscode-resizer" id="vscodeResizer" title="Drag to resize sidebar"></div>
+
+      <!-- Main Workspace Viewport -->
+      <div class="workbench-main-viewport">
+        <main class="main-workspace">
+      
+      <!-- Homepage View (State of the art landing & recent sessions) -->
+      <section id="homeView" class="home-view">
+        <!-- Hero Section (Two-Column Inspired by Reference Image 1) -->
+        <div class="home-hero">
+          <div class="hero-layout-grid">
+            
+            <!-- Left Hero Column -->
+            <div class="hero-left-col">
+              <div class="hero-badge">
+                <span class="badge-status-dot"></span> 100% Local CPU Speech AI
+              </div>
+              <h2 class="hero-headline">
+                Transcribe videos with local speaker intelligence
+              </h2>
+              <p class="hero-subtext">
+                Accurately detect speakers, synchronize interactive captions, translate languages, and edit dialogues locally on your CPU with complete data privacy.
+              </p>
+
+              <div class="hero-cta-group">
+                <button id="btnHomeOpenFolder" class="btn btn-pill-primary btn-lg">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                  </svg>
+                  Open Media Folder
+                </button>
+                <button id="btnHomeUpload" class="btn btn-pill-outline btn-lg">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  Upload File
+                </button>
+                <button id="btnHomeDemo" class="btn btn-pill-outline btn-lg">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                  Try Sample Demo
+                </button>
+                <button id="btnHomeWorkspace" class="btn btn-secondary btn-lg hidden">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                  </svg>
+                  Return to Workspace
+                </button>
+              </div>
+
+              <!-- Compact Capabilities Chips (Properly Sized Icons) -->
+              <div class="hero-highlights">
+                <span class="highlight-pill">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+                  Faster-Whisper int8
+                </span>
+                <span class="highlight-pill">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                  Sherpa-ONNX Diarization
+                </span>
+                <span class="highlight-pill">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1-4-10z"></path></svg>
+                  English &amp; Tamil Translation
+                </span>
+                <span class="highlight-pill">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                  Speaker Merging
+                </span>
+                <span class="highlight-pill">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                  Offline CPU Privacy
+                </span>
+              </div>
+            </div>
+
+            <!-- Right Hero Column: Interactive Preview Card (Ref Image 1 composition) -->
+            <div class="hero-right-col">
+              <div class="hero-mockup-card">
+                <div class="mockup-window-header">
+                  <div class="mockup-dots">
+                    <span class="dot dot-red"></span>
+                    <span class="dot dot-yellow"></span>
+                    <span class="dot dot-green"></span>
+                  </div>
+                  <span class="mockup-window-title">WhoSaid Studio • Local CPU Preview</span>
+                  <span class="mockup-pill-badge">Live Ready</span>
+                </div>
+                <div class="mockup-player-preview">
+                  <div class="mockup-video-surface">
+                    <div class="mockup-video-placeholder">
+                      <div class="mockup-play-pulse">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+                      </div>
+                      <span class="mockup-video-tag">Multi-Speaker Video Session</span>
+                    </div>
+                  </div>
+                  <div class="mockup-waveform-preview">
+                    <span class="mockup-wave-bar" style="height:35%"></span>
+                    <span class="mockup-wave-bar" style="height:60%"></span>
+                    <span class="mockup-wave-bar" style="height:85%"></span>
+                    <span class="mockup-wave-bar" style="height:45%"></span>
+                    <span class="mockup-wave-bar active-spk1" style="height:95%"></span>
+                    <span class="mockup-wave-bar active-spk1" style="height:70%"></span>
+                    <span class="mockup-wave-bar active-spk1" style="height:80%"></span>
+                    <span class="mockup-wave-bar" style="height:30%"></span>
+                    <span class="mockup-wave-bar active-spk2" style="height:88%"></span>
+                    <span class="mockup-wave-bar active-spk2" style="height:75%"></span>
+                    <span class="mockup-wave-bar active-spk2" style="height:90%"></span>
+                    <span class="mockup-wave-bar" style="height:40%"></span>
+                  </div>
+                  <div class="mockup-dialogue-stream">
+                    <div class="mockup-chat-bubble bubble-spk1">
+                      <div class="mockup-avatar-slot" id="mockupAvatarBob"></div>
+                      <div class="mockup-bubble-body">
+                        <div class="mockup-bubble-meta">
+                          <span class="mockup-speaker-name" style="color:#f6c48f">Bob</span>
+                          <span class="mockup-timestamp">00:01 - 00:06</span>
+                        </div>
+                        <p class="mockup-speech-text">A pencil with black led right to bed, the lamp shone with a steady green flame.</p>
+                      </div>
+                    </div>
+                    <div class="mockup-chat-bubble bubble-spk2">
+                      <div class="mockup-avatar-slot" id="mockupAvatarRuby"></div>
+                      <div class="mockup-bubble-body">
+                        <div class="mockup-bubble-meta">
+                          <span class="mockup-speaker-name" style="color:#cbb2fe">Ruby</span>
+                          <span class="mockup-timestamp">00:09 - 00:14</span>
+                        </div>
+                        <p class="mockup-speech-text">Clothes and lodging are free to new men. The glow deepened in the eyes.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Recent Transcriptions Section -->
+        <div class="home-section">
+          <div class="section-header">
+            <div class="section-title-wrap">
+              <h3 class="section-title">Recent Transcriptions</h3>
+              <p class="section-subtitle">Jump directly back into your recent transcripts or load demo sessions</p>
+            </div>
+            <button id="btnHomeRefreshHistory" class="btn btn-sm btn-secondary" title="Refresh list">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+              </svg>
+              Refresh
+            </button>
+          </div>
+
+          <div id="homeRecentGrid" class="home-recent-grid">
+            <!-- Dynamic Cards Populated by JS -->
+            <div class="recent-empty-state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="empty-icon">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <p>No recent transcriptions found. Click "Upload Media" or "Try Demo" to get started!</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Active Workspace View -->
+      <section id="workspaceView" class="workspace-view hidden">
+        
+        <!-- Left Column: Video Player, Captions, Waveform -->
+        <div class="workspace-left">
+          
+          <!-- Media Player Wrapper with Overlaid Auto-Hide Controls -->
+          <div class="player-container">
+            <div class="video-wrapper" id="videoWrapper">
+              <!-- Top Overlay Bar: Title Section & Action Pills (Inside Player, hides when playing) -->
+              <div class="video-player-top-bar" id="videoPlayerTopBar">
+                <div class="video-top-title-col">
+                  <span id="workspaceTitleText" class="workspace-title-text">Active Media Session</span>
+                  <span id="workspaceModelPill" class="workspace-model-pill">Whisper Base</span>
+                  <span id="workspaceDurationPill" class="workspace-duration-pill">--:--</span>
+                </div>
+                <div class="video-top-actions">
+                  <button id="btnToggleSidebar" class="btn btn-sm btn-action-pill" title="Toggle transcript sidebar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs">
+                      <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                      <path d="M15 3v18"></path>
+                    </svg>
+                    <span id="btnToggleSidebarText">Panel</span>
+                  </button>
+                  <button id="btnBarMerge" class="btn btn-sm btn-action-pill" title="Merge misclassified speakers">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs">
+                      <circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 9v12m12-9c0 3-2 6-6 6"></path>
+                    </svg>
+                    Merge
+                  </button>
+                  <button id="btnBarExport" class="btn btn-sm btn-action-pill" title="Export subtitles">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Export
+                  </button>
+                  <button id="btnBarDelete" class="btn btn-sm btn-action-pill btn-action-danger" title="Delete session">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs">
+                      <polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    Delete
+                  </button>
+                </div>
+              </div>
+
+              <!-- Main Video Stage (Unobstructed View) -->
+              <div class="video-stage" id="videoStage">
+                <video id="mediaVideo" playsinline preload="metadata">
+                  Your browser does not support HTML5 video.
+                </video>
+                <div id="mediaExpiredBanner" class="media-expired-banner hidden">
+                  <div class="expired-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                  </div>
+                  <h3 id="expiredBannerTitle">Media Stream Unavailable</h3>
+                  <p id="expiredBannerDesc">The raw video file for this session is not present on disk. The full transcript, word timestamps, and speaker diarization remain intact.</p>
+                  <div style="margin-top: 14px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <button id="btnRelinkVideo" class="btn btn-primary btn-sm" style="display:inline-flex;align-items:center;gap:6px">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                      </svg>
+                      Attach / Relink Local Video
+                    </button>
+                    <input type="file" id="relinkVideoFileInput" accept="video/*,audio/*" style="display:none">
+                  </div>
+                </div>
+
+                <!-- Floating In-Player CC / Fullscreen Subtitles -->
+                <div class="player-cc-banner hidden" id="playerCcOverlay">
+                  <div class="caption-dialogue-row" id="playerCcDialogueRow">
+                    <div id="playerCcAvatarWrap" class="caption-avatar-slot"></div>
+                    <span id="playerCcSpeakerTag" class="caption-speaker-name"></span>
+                    <p id="playerCcText" class="caption-dialogue-text"></p>
+                  </div>
+                </div>
+
+                <!-- Floating Playback Control Buttons (Hides when playing) -->
+                <div class="video-ctrl-bottom-bar" id="videoCtrlBottomBar">
+                  <div class="video-ctrl-left">
+                    <button id="btnVideoPlayPause" class="btn-ctrl-circle" title="Play/Pause (Space)">
+                      <svg id="vPlayIcon" viewBox="0 0 24 24" fill="currentColor">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                      </svg>
+                      <svg id="vPauseIcon" viewBox="0 0 24 24" fill="currentColor" class="hidden">
+                        <rect x="6" y="4" width="4" height="16"></rect>
+                        <rect x="14" y="4" width="4" height="16"></rect>
+                      </svg>
+                    </button>
+
+                    <button id="btnVideoSkipBack" class="btn-ctrl" title="Skip -10s">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 19l-9-7 9-7v14zM22 19l-9-7 9-7v14z"></path>
+                      </svg>
+                      <span>-10s</span>
+                    </button>
+
+                    <button id="btnVideoSkipFwd" class="btn-ctrl" title="Skip +10s">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 5l9 7-9 7V5zM2 5l9 7-9 7V5z"></path>
+                      </svg>
+                      <span>+10s</span>
+                    </button>
+
+                    <div class="video-time-wrap">
+                      <span id="vTimeCurrent">00:00</span> / <span id="vTimeDuration">00:00</span>
+                    </div>
+                  </div>
+
+                  <div class="video-ctrl-right">
+                    <button id="btnMuteToggle" class="btn-ctrl-icon" title="Mute/Unmute">
+                      <svg id="volHighIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                      </svg>
+                      <svg id="volMuteIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="hidden">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <line x1="23" y1="9" x2="17" y2="15"></line>
+                        <line x1="17" y1="9" x2="23" y2="15"></line>
+                      </svg>
+                    </button>
+                    <input id="vVolumeSlider" type="range" min="0" max="1" step="0.05" value="1" class="volume-slider" title="Volume">
+
+                    <button id="btnToggleCaptions" class="btn-ctrl-icon active" title="Toggle Subtitles">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                        <path d="M7 15h4M15 15h2M7 11h2M13 11h4"></path>
+                      </svg>
+                    </button>
+
+                    <button id="btnFullscreen" class="btn-ctrl-icon" title="Toggle Fullscreen">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Dedicated Full-Width Waveform Progress Bar (Below video screen, ALWAYS ACTIVE) -->
+              <div class="video-waveform-progress-wrap" id="videoTimelineWaveformWrap">
+                <div class="waveform-segmented-track" id="waveformSegmentedTrack" title="Click to seek playback">
+                  <!-- Dynamic waveform bars for speech & unmarked audio -->
+                </div>
+                <div class="waveform-seeker-line" id="waveformSeekerLine" style="left: 0%;"></div>
+                <div class="waveform-seeker-tooltip hidden" id="waveformTimelineTooltip">00:00</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Waveform & Audio Controls (Hidden in favor of Player Segmented Timeline) -->
+          <div class="waveform-panel hidden" style="display:none !important;">
+            <div class="waveform-header">
+              <div class="waveform-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon">
+                  <path d="M2 10v4M6 6v12M10 3v18M14 7v10M18 5v14M22 10v4"></path>
+                </svg>
+                <span>Synchronized Audio Waveform</span>
+              </div>
+              <div class="waveform-meta">
+                <span id="timeCurrent" class="time-display">00:00</span> / <span id="timeDuration" class="time-display">00:00</span>
+              </div>
+            </div>
+
+            <!-- WaveSurfer Mount Point -->
+            <div id="waveform" class="waveform-container"></div>
+
+            <!-- Waveform Controls Toolbar -->
+            <div class="waveform-controls">
+              <div class="ctrl-group">
+                <button id="btnPlayPause" class="btn-circle btn-primary" title="Play / Pause (Space)">
+                  <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                  <svg id="pauseIcon" viewBox="0 0 24 24" fill="currentColor" class="hidden">
+                    <rect x="6" y="4" width="4" height="16"></rect>
+                    <rect x="14" y="4" width="4" height="16"></rect>
+                  </svg>
+                </button>
+
+                <button id="btnSkipBack" class="btn-icon" title="Rewind 5s">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 19l-9-7 9-7v14zM22 19l-9-7 9-7v14z"></path>
+                  </svg>
+                </button>
+
+                <button id="btnSkipForward" class="btn-icon" title="Forward 5s">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M13 5l9 7-9 7V5zM2 5l9 7-9 7V5z"></path>
+                  </svg>
+                </button>
+
+                <!-- Speed selector -->
+                <select id="playbackSpeedSelect" class="speed-select" title="Playback Speed">
+                  <option value="0.75">0.75x</option>
+                  <option value="1.0" selected>1.0x</option>
+                  <option value="1.25">1.25x</option>
+                  <option value="1.5">1.5x</option>
+                  <option value="2.0">2.0x</option>
+                </select>
+              </div>
+
+              <!-- Zoom Slider -->
+              <div class="ctrl-group zoom-group">
+                <span class="zoom-label">Zoom</span>
+                <input id="zoomSlider" type="range" min="10" max="200" value="30" class="zoom-range">
+              </div>
+            </div>
+          </div>
+
+          <!-- Dedicated Subtitle Banner Below Waveform: <Avatar><Name>: <Text> -->
+          <div id="captionOverlay" class="subtitle-banner">
+            <div id="captionDialogueRow" class="caption-dialogue-row">
+              <div id="captionAvatarWrap" class="caption-avatar-slot"></div>
+              <span id="captionSpeakerTag" class="caption-speaker-name">Speaker:</span>
+              <p id="captionText" class="caption-dialogue-text">Subtitles will appear here synchronized with playback...</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Speakers Bar & Synced Transcript Panel (Requirement F8) -->
+        <div class="workspace-right">
+          
+          <!-- Speakers Summary Bar (Clean Avatar Grid: 5 Top, 4 Bottom + (+N)) -->
+          <div class="speakers-panel">
+            <div class="speakers-grid-header">
+              <div class="speakers-grid-title-row">
+                <span class="speakers-grid-label">Speakers</span>
+                <span id="speakerCountBadge" class="speaker-count-pill">0</span>
+              </div>
+              <button id="btnOpenFolderModalDirect" class="btn-grid-manage" title="Open Speaker Directory & Explorer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+                Manage
+              </button>
+            </div>
+            
+            <!-- 2-Row Avatar Grid (Nothing extra: Avatar + Name under it) -->
+            <div id="speakersAvatarGrid" class="speakers-avatar-grid">
+              <!-- Dynamically populated: 5 top, 4 bottom + (+N) -->
+            </div>
+
+            <!-- Hidden compatibility containers -->
+            <div id="speakersList" class="hidden" style="display:none;"></div>
+            <button id="btnOpenMergeModal" class="hidden" style="display:none;"></button>
+          </div>
+
+          <!-- Transcript Header with Search & Export -->
+          <div class="transcript-panel">
+            <div class="transcript-header">
+              <div class="search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input id="transcriptSearchInput" type="text" placeholder="Search transcript..." class="search-input">
+              </div>
+
+              <!-- Export Dropdown (Requirement F10) -->
+              <div class="export-dropdown-wrapper">
+                <button id="btnExportMenu" class="btn btn-secondary">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  Export
+                </button>
+                <div id="exportMenu" class="dropdown-menu hidden">
+                  <button class="dropdown-item" data-format="srt">
+                    <span class="fmt-title">SubRip (.srt)</span>
+                    <span class="fmt-desc">With speaker names</span>
+                  </button>
+                  <button class="dropdown-item" data-format="vtt">
+                    <span class="fmt-title">WebVTT (.vtt)</span>
+                    <span class="fmt-desc">HTML5 video standard</span>
+                  </button>
+                  <button class="dropdown-item" data-format="json">
+                    <span class="fmt-title">Full JSON (.json)</span>
+                    <span class="fmt-desc">With word-level timestamps</span>
+                  </button>
+                  <button class="dropdown-item" data-format="txt">
+                    <span class="fmt-title">Plain Text (.txt)</span>
+                    <span class="fmt-desc">Formatted dialogue script</span>
+                  </button>
+                </div>
+              </div>
+              <button id="btnCloseSidebar" class="btn btn-secondary btn-icon" title="Collapse sidebar panel">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Synced Transcript Turns Scroll Area -->
+            <div id="transcriptContainer" class="transcript-scroll-area">
+              <!-- Dynamically populated turn cards -->
+            </div>
+            
+            <div id="searchNoResults" class="search-empty hidden">
+              No matching transcript text found.
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+        </main>
+      </div><!-- /.workbench-main-viewport -->
+    </div><!-- /.app-workbench-layout -->
+
+    <!-- Transcribe Local Media File Modal (Triggered from VS Code Folder Explorer) -->
+    <div id="transcribePathModal" class="modal-backdrop hidden">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <div class="title-with-badge">
+            <h3 class="modal-title">Transcribe Media File</h3>
+            <span class="badge" id="transcribePathExtBadge">MP4</span>
+          </div>
+          <button id="btnCloseTranscribePathModal" class="btn-close" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="selected-file-info">
+            <div class="file-meta">
+              <span id="transcribePathFileName" class="name">video.mp4</span>
+              <span id="transcribePathFileSize" class="size">12.4 MB</span>
+            </div>
+            <div id="transcribePathFullLocation" class="file-location-path">F:\projects\WhoSaid\sample_data\two_speakers_demo.mp4</div>
+          </div>
+
+          <div class="model-selection-group">
+            <label class="section-label">Language &amp; Translation</label>
+            <div class="language-pills">
+              <label class="model-pill">
+                <input type="radio" name="pathLanguageMode" value="en" checked>
+                <div class="pill-content">
+                  <span class="pill-name">English</span>
+                  <span class="pill-desc">Default Transcription</span>
+                </div>
+              </label>
+              <label class="model-pill">
+                <input type="radio" name="pathLanguageMode" value="ta">
+                <div class="pill-content">
+                  <span class="pill-name">Tamil (தமிழ்)</span>
+                  <span class="pill-desc">Transcribe to Tamil</span>
+                </div>
+              </label>
+              <label class="model-pill">
+                <input type="radio" name="pathLanguageMode" value="ta_translate">
+                <div class="pill-content">
+                  <span class="pill-name">Tamil → English</span>
+                  <span class="pill-desc">Translate to English</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="model-selection-group">
+            <label class="section-label">Whisper Model Size</label>
+            <div class="model-pills">
+              <label class="model-pill">
+                <input type="radio" name="pathModelSize" value="tiny">
+                <div class="pill-content">
+                  <span class="pill-name">Tiny</span>
+                  <span class="pill-desc">Ultra Fast (~10x)</span>
+                </div>
+              </label>
+              <label class="model-pill">
+                <input type="radio" name="pathModelSize" value="base" checked>
+                <div class="pill-content">
+                  <span class="pill-name">Base</span>
+                  <span class="pill-desc">Balanced (Default)</span>
+                </div>
+              </label>
+              <label class="model-pill">
+                <input type="radio" name="pathModelSize" value="small">
+                <div class="pill-content">
+                  <span class="pill-name">Small</span>
+                  <span class="pill-desc">High Accuracy</span>
+                </div>
+              </label>
+              <label class="model-pill">
+                <input type="radio" name="pathModelSize" value="medium">
+                <div class="pill-content">
+                  <span class="pill-name">Medium</span>
+                  <span class="pill-desc">Maximum Quality</span>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btnCancelTranscribePath" class="btn btn-secondary">Cancel</button>
+          <button id="btnStartTranscribePath" class="btn btn-primary">Start Transcription</button>
+        </div>
+      </div>
+    </div>
+    <div id="uploadModal" class="modal-backdrop hidden">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3 class="modal-title">Upload Video or Audio</h3>
+          <button id="btnCloseUploadModal" class="btn-close" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          
+          <!-- Drop Area -->
+          <div id="dropZone" class="drop-zone">
+            <input type="file" id="fileInput" accept=".mp4,.mkv,.mov,.webm,.mp3,.wav" class="file-input-hidden">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="drop-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+            </svg>
+            <p class="drop-title">Drag & drop your media file here</p>
+            <p class="drop-subtitle">or <span class="drop-browse">browse from computer</span></p>
+            <span class="drop-formats">Supports MP4, MKV, MOV, WEBM, MP3, WAV</span>
+          </div>
+
+          <div id="selectedFileInfo" class="selected-file-info hidden">
+            <div class="file-meta">
+              <span id="selectedFileName" class="name">video.mp4</span>
+              <span id="selectedFileSize" class="size">12.4 MB</span>
+            </div>
+            <button id="btnRemoveFile" class="btn-text-danger">Remove</button>
+          </div>
+
+          <!-- Language Mode Selection (Feature 1) -->
+          <div class="model-selection-group">
+            <label class="section-label">Language & Translation</label>
+            <div class="language-pills">
+              <label class="model-pill">
+                <input type="radio" name="languageMode" value="en" checked>
+                <div class="pill-content">
+                  <span class="pill-name">English</span>
+                  <span class="pill-desc">Default Transcription</span>
+                </div>
+              </label>
+              <label class="model-pill">
+                <input type="radio" name="languageMode" value="ta">
+                <div class="pill-content">
+                  <span class="pill-name">Tamil (தமிழ்)</span>
+                  <span class="pill-desc">Transcribe to Tamil</span>
+                </div>
+              </label>
+              <label class="model-pill">
+                <input type="radio" name="languageMode" value="ta_translate">
+                <div class="pill-content">
+                  <span class="pill-name">Tamil → English</span>
+                  <span class="pill-desc">Translate to English</span>
+                </div>
+              </label>
+            </div>
+            <p class="section-subtext">Choose "Tamil" to transcribe in Tamil script, or "Tamil → English" to translate Tamil speech into English captions.</p>
+          </div>
+
+          <!-- Model Size Selection (Requirement Non-functional: Adjustable model size) -->
+          <div class="model-selection-group">
+            <label class="section-label">Whisper Model Size</label>
+            <div class="model-pills">
+              <label class="model-pill">
+                <input type="radio" name="modelSize" value="tiny">
+                <div class="pill-content">
+                  <span class="pill-name">Tiny</span>
+                  <span class="pill-desc">Ultra Fast (~10x)</span>
+                </div>
+              </label>
+              <label class="model-pill">
+                <input type="radio" name="modelSize" value="base" checked>
+                <div class="pill-content">
+                  <span class="pill-name">Base</span>
+                  <span class="pill-desc">Balanced (Default)</span>
+                </div>
+              </label>
+              <label class="model-pill">
+                <input type="radio" name="modelSize" value="small">
+                <div class="pill-content">
+                  <span class="pill-name">Small</span>
+                  <span class="pill-desc">High Accuracy</span>
+                </div>
+              </label>
+              <label class="model-pill">
+                <input type="radio" name="modelSize" value="medium">
+                <div class="pill-content">
+                  <span class="pill-name">Medium</span>
+                  <span class="pill-desc">Maximum Quality</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button id="btnCancelUpload" class="btn btn-secondary">Cancel</button>
+          <button id="btnStartProcessing" class="btn btn-primary" disabled>Process File</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transcription History Modal (Feature 3) -->
+    <div id="historyModal" class="modal-backdrop hidden">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-header">
+          <div class="title-with-badge">
+            <h3 class="modal-title">Transcription History</h3>
+            <span id="modalHistoryCountBadge" class="badge">0 jobs</span>
+          </div>
+          <button id="btnCloseHistoryModal" class="btn-close" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">
+            Previously transcribed media files. You can load any session back into the workspace or export captions.
+          </p>
+          <div id="historyLoading" class="history-loading hidden">
+            <div class="spinner"></div>
+            <span>Loading history...</span>
+          </div>
+          <div id="historyEmpty" class="history-empty hidden">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="empty-icon">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <p>No transcription history found yet.</p>
+          </div>
+          <div id="historyListContainer" class="history-list-grid">
+            <!-- Dynamic history items -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btnCloseHistoryBottom" class="btn btn-secondary">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom In-App Delete Confirmation Modal -->
+    <div id="deleteConfirmModal" class="modal-backdrop hidden">
+      <div class="modal-dialog progress-dialog">
+        <div class="modal-header">
+          <div class="title-with-badge">
+            <span class="step-dot" style="background: hsl(var(--destructive)); box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);"></span>
+            <h3 class="modal-title">Delete Session</h3>
+          </div>
+          <button id="btnCloseDeleteModal" class="btn-close" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc" style="color: hsl(var(--foreground)); font-size: 0.875rem;">
+            Are you sure you want to remove <strong id="deleteConfirmFileName" style="color: #38bdf8;">this session</strong>?
+          </p>
+          <p class="modal-desc">
+            This will permanently remove the transcript, speaker labels, and any stored audio/video files from your history.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button id="btnCancelDelete" class="btn btn-secondary">Cancel</button>
+          <button id="btnExecuteDelete" class="btn btn-danger">
+            Delete Permanently
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Processing Progress Modal (Requirement F9) -->
+    <div id="progressModal" class="modal-backdrop hidden">
+      <div class="modal-dialog progress-dialog">
+        <div class="progress-card">
+          <div class="progress-header">
+            <div class="spinner"></div>
+            <h3 class="progress-title">Processing Media</h3>
+          </div>
+          <p id="progressMessage" class="progress-message">Extracting audio with ffmpeg...</p>
+          
+          <div class="progress-bar-container">
+            <div id="progressBarFill" class="progress-bar-fill" style="width: 15%"></div>
+          </div>
+          
+          <div class="progress-meta">
+            <span id="progressPercent" class="progress-percent">15%</span>
+            <span class="progress-note">100% Offline • Running on CPU</span>
+          </div>
+
+          <div class="pipeline-steps">
+            <div class="step-item" id="step-extract">
+              <span class="step-dot"></span> Extract Audio (FFmpeg)
+            </div>
+            <div class="step-item" id="step-diarize">
+              <span class="step-dot"></span> Diarize Speakers (Sherpa-ONNX)
+            </div>
+            <div class="step-item" id="step-transcribe">
+              <span class="step-dot"></span> Transcribe Speech (Whisper)
+            </div>
+            <div class="step-item" id="step-align">
+              <span class="step-dot"></span> Align Turns & Profiles
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rename Speaker Modal (Requirement F5) -->
+    <div id="renameModal" class="modal-backdrop hidden">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3 class="modal-title">Rename Speaker</h3>
+          <button id="btnCloseRenameModal" class="btn-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="speaker-rename-header-card">
+            <div id="renameAvatarPreview" class="rename-avatar-preview"></div>
+            <div class="rename-meta-details">
+              <span class="rename-id-badge">Speaker ID: <code id="renameSpeakerIdTag">spk_0</code></span>
+              <span class="rename-turns-info" id="renameSpeakerTurnsInfo">Dialogue turns across session</span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="speakerNameInput" class="form-label">Speaker Display Name</label>
+            <input type="text" id="speakerNameInput" class="form-input" placeholder="e.g. Alice, Dr. Smith">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Speaker Highlight Color</label>
+            <div id="colorPickerGroup" class="color-picker-group">
+              <!-- Preset color options -->
+            </div>
+          </div>
+
+          <!-- Avatar Selector Row (Cameo Presets adapting chosen color) -->
+          <div class="form-group">
+            <div class="form-label-row">
+              <label class="form-label">Speaker Cameo Avatar</label>
+              <span class="form-label-hint">Adapts speaker color</span>
+            </div>
+            <div id="avatarPickerGroup" class="avatar-picker-group">
+              <!-- Preset Cameo Avatars rendered dynamically -->
+            </div>
+            <div class="avatar-custom-seed-wrap">
+              <input type="text" id="avatarSeedInput" class="form-input form-input-sm" placeholder="Custom Cameo Seed (e.g. Felix, Maya, Oliver)">
+            </div>
+          </div>
+
+          <!-- Enroll Voice Checkbox (Requirement F4 & F5) -->
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="enrollVoiceCheckbox" checked>
+              <div class="checkbox-text">
+                <span class="cb-title">Save as Voice Profile</span>
+                <span class="cb-desc">Automatically identify this person's voice in future files.</span>
+              </div>
+            </label>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button id="btnCancelRename" class="btn btn-secondary">Cancel</button>
+          <button id="btnSaveSpeakerRename" class="btn btn-primary">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Merge Misclassified Speakers Modal -->
+    <div id="mergeModal" class="modal-backdrop hidden">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <div class="title-with-badge">
+            <h3 class="modal-title">Merge Misclassified Speakers</h3>
+            <span class="badge">Combine Turns</span>
+          </div>
+          <button id="btnCloseMergeModal" class="btn-close" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">
+            If the same person was split into two speaker IDs, merge them below. All turns spoken by the source speaker will be reassigned to the target speaker.
+          </p>
+
+          <div class="form-group">
+            <label for="mergeSourceSelect" class="form-label">Misclassified Speaker (To Remove)</label>
+            <select id="mergeSourceSelect" class="form-input form-select">
+              <!-- Populated dynamically -->
+            </select>
+            <span class="form-help-text">This speaker ID will be removed and merged.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="mergeTargetSelect" class="form-label">Merge Into Speaker (To Keep)</label>
+            <select id="mergeTargetSelect" class="form-input form-select">
+              <!-- Populated dynamically -->
+            </select>
+            <span class="form-help-text">All dialogue turns will be assigned to this speaker name & color.</span>
+          </div>
+
+          <div id="mergePreviewCard" class="merge-preview-card">
+            <div class="merge-flow-diagram">
+              <div id="mergePreviewSource" class="merge-flow-speaker">
+                <span class="speaker-dot"></span>
+                <span class="spk-name">Source Speaker</span>
+              </div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="merge-flow-arrow">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+              <div id="mergePreviewTarget" class="merge-flow-speaker">
+                <span class="speaker-dot"></span>
+                <span class="spk-name">Target Speaker</span>
+              </div>
+            </div>
+            <p id="mergeTurnsCountText" class="merge-preview-note">0 turn(s) will be transferred.</p>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button id="btnCancelMerge" class="btn btn-secondary">Cancel</button>
+          <button id="btnConfirmMerge" class="btn btn-primary">Merge Speakers</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Voice Profiles Manager Modal (Requirement F4) -->
+    <div id="profilesModal" class="modal-backdrop hidden">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-header">
+          <div class="title-with-badge">
+            <h3 class="modal-title">Enrolled Voice Profiles</h3>
+            <span class="badge">Stored Offline</span>
+          </div>
+          <button id="btnCloseProfilesModal" class="btn-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">
+            Who Said extracts a unique vocal embedding vector (192-dim) for each speaker. Enrolled profiles are matched across new files using cosine similarity.
+          </p>
+
+          <div class="profiles-section-header">
+            <h4>Enrolled Voices (<span id="modalProfileCount">0</span>)</h4>
+            <button id="btnAddNewProfile" class="btn btn-sm btn-outline">+ Enroll New Voice</button>
+          </div>
+
+          <div id="enrolledProfilesList" class="enrolled-profiles-grid">
+            <!-- Dynamic profile cards -->
+          </div>
+
+          <!-- Enroll New Voice Form (collapsible) -->
+          <div id="enrollNewProfileCard" class="enroll-form-card hidden">
+            <h4>Enroll Voice from Audio Sample</h4>
+            <div class="form-group">
+              <label for="newProfileName" class="form-label">Person Name</label>
+              <input type="text" id="newProfileName" class="form-input" placeholder="e.g. Alice">
+            </div>
+            <div class="form-group">
+              <label for="newProfileAudio" class="form-label">Voice Sample (WAV/MP3/M4A, min 1-2 sec speech)</label>
+              <input type="file" id="newProfileAudio" accept="audio/*,video/*" class="form-file-input">
+            </div>
+            <div class="card-actions">
+              <button id="btnCancelEnroll" class="btn btn-secondary btn-sm">Cancel</button>
+              <button id="btnSubmitEnroll" class="btn btn-primary btn-sm">Extract & Save Profile</button>
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button id="btnCloseProfilesBottom" class="btn btn-secondary">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Two-Column Speaker Directory & Folder Viewer Modal (User Request) -->
+    <div id="speakerFolderModal" class="modal-backdrop hidden">
+      <div class="modal-dialog modal-folder-viewer">
+        <div class="modal-header">
+          <div class="title-with-badge">
+            <h3 class="modal-title">Speaker Directory &amp; Inspector</h3>
+            <span id="folderModalCountBadge" class="badge">0 Speakers</span>
+          </div>
+          <button id="btnCloseSpeakerFolderModal" class="btn-close" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body folder-modal-body">
+          
+          <!-- Left Pane: Table View of Speakers -->
+          <div class="folder-left-pane">
+            <div class="folder-pane-header">
+              <input type="text" id="folderSearchInput" class="form-input form-input-sm" placeholder="Filter speakers...">
+            </div>
+            <div class="folder-speakers-table-wrap">
+              <table class="folder-table" id="folderSpeakersTable">
+                <thead>
+                  <tr>
+                    <th>Speaker</th>
+                    <th>Turns</th>
+                    <th>Duration</th>
+                  </tr>
+                </thead>
+                <tbody id="folderSpeakersTableBody">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Right Pane: Folder Viewer & Editor -->
+          <div class="folder-right-pane" id="folderRightPane">
+            <div id="folderSpeakerEmptyState" class="folder-empty-state hidden">
+              <p>Select a speaker from the table on the left to inspect and edit.</p>
+            </div>
+
+            <div id="folderSpeakerContent" class="folder-detail-content">
+              <!-- Top Edit Card -->
+              <div class="folder-speaker-card">
+                <div class="folder-avatar-col">
+                  <div id="folderAvatarPreview" class="folder-avatar-preview"></div>
+                  <span id="folderSpeakerIdBadge" class="folder-id-badge">spk_0</span>
+                </div>
+                <div class="folder-meta-col">
+                  <div class="folder-input-row">
+                    <input type="text" id="folderSpeakerNameInput" class="form-input" placeholder="Speaker Name">
+                    <button id="btnFolderSaveName" class="btn btn-primary btn-sm">Save</button>
+                  </div>
+                  
+                  <!-- Color Presets -->
+                  <div class="folder-color-row" id="folderColorRow">
+                    <!-- Dynamic color dots -->
+                  </div>
+
+                  <!-- Cameo Avatar Presets -->
+                  <div class="folder-avatar-presets-row" id="folderAvatarPresetsRow">
+                    <!-- Dynamic Cameo avatar seeds -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Merge Section -->
+              <div class="folder-merge-strip">
+                <span class="folder-strip-label">Merge speaker:</span>
+                <select id="folderMergeTargetSelect" class="form-input form-select form-input-sm">
+                  <!-- Populated dynamically with other speakers -->
+                </select>
+                <button id="btnFolderExecuteMerge" class="btn btn-sm btn-outline">Merge Into</button>
+              </div>
+
+              <!-- Folder Viewer for Turns (Files in Folder) -->
+              <div class="folder-turns-section">
+                <div class="folder-turns-header">
+                  <div class="folder-turns-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs">
+                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <span>Dialogue Turns Folder</span>
+                    <span id="folderTurnsCount" class="folder-turns-count">(0 files)</span>
+                  </div>
+                </div>
+
+                <div id="folderTurnsList" class="folder-turns-list">
+                  <!-- List of turn items formatted like files in a folder -->
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button id="btnCloseFolderBottom" class="btn btn-secondary">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+  </div>
+
+  <script src="/static/app.js?v=shadcn1"></script>
+</body>
+</html>
