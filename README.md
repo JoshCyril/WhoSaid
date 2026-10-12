@@ -1,6 +1,7 @@
 # Who Said — Local Video Transcriber with Speaker Captions
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Beta Release](https://img.shields.io/badge/Release-v1.0.0--beta.1-orange.svg)](https://github.com/JoshCyril/WhoSaid/releases/tag/v1.0.0-beta.1)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Electron 44](https://img.shields.io/badge/Electron-44.7-47848F.svg)](https://www.electronjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg)](https://fastapi.tiangolo.com/)
@@ -49,6 +50,17 @@ Everything runs locally on your CPU with **zero cloud calls**.
 - **Subtitle & Data Exports**: Export as SubRip (`.srt`), WebVTT (`.vtt`), full word-level (`.json`), and readable dialogue script (`.txt`).
 - **VS Code Style Folder Explorer**: Browse local directories with an authentic activity bar and collapsible folder tree. Video and audio files are highlighted, pre-cached files show ready indicators, and files can be transcribed directly from disk.
 - **All-In-One Self-Hosted Executable**: Bundled Electron desktop shell that self-hosts the backend and connects to the embedded SQLite database with zero external Python runtime required.
+
+---
+
+## Download Pre-built Release (.exe)
+
+> ⚠️ **Beta Testing Notice**: This release is currently in **Beta Testing** and is not the final release.
+
+You can download pre-compiled Windows executable binaries directly from [GitHub Releases](https://github.com/JoshCyril/WhoSaid/releases):
+
+- 📦 **[WhoSaid Setup 1.0.0.exe (Installer)](https://github.com/JoshCyril/WhoSaid/releases/download/v1.0.0-beta.1/WhoSaid.Setup.1.0.0.exe)** — Standard Windows installer.
+- 🚀 **[WhoSaid 1.0.0.exe (Portable)](https://github.com/JoshCyril/WhoSaid/releases/download/v1.0.0-beta.1/WhoSaid.1.0.0.exe)** — Zero-install standalone executable.
 
 ---
 
