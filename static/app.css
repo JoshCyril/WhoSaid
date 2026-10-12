@@ -1484,28 +1484,31 @@ html, body {
   margin: 0;
 }
 
-/* Player Container (Attached seamlessly below tabs bar) */
+/* Player Container (Attached seamlessly below tabs bar, anchored top-left) */
 .player-container {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 340px;
+  min-height: 280px;
   background: #121417;
   border: none;
   border-radius: 0;
-  overflow: hidden;
+  overflow: auto;
   position: relative;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 100%;
 }
 
 .video-wrapper {
-  flex: 1;
   display: flex;
   flex-direction: column;
   position: relative;
-  background: #121417;
+  background: #000;
   border: none;
   border-radius: 0;
   overflow: hidden;
+  width: 100%;
+  max-width: 100%;
 }
 
 /* ==========================================================================
@@ -1586,26 +1589,26 @@ html, body {
 
 /* Video Canvas Stage - Anchored Top-Left */
 .video-stage {
-  flex: 1;
   position: relative;
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
-  background: #121417;
+  background: #000;
   border-radius: 0;
   overflow: hidden;
   cursor: pointer;
-  min-height: 380px;
+  width: 100%;
+  min-height: 240px;
 }
 
 #mediaVideo {
-  max-width: 100%;
-  max-height: 100%;
+  display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
+  max-height: 60vh;
   object-fit: contain;
   object-position: top left;
-  background: #121417;
+  background: #000;
 }
 
 /* Expired Media Banner */
@@ -1825,15 +1828,15 @@ html, body {
   width: 100%;
   position: relative;
   cursor: pointer !important;
-  padding: 0 10px;
-  background: #2e2e2e;
-  border-top: 1px solid #444444;
-  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-  height: 6px;
+  padding: 0 !important;
+  background: #181b20;
+  border-top: 1px solid #3c3c3c;
+  border-radius: 0;
+  height: 8px;
   user-select: none;
   display: flex;
   align-items: flex-end;
-  transition: height 0.28s cubic-bezier(0.4, 0, 0.2, 1), padding 0.28s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.24s ease;
+  transition: height 0.22s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease;
   z-index: 100 !important;
   overflow: visible !important;
   box-sizing: border-box;
@@ -1845,9 +1848,9 @@ html, body {
 
 .video-wrapper:hover .video-waveform-progress-wrap,
 .video-waveform-progress-wrap:hover {
-  height: 48px;
-  padding: 4px 10px;
-  background: #2e2e2e;
+  height: 44px;
+  padding: 0 !important;
+  background: #1e2228;
 }
 
 .waveform-segmented-track {
@@ -1855,28 +1858,24 @@ html, body {
   height: 100%;
   display: flex;
   align-items: flex-end;
-  gap: 0px;
-  padding: 0;
-  transition: gap 0.25s ease;
-}
-
-.video-wrapper:hover .waveform-segmented-track,
-.video-waveform-progress-wrap:hover .waveform-segmented-track {
-  gap: 2px;
+  gap: 0px !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 .waveform-bar {
-  flex: 1;
-  min-width: 1px;
+  flex: 1 1 0px;
+  min-width: 0 !important;
   height: 100%;
   border-radius: 0px;
-  transition: height 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.15s ease, border-radius 0.2s ease, opacity 0.2s ease;
+  margin: 0 !important;
+  transition: height 0.2s cubic-bezier(0.4, 0, 0.2, 1), background 0.15s ease, opacity 0.15s ease;
   pointer-events: none;
 }
 
 .video-wrapper:hover .waveform-bar,
 .video-waveform-progress-wrap:hover .waveform-bar {
-  border-radius: 2px;
+  border-radius: 1px;
 }
 
 /* Unmarked / Ambient Section Bars */
@@ -3743,6 +3742,43 @@ html, body {
   color: #9ca3af;
   font-size: 14px;
   cursor: pointer;
+}
+
+/* Explorer Group Bar */
+.explorer-group-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 12px 6px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+  gap: 8px;
+  background: #14171a;
+}
+
+.explorer-group-label {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.explorer-group-select {
+  flex: 1;
+  height: 22px;
+  background: #1c2026;
+  border: 1px solid #333a44;
+  border-radius: 4px;
+  color: #e2e8f0;
+  font-size: 11px;
+  padding: 0 6px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.explorer-group-select:focus {
+  border-color: #38bdf8;
 }
 
 /* Sections & Accordions */

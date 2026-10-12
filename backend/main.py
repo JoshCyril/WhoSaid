@@ -21,7 +21,7 @@ from backend.db import (
     get_db_path, get_default_db_path, set_db_path
 )
 from backend.audio import (
-    extract_audio_16k, compute_file_hash, generate_waveform_peaks, load_audio_samples
+    extract_audio_16k, compute_file_hash, generate_waveform_peaks, load_audio_samples, get_media_duration
 )
 from backend.cleanup import cleanup_old_media
 from backend.diarizer import DiarizerService
@@ -148,12 +148,18 @@ def process_media_pipeline(job_id: str, file_path: str, model_size: str, file_ha
         update_progress(92.0, "Aligning speech timestamps with speaker turns...", status="aligning")
         merged_turns = TranscriberService.merge_transcription_and_diarization(whisper_segs, intervals, speakers)
 
+        # Remove speakers who speak 0 times (null speakers)
+        spoken_speaker_ids = {t["speaker_id"] for t in merged_turns if t.get("speaker_id") and (t.get("text") or "").strip()}
+        active_speakers = [s for s in speakers if s["id"] in spoken_speaker_ids]
+        if not active_speakers and speakers:
+            active_speakers = [speakers[0]]
+
         # Save transcript to database
         transcript_id = save_transcript(
             job_id=job_id,
             file_hash=file_hash,
             model_size=model_size,
-            speakers=speakers,
+            speakers=active_speakers,
             segments=merged_turns
         )
 
@@ -438,7 +444,8 @@ async def scan_filesystem_folder(folder_path: Optional[str] = None):
                                 cached_info = {
                                     "job_id": j["id"],
                                     "transcript_id": t_id,
-                                    "model_size": j.get("model_size", "base")
+                                    "model_size": j.get("model_size", "base"),
+                                    "duration": j.get("duration")
                                 }
                                 break
 
@@ -450,6 +457,7 @@ async def scan_filesystem_folder(folder_path: Optional[str] = None):
                     "ext": ext,
                     "is_media": is_media,
                     "is_subtitle": is_sub,
+                    "duration": (cached_info.get("duration") if cached_info else None) or (get_media_duration(entry_path) if is_media else None),
                     "cached_job": cached_info
                 })
 
@@ -492,13 +500,19 @@ async def get_file_properties(file_path: str):
     except Exception as e:
         pass
 
+    dur = job.get("duration") if job else None
+    is_media = ext in {".mp4", ".mkv", ".mov", ".webm", ".mp3", ".wav", ".flac", ".ogg", ".m4a", ".aac"}
+    if (dur is None or dur <= 0.0) and is_media:
+        dur = get_media_duration(file_path)
+
     return JSONResponse({
         "name": filename,
         "path": file_path,
         "size": size,
         "ext": ext,
         "mtime": mtime,
-        "duration": job.get("duration") if job else None,
+        "duration": dur,
+        "is_media": is_media,
         "model_size": job.get("model_size") if job else None,
         "cached": bool(transcript_id),
         "transcript_id": transcript_id,
@@ -581,12 +595,26 @@ async def get_transcript_data(transcript_id: str):
             except Exception as e:
                 print(f"[Audio] Error auto-regenerating wav: {e}")
 
+        if (not duration or duration <= 0.0) and media_available and file_path:
+            duration = get_media_duration(file_path) or 0.0
+            if duration > 0.0:
+                update_job(job["id"], duration=duration)
+
         if audio_path and os.path.exists(audio_path):
             audio_available = True
             try:
                 peaks = generate_waveform_peaks(audio_path, num_peaks=600)
             except Exception:
                 peaks = []
+
+    if (not duration or duration <= 0.0) and data.get("segments"):
+        duration = max((s.get("end", 0.0) for s in data["segments"]), default=0.0)
+
+    # Filter out 0-turn / null speakers from transcript data
+    segments = data.get("segments", [])
+    active_ids = {s.get("speaker_id") for s in segments if s.get("speaker_id") and (s.get("text") or "").strip()}
+    if active_ids and data.get("speakers"):
+        data["speakers"] = [spk for spk in data["speakers"] if spk["id"] in active_ids]
 
     data["peaks"] = peaks
     data["duration"] = duration
@@ -672,6 +700,7 @@ async def rename_speaker(transcript_id: str, payload: Dict[str, Any]):
 
 # --- Merge Misclassified Speakers ---
 @app.post("/api/transcripts/{transcript_id}/merge-speakers")
+@app.post("/api/transcripts/{transcript_id}/merge_speakers")
 async def merge_speakers(transcript_id: str, payload: Dict[str, Any]):
     """
     Merges a misclassified source speaker into a target speaker.
@@ -724,6 +753,7 @@ async def merge_speakers(transcript_id: str, payload: Dict[str, Any]):
 
     return JSONResponse({
         "status": "success",
+        "id": transcript_id,
         "message": f"Merged '{source_spk['label']}' ({source_id}) into '{target_spk['label']}' ({target_id}). Reassigned {reassigned_count} turn(s).",
         "speakers": updated_speakers,
         "segments": segments,

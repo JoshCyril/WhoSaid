@@ -1,8 +1,8 @@
 // --- Who Said: Client Application Engine ---
 
 const PALETTE = [
-  "#f6c48f", "#fae084", "#a3c9a8", "#9ec5e8", "#cbb2fe",
-  "#f4a7bb", "#9ae3d1", "#d2b48c", "#b4c596", "#b6c2f8"
+  "#fb7185", "#2dd4bf", "#fbbf24", "#c084fc", "#4ade80",
+  "#f472b6", "#38bdf8", "#f97316", "#a3e635", "#818cf8"
 ];
 
 const CAMEO_PRESETS = ["Felix", "Daisy", "Jack", "Willow", "Leo", "Maya", "Milo", "Zoe"];
@@ -249,6 +249,8 @@ class WhoSaidApp {
     this.btnPropActionText = document.getElementById("btnPropActionText");
     this.btnClearProperties = document.getElementById("btnClearProperties");
     this.selectedPropertyItem = null;
+    this.explorerGroupBySelect = document.getElementById("explorerGroupBySelect");
+    this.btnBarMerge = document.getElementById("btnBarMerge");
 
     // Transcribe Path Modal
     this.transcribePathModal = document.getElementById("transcribePathModal");
@@ -367,6 +369,18 @@ class WhoSaidApp {
           this.videoWrapper.classList.remove("controls-hidden");
         }
         clearTimeout(hideTimer);
+      });
+      this.mediaVideo.addEventListener("loadedmetadata", () => {
+        const dur = this.mediaVideo.duration;
+        if (dur && !isNaN(dur) && dur > 0) {
+          if (this.currentTranscript) {
+            this.currentTranscript.duration = dur;
+            this.renderSegmentedWaveformTimeline(this.currentTranscript.segments, dur);
+          }
+          const formattedDur = this.formatTime(dur);
+          if (this.timeDuration) this.timeDuration.textContent = formattedDur;
+          if (this.vTimeDuration) this.vTimeDuration.textContent = formattedDur;
+        }
       });
     }
   }
@@ -637,7 +651,13 @@ class WhoSaidApp {
     const exportMenu = document.getElementById("exportMenu");
 
     if (btnBarMerge) {
-      btnBarMerge.addEventListener("click", () => this.openSpeakerFolderModal());
+      btnBarMerge.addEventListener("click", () => this.openMergeModal());
+    }
+
+    if (this.explorerGroupBySelect) {
+      this.explorerGroupBySelect.addEventListener("change", () => {
+        this.refreshExplorerTree();
+      });
     }
 
     if (btnBarExport && exportMenu) {
@@ -1482,24 +1502,39 @@ class WhoSaidApp {
   }
 
   // --- Render Transcript & Speakers ---
-  // --- Render Transcript & Speakers ---
   renderTranscript(transcript) {
     this.currentTranscript = transcript;
     if (this.speakersList) this.speakersList.innerHTML = "";
     this.transcriptContainer.innerHTML = "";
 
-    const speakers = transcript.speakers || [];
+    const rawSpeakers = transcript.speakers || [];
     const segments = transcript.segments || [];
+
+    // Filter out speakers who speak 0 times (null speakers)
+    const speakerTurns = {};
+    segments.forEach((seg) => {
+      if (seg.speaker_id && (seg.text || "").trim()) {
+        speakerTurns[seg.speaker_id] = (speakerTurns[seg.speaker_id] || 0) + 1;
+      }
+    });
+    const activeSpeakers = rawSpeakers.filter((s) => (speakerTurns[s.id] || 0) > 0);
+    const speakers = activeSpeakers.length > 0 ? activeSpeakers : rawSpeakers;
 
     if (this.speakerCountBadge) {
       this.speakerCountBadge.textContent = `${speakers.length}`;
     }
 
-    // 1. Render Clean Speaker Avatar Grid (5 Top, 4 Bottom + (+N))
+    // 1. Render Clean Speaker Avatar Grid
     this.renderSpeakerAvatarGrid(speakers);
 
     // 2. Render Flat Segmented Waveform Timeline Bar in Player
-    const totalDuration = transcript.duration || (this.mediaVideo && this.mediaVideo.duration ? this.mediaVideo.duration : 0);
+    let totalDuration = transcript.duration || 0;
+    if (!totalDuration && segments.length > 0) {
+      totalDuration = segments.reduce((max, s) => Math.max(max, s.end || 0), 0);
+    }
+    if (!totalDuration && this.mediaVideo && this.mediaVideo.duration && !isNaN(this.mediaVideo.duration)) {
+      totalDuration = this.mediaVideo.duration;
+    }
     this.renderSegmentedWaveformTimeline(segments, totalDuration);
 
     // Initialize subtitle banner under player: always visible in default view
@@ -1636,7 +1671,11 @@ class WhoSaidApp {
     if (!this.waveformSegmentedTrack) return;
     this.waveformSegmentedTrack.innerHTML = "";
 
-    const totalDur = duration || (this.mediaVideo && this.mediaVideo.duration ? this.mediaVideo.duration : 0) || 1;
+    let totalDur = duration || (this.mediaVideo && this.mediaVideo.duration ? this.mediaVideo.duration : 0);
+    if (!totalDur && segments && segments.length > 0) {
+      totalDur = segments.reduce((max, s) => Math.max(max, s.end || 0), 0);
+    }
+    if (!totalDur || isNaN(totalDur) || totalDur <= 0) totalDur = 1;
     const NUM_BARS = 160;
     const peaks = this.currentAudioPeaks || [];
     const hasPeaks = peaks.length > 0;
@@ -1794,7 +1833,15 @@ class WhoSaidApp {
   // --- Two-Column Speaker Directory & Folder Viewer Modal ---
   openSpeakerFolderModal(initialSpeakerId = null) {
     if (!this.speakerFolderModal || !this.currentTranscript) return;
-    const speakers = this.currentTranscript.speakers || [];
+    const segments = this.currentTranscript.segments || [];
+    const speakerTurns = {};
+    segments.forEach((seg) => {
+      if (seg.speaker_id && (seg.text || "").trim()) {
+        speakerTurns[seg.speaker_id] = (speakerTurns[seg.speaker_id] || 0) + 1;
+      }
+    });
+    const activeSpeakers = (this.currentTranscript.speakers || []).filter((s) => (speakerTurns[s.id] || 0) > 0);
+    const speakers = activeSpeakers.length > 0 ? activeSpeakers : (this.currentTranscript.speakers || []);
     if (speakers.length === 0) return;
 
     this.speakerFolderModal.classList.remove("hidden");
@@ -2017,10 +2064,26 @@ class WhoSaidApp {
         })
       });
       const updated = await resp.json();
-      this.currentTranscript = updated;
-      this.renderTranscript(updated);
-      this.renderFolderSpeakersTable(updated.speakers || [], targetId);
-      this.showToast(`Merged ${sourceSpk ? sourceSpk.label : 'speaker'} into ${targetSpk ? targetSpk.label : 'target'}`, "success");
+      if (resp.ok && updated.speakers) {
+        this.currentTranscript.speakers = updated.speakers;
+        this.currentTranscript.segments = updated.segments;
+        this.renderTranscript(this.currentTranscript);
+        this.renderWaveformRegions();
+
+        // Update tabs cache
+        const tab = this.openTabs.find((t) => t.id === this.activeTabId);
+        if (tab && tab.transcript) {
+          tab.transcript.speakers = updated.speakers;
+          tab.transcript.segments = updated.segments;
+        }
+
+        const nextActiveId = (updated.speakers || []).some((s) => s.id === targetId) ? targetId : (updated.speakers[0]?.id || null);
+        this.renderFolderSpeakersTable(updated.speakers || [], nextActiveId);
+        if (nextActiveId) this.selectFolderSpeaker(nextActiveId);
+        this.showToast(`Merged ${sourceSpk ? sourceSpk.label : 'speaker'} into ${targetSpk ? targetSpk.label : 'target'}`, "success");
+      } else {
+        this.showToast(updated.detail || "Failed to merge speakers", "error");
+      }
     } catch (e) {
       this.showToast("Failed to merge speakers", "error");
     }
@@ -2324,8 +2387,21 @@ class WhoSaidApp {
         this.currentTranscript.speakers = res.speakers;
         this.currentTranscript.segments = res.segments;
 
+        // Update tabs cache
+        const tab = this.openTabs.find((t) => t.id === this.activeTabId);
+        if (tab && tab.transcript) {
+          tab.transcript.speakers = res.speakers;
+          tab.transcript.segments = res.segments;
+        }
+
         this.renderTranscript(this.currentTranscript);
         this.renderWaveformRegions();
+
+        if (this.speakerFolderModal && !this.speakerFolderModal.classList.contains("hidden")) {
+          const nextActiveId = (res.speakers || []).some((s) => s.id === targetId) ? targetId : (res.speakers[0]?.id || null);
+          this.renderFolderSpeakersTable(res.speakers || [], nextActiveId);
+          if (nextActiveId) this.selectFolderSpeaker(nextActiveId);
+        }
       } else {
         this.showToast(res.detail || "Merge failed", "error");
       }
@@ -3487,11 +3563,9 @@ class WhoSaidApp {
       if (this.explorerEmptyState) this.explorerEmptyState.classList.add("hidden");
       if (this.explorerTreeView) {
         this.explorerTreeView.classList.remove("hidden");
-        this.explorerTreeView.innerHTML = "";
-        this.renderTreeNode(data.root, this.explorerTreeView, 0);
+        this.refreshExplorerTree();
       }
 
-      this.applyTreeFilter();
       if (!silent) {
         this.showToast(`Opened folder: ${data.folder_name}`, "success");
       }
@@ -3499,6 +3573,232 @@ class WhoSaidApp {
       console.error("Error loading folder tree:", err);
       if (!silent) this.showToast("Failed to scan folder", "error");
     }
+  }
+
+  getAllFilesFromTree(node) {
+    let files = [];
+    if (!node) return files;
+    if (node.children) {
+      node.children.forEach((child) => {
+        if (child.is_dir) {
+          files = files.concat(this.getAllFilesFromTree(child));
+        } else {
+          files.push(child);
+        }
+      });
+    }
+    return files;
+  }
+
+  refreshExplorerTree() {
+    if (!this.currentFolderTree || !this.explorerTreeView) return;
+    const groupBy = this.explorerGroupBySelect ? this.explorerGroupBySelect.value : "none";
+    this.explorerTreeView.innerHTML = "";
+    if (groupBy === "none" || !groupBy) {
+      this.renderTreeNode(this.currentFolderTree, this.explorerTreeView, 0);
+    } else {
+      this.renderGroupedExplorer(this.currentFolderTree, groupBy);
+    }
+    this.applyTreeFilter();
+  }
+
+  renderGroupedExplorer(rootNode, groupBy) {
+    const allFiles = this.getAllFilesFromTree(rootNode);
+    if (allFiles.length === 0) {
+      this.explorerTreeView.innerHTML = `<div class="tree-empty-hint">No files found</div>`;
+      return;
+    }
+
+    const groups = {};
+    const now = Date.now() / 1000;
+
+    allFiles.forEach((f) => {
+      let gName = "Other";
+      if (groupBy === "date") {
+        const mtime = f.mtime || (now - 86400 * 30);
+        const ageSec = now - mtime;
+        if (ageSec < 86400) {
+          gName = "Today";
+        } else if (ageSec < 86400 * 2) {
+          gName = "Yesterday";
+        } else if (ageSec < 86400 * 7) {
+          gName = "This Week";
+        } else if (ageSec < 86400 * 30) {
+          gName = "This Month";
+        } else {
+          gName = "Older";
+        }
+      } else if (groupBy === "size") {
+        const sz = f.size || 0;
+        if (sz >= 100 * 1024 * 1024) {
+          gName = "Very Large (> 100 MB)";
+        } else if (sz >= 20 * 1024 * 1024) {
+          gName = "Large (20 MB - 100 MB)";
+        } else if (sz >= 5 * 1024 * 1024) {
+          gName = "Medium (5 MB - 20 MB)";
+        } else {
+          gName = "Small (< 5 MB)";
+        }
+      } else if (groupBy === "duration") {
+        const d = f.duration || (f.cached_job ? f.cached_job.duration : 0) || 0;
+        if (d >= 900) {
+          gName = "Long (> 15 min)";
+        } else if (d >= 120) {
+          gName = "Medium (2 min - 15 min)";
+        } else if (d > 0) {
+          gName = "Short (< 2 min)";
+        } else {
+          gName = "No Duration / Other";
+        }
+      }
+
+      if (!groups[gName]) groups[gName] = [];
+      groups[gName].push(f);
+    });
+
+    let order = Object.keys(groups);
+    if (groupBy === "date") {
+      const dateOrder = ["Today", "Yesterday", "This Week", "This Month", "Older"];
+      order.sort((a, b) => (dateOrder.indexOf(a) === -1 ? 99 : dateOrder.indexOf(a)) - (dateOrder.indexOf(b) === -1 ? 99 : dateOrder.indexOf(b)));
+    } else if (groupBy === "size") {
+      const sizeOrder = ["Very Large (> 100 MB)", "Large (20 MB - 100 MB)", "Medium (5 MB - 20 MB)", "Small (< 5 MB)"];
+      order.sort((a, b) => sizeOrder.indexOf(a) - sizeOrder.indexOf(b));
+    } else if (groupBy === "duration") {
+      const durOrder = ["Long (> 15 min)", "Medium (2 min - 15 min)", "Short (< 2 min)", "No Duration / Other"];
+      order.sort((a, b) => durOrder.indexOf(a) - durOrder.indexOf(b));
+    }
+
+    order.forEach((gName) => {
+      const items = groups[gName];
+      if (!items || items.length === 0) return;
+
+      const groupWrap = document.createElement("div");
+      groupWrap.className = "tree-node-wrap";
+
+      const headerRow = document.createElement("div");
+      headerRow.className = "tree-node folder-node";
+      headerRow.style.paddingLeft = "10px";
+      headerRow.dataset.isDir = "true";
+      headerRow.innerHTML = `
+        <span class="tree-chevron expanded">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </span>
+        <span class="tree-icon icon-folder">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+        </span>
+        <span class="item-name" style="font-weight:600;">${this.escapeHtml(gName)}</span>
+        <span class="tree-badge-media-count">${items.length} ${items.length === 1 ? 'file' : 'files'}</span>
+      `;
+
+      const childrenContainer = document.createElement("div");
+      childrenContainer.className = "tree-children";
+
+      headerRow.addEventListener("click", () => {
+        const chevron = headerRow.querySelector(".tree-chevron");
+        const isExpanded = chevron.classList.toggle("expanded");
+        childrenContainer.classList.toggle("hidden", !isExpanded);
+      });
+
+      items.forEach((item) => {
+        const fileEl = this.createFileNodeElement(item, 24);
+        childrenContainer.appendChild(fileEl);
+      });
+
+      groupWrap.appendChild(headerRow);
+      groupWrap.appendChild(childrenContainer);
+      this.explorerTreeView.appendChild(groupWrap);
+    });
+  }
+
+  createFileNodeElement(item, paddingLeft = 14) {
+    const el = document.createElement("div");
+    el.className = "tree-node-wrap";
+
+    const row = document.createElement("div");
+    row.className = "tree-node file-node";
+    row.style.paddingLeft = `${paddingLeft}px`;
+    row.dataset.path = item.path;
+    row.dataset.name = (item.name || "").toLowerCase();
+    row.dataset.isMedia = item.is_media ? "true" : "false";
+    row.dataset.isDir = "false";
+
+    let iconSvg = "";
+    let iconClass = "icon-file";
+    if (item.is_media) {
+      const isVideo = [".mp4", ".mkv", ".mov", ".webm"].includes(item.ext);
+      if (isVideo) {
+        iconClass = "icon-video";
+        iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>`;
+      } else {
+        iconClass = "icon-audio";
+        iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>`;
+      }
+    } else if (item.is_subtitle) {
+      iconClass = "icon-subtitle";
+      iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>`;
+    } else {
+      iconClass = "icon-file";
+      iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>`;
+    }
+
+    const cachedBadge = item.cached_job ? `<span class="tree-badge-cached" title="Transcribed with Whisper ${item.cached_job.model_size}">✓ Ready</span>` : "";
+
+    let actionButtons = "";
+    if (item.is_media) {
+      const btnLabel = item.cached_job ? "Open" : "Transcribe";
+      actionButtons = `
+        <div class="tree-node-actions">
+          <button class="tree-action-pill" title="${btnLabel} file">${btnLabel}</button>
+          ${window.electronAPI ? `<button class="tree-action-icon btn-reveal-os" title="Reveal in Windows Explorer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></button>` : ""}
+        </div>
+      `;
+    }
+
+    row.innerHTML = `
+      <span class="tree-icon ${iconClass}">${iconSvg}</span>
+      <span class="item-name" title="${item.path}">${this.escapeHtml(item.name)}</span>
+      ${cachedBadge}
+      ${actionButtons}
+    `;
+
+    // Click actions
+    row.addEventListener("click", (e) => {
+      if (e.target.closest(".btn-reveal-os")) {
+        e.stopPropagation();
+        if (window.electronAPI?.showInFolder) {
+          window.electronAPI.showInFolder(item.path);
+        }
+        return;
+      }
+
+      // Always display properties in Properties Window
+      this.displayFileProperties(item);
+
+      // If clicked specifically on the action pill, execute immediately
+      if (e.target.closest(".tree-action-pill")) {
+        if (item.is_media) {
+          if (item.cached_job && item.cached_job.transcript_id) {
+            this.loadTranscript(item.cached_job.transcript_id);
+          } else {
+            this.openTranscribePathModal(item);
+          }
+        }
+      }
+    });
+
+    // Double click to open/transcribe immediately
+    row.addEventListener("dblclick", () => {
+      if (item.is_media) {
+        if (item.cached_job && item.cached_job.transcript_id) {
+          this.loadTranscript(item.cached_job.transcript_id);
+        } else {
+          this.openTranscribePathModal(item);
+        }
+      }
+    });
+
+    el.appendChild(row);
+    return el;
   }
 
   saveToRecentFolders(folderPath) {
@@ -3566,92 +3866,8 @@ class WhoSaidApp {
         // Recurse children
         this.renderTreeNode(item, childrenContainer, depth + 1);
       } else {
-        // File row
-        const row = document.createElement("div");
-        row.className = "tree-node file-node";
-        row.style.paddingLeft = `${paddingLeft + 14}px`;
-        row.dataset.path = item.path;
-        row.dataset.name = item.name.toLowerCase();
-        row.dataset.isMedia = item.is_media ? "true" : "false";
-        row.dataset.isDir = "false";
-
-        let iconSvg = "";
-        let iconClass = "icon-file";
-        if (item.is_media) {
-          const isVideo = [".mp4", ".mkv", ".mov", ".webm"].includes(item.ext);
-          if (isVideo) {
-            iconClass = "icon-video";
-            iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>`;
-          } else {
-            iconClass = "icon-audio";
-            iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>`;
-          }
-        } else if (item.is_subtitle) {
-          iconClass = "icon-subtitle";
-          iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>`;
-        } else {
-          iconClass = "icon-file";
-          iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>`;
-        }
-
-        const cachedBadge = item.cached_job ? `<span class="tree-badge-cached" title="Transcribed with Whisper ${item.cached_job.model_size}">✓ Ready</span>` : "";
-
-        let actionButtons = "";
-        if (item.is_media) {
-          const btnLabel = item.cached_job ? "Open" : "Transcribe";
-          actionButtons = `
-            <div class="tree-node-actions">
-              <button class="tree-action-pill" title="${btnLabel} file">${btnLabel}</button>
-              ${window.electronAPI ? `<button class="tree-action-icon btn-reveal-os" title="Reveal in Windows Explorer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></button>` : ""}
-            </div>
-          `;
-        }
-
-        row.innerHTML = `
-          <span class="tree-icon ${iconClass}">${iconSvg}</span>
-          <span class="item-name" title="${item.path}">${this.escapeHtml(item.name)}</span>
-          ${cachedBadge}
-          ${actionButtons}
-        `;
-
-        // Click actions
-        row.addEventListener("click", (e) => {
-          if (e.target.closest(".btn-reveal-os")) {
-            e.stopPropagation();
-            if (window.electronAPI?.showInFolder) {
-              window.electronAPI.showInFolder(item.path);
-            }
-            return;
-          }
-
-          // Always display properties in Properties Window
-          this.displayFileProperties(item);
-
-          // If clicked specifically on the action pill, execute immediately
-          if (e.target.closest(".tree-action-pill")) {
-            if (item.is_media) {
-              if (item.cached_job && item.cached_job.transcript_id) {
-                this.loadTranscript(item.cached_job.transcript_id);
-              } else {
-                this.openTranscribePathModal(item);
-              }
-            }
-          }
-        });
-
-        // Double click to open/transcribe immediately
-        row.addEventListener("dblclick", () => {
-          if (item.is_media) {
-            if (item.cached_job && item.cached_job.transcript_id) {
-              this.loadTranscript(item.cached_job.transcript_id);
-            } else {
-              this.openTranscribePathModal(item);
-            }
-          }
-        });
-
-        el.appendChild(row);
-        container.appendChild(el);
+        const fileEl = this.createFileNodeElement(item, paddingLeft + 14);
+        container.appendChild(fileEl);
       }
     });
   }
@@ -3706,7 +3922,7 @@ class WhoSaidApp {
       } else if (item.cached_job?.duration) {
         this.propFileDuration.textContent = this.formatTime(item.cached_job.duration);
       } else {
-        this.propFileDuration.textContent = item.is_media ? "--:--" : "N/A";
+        this.propFileDuration.textContent = item.is_media ? "Probing..." : "N/A";
       }
     }
 
@@ -3721,15 +3937,19 @@ class WhoSaidApp {
       fetch(`/api/fs/file-properties?file_path=${encodeURIComponent(item.path)}`)
         .then((r) => r.ok ? r.json() : null)
         .then((props) => {
-          if (props && this.selectedPropertyItem?.path === item.path) {
-            if (props.duration && this.propFileDuration) {
+          if (props && this.selectedPropertyItem && (this.selectedPropertyItem.path === item.path || this.selectedPropertyItem.name === item.name)) {
+            if (props.duration != null && props.duration > 0 && this.propFileDuration) {
+              item.duration = props.duration;
               this.propFileDuration.textContent = this.formatTime(props.duration);
+            } else if (this.propFileDuration && item.is_media && this.propFileDuration.textContent === "Probing...") {
+              this.propFileDuration.textContent = "--:--";
             }
             if (props.cached && props.transcript_id) {
               item.cached_job = {
                 transcript_id: props.transcript_id,
                 job_id: props.job_id,
-                model_size: props.model_size
+                model_size: props.model_size,
+                duration: props.duration
               };
               if (this.propFileStatus) {
                 this.propFileStatus.textContent = "Transcribed (Ready)";

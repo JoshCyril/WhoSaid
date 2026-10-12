@@ -4,7 +4,7 @@ import subprocess
 import imageio_ffmpeg
 import soundfile as sf
 import numpy as np
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 
 def get_ffmpeg_path() -> str:
     env_exe = os.environ.get("IMAGEIO_FFMPEG_EXE")
@@ -77,3 +77,32 @@ def generate_waveform_peaks(wav_path: str, num_peaks: int = 800) -> List[float]:
         return [round(p / max_val, 4) for p in peaks]
     except Exception:
         return []
+
+def get_media_duration(file_path: str) -> Optional[float]:
+    """
+    Fast extraction of media file duration in seconds.
+    Tries soundfile for audio containers, and ffmpeg header probe for videos.
+    """
+    if not file_path or not os.path.exists(file_path):
+        return None
+    ext = os.path.splitext(file_path)[1].lower()
+    if ext in {".wav", ".flac", ".ogg"}:
+        try:
+            info = sf.info(file_path)
+            return round(info.duration, 2)
+        except Exception:
+            pass
+
+    # Use ffmpeg -i probe
+    try:
+        cmd = [FFMPEG_EXE, "-i", file_path]
+        proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=5)
+        import re
+        match = re.search(r"Duration:\s*(\d+):(\d+):(\d+\.?\d*)", proc.stderr)
+        if match:
+            h, m, s = match.groups()
+            dur = int(h) * 3600 + int(m) * 60 + float(s)
+            return round(dur, 2)
+    except Exception:
+        pass
+    return None

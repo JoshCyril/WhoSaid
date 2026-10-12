@@ -233,6 +233,17 @@
           <button id="btnClearExplorerFilter" class="filter-clear-btn hidden" title="Clear filter">&times;</button>
         </div>
 
+        <!-- Explorer Group By Options (Date, Size, Duration) -->
+        <div class="explorer-group-bar">
+          <span class="explorer-group-label">Group:</span>
+          <select id="explorerGroupBySelect" class="explorer-group-select" title="Group files by Date, Size, or Duration">
+            <option value="none" selected>Folders (Default)</option>
+            <option value="date">Date Modified</option>
+            <option value="size">File Size</option>
+            <option value="duration">Media Duration</option>
+          </select>
+        </div>
+
         <!-- Section: Open Editors / Active File (VS Code Style) -->
         <div class="explorer-section" id="explorerOpenEditorsSection">
           <div class="section-accordion-header" id="headerOpenEditors">
@@ -667,6 +678,15 @@
                 <div class="waveform-seeker-line" id="waveformSeekerLine" style="left: 0%;"></div>
                 <div class="waveform-seeker-tooltip hidden" id="waveformTimelineTooltip">00:00</div>
               </div>
+
+              <!-- Dedicated Subtitle Banner: Directly relative and attached to player -->
+              <div id="captionOverlay" class="subtitle-banner">
+                <div id="captionDialogueRow" class="caption-dialogue-row">
+                  <div id="captionAvatarWrap" class="caption-avatar-slot"></div>
+                  <span id="captionSpeakerTag" class="caption-speaker-name">Speaker:</span>
+                  <p id="captionText" class="caption-dialogue-text">Subtitles will appear here synchronized with playback...</p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -730,15 +750,6 @@
             </div>
           </div>
           </div><!-- /.workspace-editor-group -->
-
-          <!-- Dedicated Subtitle Banner Below Waveform: <Avatar><Name>: <Text> -->
-          <div id="captionOverlay" class="subtitle-banner">
-            <div id="captionDialogueRow" class="caption-dialogue-row">
-              <div id="captionAvatarWrap" class="caption-avatar-slot"></div>
-              <span id="captionSpeakerTag" class="caption-speaker-name">Speaker:</span>
-              <p id="captionText" class="caption-dialogue-text">Subtitles will appear here synchronized with playback...</p>
-            </div>
-          </div>
 
         </div>
 

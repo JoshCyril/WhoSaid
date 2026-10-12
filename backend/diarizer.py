@@ -23,16 +23,16 @@ SEG_MODEL_PATH = os.path.join(MODELS_DIR, "model.onnx")
 EMB_MODEL_PATH = os.path.join(MODELS_DIR, "3dspeaker_speech_campplus_sv_zh_en_16k-common_advanced.onnx")
 
 SPEAKER_COLORS = [
-    "#f6c48f",  # 1. Warm Pastel Peach
-    "#fae084",  # 2. Soft Pastel Buttercup
-    "#a3c9a8",  # 3. Muted Pastel Sage
-    "#9ec5e8",  # 4. Powder Pastel Sky
-    "#cbb2fe",  # 5. Soft Pastel Wisteria / Lavender
-    "#f4a7bb",  # 6. Blush Pastel Rose
-    "#9ae3d1",  # 7. Minty Pastel Seafoam
-    "#d2b48c",  # 8. Warm Pastel Sand / Tan
-    "#b4c596",  # 9. Muted Pastel Olive
-    "#b6c2f8",  # 10. Soft Pastel Periwinkle
+    "#fb7185",  # 1. Warm Coral / Rose (~350° on color wheel)
+    "#2dd4bf",  # 2. Crisp Teal / Cyan (~175° - OPPOSITE on color wheel for main speakers)
+    "#fbbf24",  # 3. Vibrant Amber / Gold (~45°)
+    "#c084fc",  # 4. Violet / Purple (~270° - OPPOSITE)
+    "#4ade80",  # 5. Mint Green (~135°)
+    "#f472b6",  # 6. Electric Pink (~315° - OPPOSITE)
+    "#38bdf8",  # 7. Sky Blue (~200°)
+    "#f97316",  # 8. Tangerine Orange (~25° - OPPOSITE)
+    "#a3e635",  # 9. Lime Green (~85°)
+    "#818cf8",  # 10. Periwinkle Indigo (~240° - OPPOSITE)
 ]
 
 def cosine_similarity(a: List[float], b: List[float]) -> float:
