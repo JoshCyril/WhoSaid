@@ -45,6 +45,8 @@ class WhoSaidApp {
     this.btnHomeWorkspace = document.getElementById("btnHomeWorkspace");
     this.btnHomeRefreshHistory = document.getElementById("btnHomeRefreshHistory");
     this.homeRecentGrid = document.getElementById("homeRecentGrid");
+    this.homeHeroSection = document.getElementById("homeHeroSection");
+    this.btnHomeSectionUpload = document.getElementById("btnHomeSectionUpload");
 
     this.activeFileIndicator = document.getElementById("activeFileIndicator");
     this.activeFileName = document.getElementById("activeFileName");
@@ -469,7 +471,20 @@ class WhoSaidApp {
     if (!this.homeRecentGrid) return;
     this.homeRecentGrid.innerHTML = "";
 
-    if (!list || list.length === 0) {
+    const hasRecent = Array.isArray(list) && list.length > 0;
+    // User request: in UI only display the hero content if there is no 'recent transcript'
+    if (this.homeHeroSection) {
+      if (hasRecent) {
+        this.homeHeroSection.classList.add("hidden");
+      } else {
+        this.homeHeroSection.classList.remove("hidden");
+      }
+    }
+    if (this.btnHomeSectionUpload) {
+      this.btnHomeSectionUpload.classList.toggle("hidden", !hasRecent);
+    }
+
+    if (!hasRecent) {
       this.homeRecentGrid.innerHTML = `
         <div class="recent-empty-state">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="empty-icon">
@@ -561,7 +576,12 @@ class WhoSaidApp {
         this.openDeleteConfirmModal(item.job_id, item.filename, () => {
           card.style.opacity = "0";
           card.style.transform = "scale(0.95)";
-          setTimeout(() => card.remove(), 250);
+          setTimeout(() => {
+            card.remove();
+            if (this.homeRecentGrid && this.homeRecentGrid.children.length === 0) {
+              this.renderHomeRecentGrid([]);
+            }
+          }, 250);
         });
       });
 
@@ -588,6 +608,7 @@ class WhoSaidApp {
 
     // Homepage CTA buttons
     if (this.btnHomeUpload) this.btnHomeUpload.addEventListener("click", () => this.openUploadModal());
+    if (this.btnHomeSectionUpload) this.btnHomeSectionUpload.addEventListener("click", () => this.openUploadModal());
     if (this.btnHomeDemo) this.btnHomeDemo.addEventListener("click", () => this.loadDemo());
     if (this.btnHomeWorkspace) this.btnHomeWorkspace.addEventListener("click", () => this.showWorkspaceView());
     if (this.btnHomeRefreshHistory) this.btnHomeRefreshHistory.addEventListener("click", () => this.loadHomeRecentSessions());

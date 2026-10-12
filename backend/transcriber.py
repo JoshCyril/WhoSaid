@@ -192,7 +192,7 @@ class TranscriberService:
         }
 
         # Helper to find which diarized interval matches a word
-        def get_speaker_for_time(start: float, end: float) -> Dict[str, Any]:
+        def get_speaker_for_time(start: float, end: float, fallback_id: Optional[str] = None) -> Dict[str, Any]:
             if not diarized_intervals:
                 return default_spk
 
@@ -222,23 +222,38 @@ class TranscriberService:
                     closest_dist = dist
                     closest_spk_id = interval["speaker_id"]
 
-            chosen_id = best_spk_id if best_overlap > 0 else closest_spk_id
+            if best_overlap > 0:
+                chosen_id = best_spk_id
+            elif closest_dist <= 1.2 and closest_spk_id:
+                chosen_id = closest_spk_id
+            elif fallback_id and fallback_id in speaker_lookup:
+                chosen_id = fallback_id
+            else:
+                chosen_id = closest_spk_id or (default_spk["id"] if default_spk else "spk_0")
+
             return speaker_lookup.get(chosen_id, default_spk)
 
         # Flatten all words with assigned speaker
         all_words = []
         for seg in whisper_segments:
+            seg_start = seg.get("start", 0.0)
+            seg_end = seg.get("end", 0.0)
+            # Dominant speaker for this overall whisper segment
+            seg_spk = get_speaker_for_time(seg_start, seg_end)
+            prev_spk_id = seg_spk["id"]
+
             words = seg.get("words", [])
-            if not words and seg["text"]:
-                # If word timestamps weren't generated for some reason, synthesize one
+            if not words and seg.get("text"):
                 words = [{
                     "word": seg["text"],
-                    "start": seg["start"],
-                    "end": seg["end"],
+                    "start": seg_start,
+                    "end": seg_end,
                     "prob": 1.0
                 }]
+
             for w in words:
-                spk = get_speaker_for_time(w["start"], w["end"])
+                spk = get_speaker_for_time(w["start"], w["end"], fallback_id=prev_spk_id)
+                prev_spk_id = spk["id"]
                 all_words.append({
                     "word": w["word"],
                     "start": w["start"],

@@ -2,6 +2,7 @@
   "name": "whosaid",
   "version": "1.0.0",
   "description": "Who Said - Local Video Transcriber & Speaker Captions",
+  "author": "Josh Cyril <joshuacyril@users.noreply.github.com>",
   "main": "electron/main.js",
   "scripts": {
     "start": "electron .",
@@ -20,6 +21,7 @@
       "output": "dist"
     },
     "win": {
+      "icon": "build/icon.ico",
       "target": [
         "nsis",
         "portable"
@@ -29,7 +31,9 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
+      "createStartMenuShortcut": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico"
     },
     "files": [
       "electron/**/*",

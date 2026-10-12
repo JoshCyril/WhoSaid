@@ -9,6 +9,8 @@ venv/
 .venv/
 ENV/
 build/
+!build/icon.ico
+!build/icon.png
 develop-eggs/
 dist_backend/
 build_backend/

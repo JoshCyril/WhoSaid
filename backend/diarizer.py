@@ -68,16 +68,16 @@ class DiarizerService:
         )
         self.extractor = sherpa_onnx.SpeakerEmbeddingExtractor(self.emb_cfg)
 
-        # 3. Clustering Config
-        cluster_cfg = sherpa_onnx.FastClusteringConfig(num_clusters=-1, threshold=0.55)
+        # 3. Clustering Config (higher threshold to prevent over-fragmenting speakers)
+        cluster_cfg = sherpa_onnx.FastClusteringConfig(num_clusters=-1, threshold=0.68)
 
-        # 4. Diarization Pipeline
+        # 4. Diarization Pipeline (min_duration_on=0.6 to ignore short noise bursts)
         self.diarizer_cfg = sherpa_onnx.OfflineSpeakerDiarizationConfig(
             segmentation=seg_cfg,
             embedding=self.emb_cfg,
             clustering=cluster_cfg,
-            min_duration_on=0.3,
-            min_duration_off=0.5
+            min_duration_on=0.6,
+            min_duration_off=0.6
         )
         self.diarizer = sherpa_onnx.OfflineSpeakerDiarization(self.diarizer_cfg)
 
@@ -111,9 +111,9 @@ class DiarizerService:
     ) -> Dict[str, Any]:
         """
         Runs speaker diarization on audio samples, computes speaker embeddings,
+        merges duplicate sub-clusters via agglomerative embedding similarity,
         and matches against enrolled voice profiles.
         """
-        # Internal callback for sherpa-onnx
         def _cb(processed: int, total: int) -> int:
             if progress_callback:
                 progress_callback(processed, total)
@@ -125,28 +125,29 @@ class DiarizerService:
         # Group audio chunks by speaker to compute a representative voice embedding
         speaker_samples: Dict[int, List[np.ndarray]] = {}
         diarized_intervals = []
+        cluster_durations: Dict[int, float] = {}
 
         for seg in raw_segments:
+            dur = round(seg.end - seg.start, 2)
             diarized_intervals.append({
                 "start": round(seg.start, 2),
                 "end": round(seg.end, 2),
                 "cluster_id": seg.speaker
             })
+            cluster_durations[seg.speaker] = cluster_durations.get(seg.speaker, 0.0) + dur
             start_idx = int(seg.start * sample_rate)
             end_idx = min(len(samples), int(seg.end * sample_rate))
-            if end_idx - start_idx > int(0.5 * sample_rate):
+            if end_idx - start_idx > int(0.4 * sample_rate):
                 chunk = samples[start_idx:end_idx]
                 speaker_samples.setdefault(seg.speaker, []).append(chunk)
 
-        # Enrolled voice profiles from database
-        voice_profiles = get_all_voice_profiles()
+        # Sort clusters by duration descending so major speakers serve as anchor targets
+        sorted_cids = sorted(speaker_samples.keys(), key=lambda cid: cluster_durations.get(cid, 0.0), reverse=True)
+        cluster_remap: Dict[int, int] = {cid: cid for cid in sorted_cids}
+        embeddings: Dict[int, Optional[List[float]]] = {}
 
-        # Compute embedding per speaker cluster and find profile matches
-        speaker_map: Dict[int, Dict[str, Any]] = {}
-        color_idx = 0
-
-        for spk_id, chunks in speaker_samples.items():
-            # Combine up to 15 seconds of audio for highest fidelity embedding
+        for spk_id in sorted_cids:
+            chunks = speaker_samples[spk_id]
             combined = []
             total_samples = 0
             for c in chunks:
@@ -154,9 +155,66 @@ class DiarizerService:
                 total_samples += len(c)
                 if total_samples >= 15 * sample_rate:
                     break
-
             combined_audio = np.concatenate(combined) if combined else np.array([], dtype=np.float32)
-            embedding = self.extract_embedding_from_samples(combined_audio, sample_rate)
+            embeddings[spk_id] = self.extract_embedding_from_samples(combined_audio, sample_rate)
+
+        # Post-Diarization Agglomerative Cosine Merge:
+        # Merge clusters that have high cosine similarity (same person fragmented by noise or tone shifts)
+        MERGE_SIMILARITY_THRESHOLD = 0.58
+        for i, cid_i in enumerate(sorted_cids):
+            target_cid = cluster_remap[cid_i]
+            emb_i = embeddings.get(cid_i)
+            if not emb_i:
+                continue
+            for j in range(i + 1, len(sorted_cids)):
+                cid_j = sorted_cids[j]
+                if cluster_remap[cid_j] != cid_j:
+                    continue  # already remapped
+                emb_j = embeddings.get(cid_j)
+                if not emb_j:
+                    continue
+                sim = cosine_similarity(emb_i, emb_j)
+                if sim >= MERGE_SIMILARITY_THRESHOLD:
+                    cluster_remap[cid_j] = target_cid
+
+        # Micro-cluster noise suppression: merge sub-second artifacts into dominant or nearest cluster
+        primary_cids = [cid for cid in sorted_cids if cluster_remap[cid] == cid]
+        if primary_cids:
+            dominant_cid = primary_cids[0]
+            for cid in sorted_cids:
+                if cluster_durations.get(cid, 0.0) < 1.0 and len(primary_cids) > 1:
+                    emb = embeddings.get(cid)
+                    best_match = dominant_cid
+                    best_s = -1.0
+                    if emb:
+                        for p_cid in primary_cids:
+                            p_emb = embeddings.get(p_cid)
+                            if p_emb:
+                                s = cosine_similarity(emb, p_emb)
+                                if s > best_s:
+                                    best_s = s
+                                    best_match = p_cid
+                    cluster_remap[cid] = best_match
+
+        # Apply re-mapping to intervals
+        for interval in diarized_intervals:
+            interval["cluster_id"] = cluster_remap.get(interval["cluster_id"], interval["cluster_id"])
+
+        # Enrolled voice profiles from database
+        voice_profiles = get_all_voice_profiles()
+
+        # Build clean consolidated speaker mapping
+        unique_final_cids = sorted(
+            list(set(cluster_remap.values())),
+            key=lambda c: cluster_durations.get(c, 0.0),
+            reverse=True
+        )
+
+        speaker_map: Dict[int, Dict[str, Any]] = {}
+        color_idx = 0
+
+        for final_idx, cid in enumerate(unique_final_cids):
+            embedding = embeddings.get(cid)
 
             # Match with enrolled voice profiles
             matched_profile = None
@@ -174,14 +232,14 @@ class DiarizerService:
                 speaker_color = matched_profile.get("color", SPEAKER_COLORS[color_idx % len(SPEAKER_COLORS)])
                 profile_id = matched_profile["id"]
             else:
-                speaker_name = f"Speaker {spk_id + 1}"
+                speaker_name = f"Speaker {final_idx + 1}"
                 speaker_color = SPEAKER_COLORS[color_idx % len(SPEAKER_COLORS)]
                 profile_id = None
             color_idx += 1
 
-            speaker_map[spk_id] = {
-                "id": f"spk_{spk_id}",
-                "cluster_id": spk_id,
+            speaker_map[cid] = {
+                "id": f"spk_{final_idx}",
+                "cluster_id": cid,
                 "label": speaker_name,
                 "color": speaker_color,
                 "profile_id": profile_id,
@@ -204,7 +262,9 @@ class DiarizerService:
         # Attach assigned speaker label and color to intervals
         enriched_intervals = []
         for interval in diarized_intervals:
-            spk_info = speaker_map.get(interval["cluster_id"], speaker_map[0])
+            spk_info = speaker_map.get(interval["cluster_id"])
+            if not spk_info and speaker_map:
+                spk_info = list(speaker_map.values())[0]
             enriched_intervals.append({
                 "start": interval["start"],
                 "end": interval["end"],

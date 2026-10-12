@@ -148,6 +148,10 @@ def build():
     for exc in excludes:
         args.append(f"--exclude-module={exc}")
 
+    icon_path = os.path.join(BASE_DIR, "build", "icon.ico")
+    if os.path.exists(icon_path):
+        args.append(f"--icon={icon_path}")
+
     print(f"Running PyInstaller with {len(args)} arguments...")
     PyInstaller.__main__.run(args)
     print("PyInstaller build complete!")

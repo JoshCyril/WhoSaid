@@ -300,8 +300,11 @@ function killPythonProcess() {
     pythonProcess = null;
   }
 }
-
 function createMainWindow() {
+  const iconIco = path.join(PROJECT_ROOT, 'build', 'icon.ico');
+  const iconPng = path.join(PROJECT_ROOT, 'build', 'icon.png');
+  const appIcon = fs.existsSync(iconIco) ? iconIco : (fs.existsSync(iconPng) ? iconPng : undefined);
+
   mainWindow = new BrowserWindow({
     width: 1440,
     height: 900,
@@ -309,6 +312,8 @@ function createMainWindow() {
     minHeight: 680,
     backgroundColor: '#2e2e2e',
     title: 'Who Said — Local Video Transcriber & Speaker Captions',
+    icon: appIcon,
+    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -316,77 +321,11 @@ function createMainWindow() {
     }
   });
 
-  // Desktop App Menu
-  const menuTemplate = [
-    {
-      label: 'File',
-      submenu: [
-        {
-          label: 'Open Folder...',
-          accelerator: 'CmdOrCtrl+O',
-          click: async () => {
-            if (mainWindow) {
-              mainWindow.webContents.send('menu:open-folder');
-            }
-          }
-        },
-        {
-          label: 'Open Sample Data',
-          click: async () => {
-            if (mainWindow) {
-              const samplePath = path.join(PROJECT_ROOT, 'sample_data');
-              mainWindow.webContents.send('menu:select-folder-path', samplePath);
-            }
-          }
-        },
-        { type: 'separator' },
-        { role: 'quit' }
-      ]
-    },
-    {
-      label: 'View',
-      submenu: [
-        {
-          label: 'Toggle Folder Explorer',
-          accelerator: 'CmdOrCtrl+B',
-          click: () => {
-            if (mainWindow) {
-              mainWindow.webContents.send('menu:toggle-explorer');
-            }
-          }
-        },
-        { type: 'separator' },
-        { role: 'reload' },
-        { role: 'forceReload' },
-        { role: 'toggleDevTools' },
-        { type: 'separator' },
-        { role: 'resetZoom' },
-        { role: 'zoomIn' },
-        { role: 'zoomOut' },
-        { type: 'separator' },
-        { role: 'togglefullscreen' }
-      ]
-    },
-    {
-      label: 'Help',
-      submenu: [
-        {
-          label: 'About Who Said',
-          click: () => {
-            dialog.showMessageBox(mainWindow, {
-              type: 'info',
-              title: 'Who Said Desktop',
-              message: 'Who Said — Local Video Transcriber & Speaker Captions',
-              detail: 'Version 1.0.0 (Desktop MVP)\n100% Offline Speech Diarization & Transcription on CPU.'
-            });
-          }
-        }
-      ]
-    }
-  ];
-
-  const menu = Menu.buildFromTemplate(menuTemplate);
-  Menu.setApplicationMenu(menu);
+  // Remove top native application menu (File, View, Help) for a sleek, modern desktop frame
+  Menu.setApplicationMenu(null);
+  if (mainWindow.removeMenu) {
+    mainWindow.removeMenu();
+  }
 
   // Recovery hook: if loading localhost URL ever fails, fallback to local setup.html
   mainWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription, validatedURL) => {
