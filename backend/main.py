@@ -25,9 +25,12 @@ from backend.audio import (
     extract_audio_16k, compute_file_hash, generate_waveform_peaks, load_audio_samples, get_media_duration
 )
 from backend.cleanup import cleanup_old_media
-from backend.diarizer import DiarizerService
-from backend.transcriber import TranscriberService, get_whisper_models_status, MODELS_DIR
+from backend.transcriber import (
+    TranscriberService, get_whisper_models_status, MODELS_DIR,
+    get_models_dir, get_default_models_dir, set_models_dir
+)
 from backend.exporter import export_srt, export_vtt, export_json, export_txt
+
 
 
 # Directories
@@ -435,9 +438,12 @@ async def scan_filesystem_folder(folder_path: Optional[str] = None):
                 is_media = ext in media_exts
                 is_sub = ext in sub_exts
                 try:
-                    size = entry.stat().st_size
+                    st = entry.stat()
+                    size = st.st_size
+                    mtime = st.st_mtime
                 except Exception:
                     size = 0
+                    mtime = 0
 
                 # Match with database jobs
                 cached_info = None
@@ -460,12 +466,14 @@ async def scan_filesystem_folder(folder_path: Optional[str] = None):
                     "path": entry_path,
                     "is_dir": False,
                     "size": size,
+                    "mtime": mtime,
                     "ext": ext,
                     "is_media": is_media,
                     "is_subtitle": is_sub,
                     "duration": (cached_info.get("duration") if cached_info else None) or (get_media_duration(entry_path) if is_media else None),
                     "cached_job": cached_info
                 })
+
 
         return node
 
@@ -1013,14 +1021,44 @@ async def api_db_download():
     filename = os.path.basename(active_path) or "whosaid.db"
     return FileResponse(active_path, media_type="application/x-sqlite3", filename=filename)
 
-@app.get("/api/backend/models-info")
-async def api_get_models_info():
-    seg_exists = os.path.exists(os.path.join(MODELS_DIR, "model.onnx"))
-    emb_exists = os.path.exists(os.path.join(MODELS_DIR, "3dspeaker_speech_campplus_sv_zh_en_16k-common_advanced.onnx"))
-    whisper_status = get_whisper_models_status()
+@app.get("/api/backend/models-config")
+async def api_get_models_config():
+    active_dir = get_models_dir()
+    default_dir = get_default_models_dir()
     return JSONResponse({
-        "models_dir": MODELS_DIR,
-        "exists": os.path.exists(MODELS_DIR),
+        "current_models_dir": active_dir,
+        "default_models_dir": default_dir,
+        "is_custom": os.path.abspath(active_dir) != os.path.abspath(default_dir),
+        "exists": os.path.exists(active_dir)
+    })
+
+@app.post("/api/backend/models-config")
+async def api_set_models_config(request: Request):
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+
+    reset = body.get("reset_to_default", False)
+    new_dir = body.get("models_dir")
+
+    if reset or not new_dir:
+        updated_dir = set_models_dir(None)
+    else:
+        clean_dir = str(new_dir).strip()
+        updated_dir = set_models_dir(clean_dir)
+
+    seg_exists = os.path.exists(os.path.join(updated_dir, "model.onnx"))
+    emb_exists = os.path.exists(os.path.join(updated_dir, "3dspeaker_speech_campplus_sv_zh_en_16k-common_advanced.onnx"))
+    whisper_status = get_whisper_models_status()
+
+    return JSONResponse({
+        "status": "success",
+        "message": f"Connected to models directory at {updated_dir}",
+        "current_models_dir": updated_dir,
+        "default_models_dir": get_default_models_dir(),
+        "is_custom": os.path.abspath(updated_dir) != os.path.abspath(get_default_models_dir()),
+        "exists": os.path.exists(updated_dir),
         "diarization": {
             "segmentation_model": seg_exists,
             "embedding_model": emb_exists,
@@ -1029,6 +1067,26 @@ async def api_get_models_info():
         "whisper_models": whisper_status,
         "offline_ready": (seg_exists and emb_exists and whisper_status.get("tiny", {}).get("installed_locally", False))
     })
+
+@app.get("/api/backend/models-info")
+async def api_get_models_info():
+    current_dir = get_models_dir()
+    seg_exists = os.path.exists(os.path.join(current_dir, "model.onnx"))
+    emb_exists = os.path.exists(os.path.join(current_dir, "3dspeaker_speech_campplus_sv_zh_en_16k-common_advanced.onnx"))
+    whisper_status = get_whisper_models_status()
+    return JSONResponse({
+        "models_dir": current_dir,
+        "exists": os.path.exists(current_dir),
+        "is_custom": os.path.abspath(current_dir) != os.path.abspath(get_default_models_dir()),
+        "diarization": {
+            "segmentation_model": seg_exists,
+            "embedding_model": emb_exists,
+            "ready": seg_exists and emb_exists
+        },
+        "whisper_models": whisper_status,
+        "offline_ready": (seg_exists and emb_exists and whisper_status.get("tiny", {}).get("installed_locally", False))
+    })
+
 
 @app.get("/favicon.ico")
 async def get_favicon():

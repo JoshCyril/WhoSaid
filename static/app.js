@@ -3573,8 +3573,8 @@ class WhoSaidApp {
         window.electronAPI.saveRecentFolder(data.folder_path);
       }
 
-      // Ensure explorer sidebar is opened
-      if (this.vscodeExplorerSidebar && this.vscodeExplorerSidebar.classList.contains("collapsed")) {
+      // Ensure explorer sidebar is opened (only on explicit user action, not silent auto-refresh)
+      if (!silent && this.vscodeExplorerSidebar && this.vscodeExplorerSidebar.classList.contains("collapsed")) {
         this.toggleExplorerSidebar();
       }
 
@@ -3588,8 +3588,11 @@ class WhoSaidApp {
       if (this.explorerEmptyState) this.explorerEmptyState.classList.add("hidden");
       if (this.explorerTreeView) {
         this.explorerTreeView.classList.remove("hidden");
-        this.refreshExplorerTree();
+        this.refreshExplorerTree(silent);
       }
+
+      // Activate auto-refresh timer
+      this.startExplorerAutoRefresh();
 
       if (!silent) {
         this.showToast(`Opened folder: ${data.folder_name}`, "success");
@@ -3600,30 +3603,57 @@ class WhoSaidApp {
     }
   }
 
-  getAllFilesFromTree(node) {
-    let files = [];
-    if (!node) return files;
-    if (node.children) {
-      node.children.forEach((child) => {
-        if (child.is_dir) {
-          files = files.concat(this.getAllFilesFromTree(child));
-        } else {
-          files.push(child);
+  startExplorerAutoRefresh() {
+    if (this._explorerAutoRefreshTimer) return;
+    this._explorerAutoRefreshTimer = setInterval(() => {
+      if (this.currentFolderPath && !document.hidden) {
+        this.loadFolderTree(this.currentFolderPath, true);
+      }
+    }, 4000);
+
+    if (!this._windowFocusBound) {
+      this._windowFocusBound = true;
+      window.addEventListener("focus", () => {
+        if (this.currentFolderPath) {
+          this.loadFolderTree(this.currentFolderPath, true);
         }
       });
     }
-    return files;
   }
 
-  refreshExplorerTree() {
+  refreshExplorerTree(preserveExpanded = false) {
     if (!this.currentFolderTree || !this.explorerTreeView) return;
     const groupBy = this.explorerGroupBySelect ? this.explorerGroupBySelect.value : "none";
+
+    // Preserve expanded folder paths on silent refresh
+    const expandedPaths = new Set();
+    if (preserveExpanded) {
+      this.explorerTreeView.querySelectorAll(".folder-node").forEach((node) => {
+        const chevron = node.querySelector(".tree-chevron.expanded");
+        if (chevron && node.dataset.path) expandedPaths.add(node.dataset.path);
+      });
+    }
+
     this.explorerTreeView.innerHTML = "";
     if (groupBy === "none" || !groupBy) {
       this.renderTreeNode(this.currentFolderTree, this.explorerTreeView, 0);
     } else {
       this.renderGroupedExplorer(this.currentFolderTree, groupBy);
     }
+
+    if (preserveExpanded && expandedPaths.size > 0) {
+      this.explorerTreeView.querySelectorAll(".folder-node").forEach((node) => {
+        if (expandedPaths.has(node.dataset.path)) {
+          const chevron = node.querySelector(".tree-chevron");
+          const container = node.parentElement?.querySelector(".tree-children");
+          if (chevron && container) {
+            chevron.classList.add("expanded");
+            container.classList.remove("hidden");
+          }
+        }
+      });
+    }
+
     this.applyTreeFilter();
   }
 
@@ -3635,24 +3665,37 @@ class WhoSaidApp {
     }
 
     const groups = {};
-    const now = Date.now() / 1000;
+    const now = Date.now();
 
     allFiles.forEach((f) => {
       let gName = "Other";
       if (groupBy === "date") {
-        const mtime = f.mtime || (now - 86400 * 30);
-        const ageSec = now - mtime;
-        if (ageSec < 86400) {
-          gName = "Today";
-        } else if (ageSec < 86400 * 2) {
-          gName = "Yesterday";
-        } else if (ageSec < 86400 * 7) {
-          gName = "This Week";
-        } else if (ageSec < 86400 * 30) {
-          gName = "This Month";
+        const timestamp = (f.mtime && Number(f.mtime) > 0) ? Number(f.mtime) * 1000 : 0;
+        let sortKey = 0;
+
+        if (timestamp > 0) {
+          const fileDate = new Date(timestamp);
+          const today = new Date();
+          const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+          const startOfYesterday = startOfToday - 86400000;
+          const startOfWeek = startOfToday - 6 * 86400000;
+          const startOfFileDay = new Date(fileDate.getFullYear(), fileDate.getMonth(), fileDate.getDate()).getTime();
+
+          sortKey = startOfFileDay;
+          if (startOfFileDay >= startOfToday) {
+            gName = "Today";
+          } else if (startOfFileDay >= startOfYesterday) {
+            gName = "Yesterday";
+          } else if (startOfFileDay >= startOfWeek) {
+            gName = "This Week";
+          } else {
+            gName = fileDate.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+          }
         } else {
-          gName = "Older";
+          gName = "No Date";
+          sortKey = -1;
         }
+        f._groupSortKey = sortKey;
       } else if (groupBy === "size") {
         const sz = f.size || 0;
         if (sz >= 100 * 1024 * 1024) {
@@ -3683,8 +3726,11 @@ class WhoSaidApp {
 
     let order = Object.keys(groups);
     if (groupBy === "date") {
-      const dateOrder = ["Today", "Yesterday", "This Week", "This Month", "Older"];
-      order.sort((a, b) => (dateOrder.indexOf(a) === -1 ? 99 : dateOrder.indexOf(a)) - (dateOrder.indexOf(b) === -1 ? 99 : dateOrder.indexOf(b)));
+      order.sort((a, b) => {
+        const keyA = groups[a][0]?._groupSortKey ?? 0;
+        const keyB = groups[b][0]?._groupSortKey ?? 0;
+        return keyB - keyA; // Newest date first
+      });
     } else if (groupBy === "size") {
       const sizeOrder = ["Very Large (> 100 MB)", "Large (20 MB - 100 MB)", "Medium (5 MB - 20 MB)", "Small (< 5 MB)"];
       order.sort((a, b) => sizeOrder.indexOf(a) - sizeOrder.indexOf(b));
@@ -3697,6 +3743,11 @@ class WhoSaidApp {
       const items = groups[gName];
       if (!items || items.length === 0) return;
 
+      // Sort files inside each group by modified time descending if grouping by date
+      if (groupBy === "date") {
+        items.sort((a, b) => ((b.mtime || 0) - (a.mtime || 0)));
+      }
+
       const groupWrap = document.createElement("div");
       groupWrap.className = "tree-node-wrap";
 
@@ -3704,6 +3755,7 @@ class WhoSaidApp {
       headerRow.className = "tree-node folder-node";
       headerRow.style.paddingLeft = "10px";
       headerRow.dataset.isDir = "true";
+      headerRow.dataset.path = `group-${gName}`;
       headerRow.innerHTML = `
         <span class="tree-chevron expanded">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><polyline points="9 18 15 12 9 6"></polyline></svg>
@@ -3734,6 +3786,7 @@ class WhoSaidApp {
       this.explorerTreeView.appendChild(groupWrap);
     });
   }
+
 
   createFileNodeElement(item, paddingLeft = 14) {
     const el = document.createElement("div");
@@ -4398,7 +4451,58 @@ class WhoSaidApp {
         }
       });
     }
+
+    // 10. AI Models Folder Selection, Application & Dynamic Switching
+    const inputActiveModelsPath = document.getElementById("inputActiveModelsPath");
+    const btnBrowseModelsFolder = document.getElementById("btnBrowseModelsFolder");
+    const btnApplyModelsPath = document.getElementById("btnApplyModelsPath");
+    const btnResetDefaultModels = document.getElementById("btnResetDefaultModels");
+    const btnCopyActiveModelsPath = document.getElementById("btnCopyActiveModelsPath");
+
+    if (btnBrowseModelsFolder) {
+      btnBrowseModelsFolder.addEventListener("click", async () => {
+        let chosenPath = null;
+        if (window.electronAPI && window.electronAPI.openFolderDialog) {
+          chosenPath = await window.electronAPI.openFolderDialog();
+        } else {
+          chosenPath = prompt("Enter path to AI Models directory:", inputActiveModelsPath ? inputActiveModelsPath.value : "");
+        }
+        if (chosenPath && chosenPath.trim()) {
+          if (inputActiveModelsPath) inputActiveModelsPath.value = chosenPath.trim();
+          await this.switchModelsDirectory(chosenPath.trim());
+        }
+      });
+    }
+
+    if (btnApplyModelsPath) {
+      btnApplyModelsPath.addEventListener("click", async () => {
+        const val = inputActiveModelsPath ? inputActiveModelsPath.value.trim() : "";
+        if (!val) {
+          this.showToast("Please enter or select an AI models folder path", "warning");
+          return;
+        }
+        await this.switchModelsDirectory(val);
+      });
+    }
+
+    if (btnResetDefaultModels) {
+      btnResetDefaultModels.addEventListener("click", async () => {
+        await this.switchModelsDirectory(null, true);
+      });
+    }
+
+    if (btnCopyActiveModelsPath) {
+      btnCopyActiveModelsPath.addEventListener("click", () => {
+        const pathVal = inputActiveModelsPath ? inputActiveModelsPath.value.trim() : (this.currentModelsPath || "");
+        if (pathVal) {
+          navigator.clipboard.writeText(pathVal).then(() => {
+            this.showToast("Models directory copied to clipboard", "success");
+          });
+        }
+      });
+    }
   }
+
 
   async switchDatabase(dbPath, resetToDefault = false) {
     try {
@@ -4444,6 +4548,34 @@ class WhoSaidApp {
       this.showToast(e.message || "Failed to connect to database", "error");
     }
   }
+
+  async switchModelsDirectory(modelsPath, resetToDefault = false) {
+    try {
+      this.showToast(resetToDefault ? "Resetting models directory..." : "Switching models directory...", "info");
+      const resp = await fetch("/api/backend/models-config", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          models_dir: resetToDefault ? null : modelsPath,
+          reset_to_default: resetToDefault
+        })
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json();
+        throw new Error(err.detail || "Failed to update models directory");
+      }
+
+      const res = await resp.json();
+      const folderName = res.current_models_dir.split(/[\\/]/).pop() || "models";
+      this.showToast(resetToDefault ? "Reset to bundled models directory" : `Loaded models from: ${folderName}`, "success");
+      await this.loadModelsInfo();
+    } catch (e) {
+      console.error("Models directory switch error:", e);
+      this.showToast(e.message || "Failed to update models directory", "error");
+    }
+  }
+
 
   async loadDbStats() {
     try {
@@ -4542,6 +4674,20 @@ class WhoSaidApp {
       if (!resp.ok) return;
       const data = await resp.json();
 
+      this.currentModelsPath = data.models_dir;
+      const inputActiveModelsPath = document.getElementById("inputActiveModelsPath");
+      if (inputActiveModelsPath) inputActiveModelsPath.value = data.models_dir || "";
+
+      const modelsStorageTypeBadge = document.getElementById("modelsStorageTypeBadge");
+      if (modelsStorageTypeBadge) {
+        modelsStorageTypeBadge.textContent = data.is_custom ? "Custom" : "Bundled";
+      }
+
+      const modelsOfflineStatusBadge = document.getElementById("modelsOfflineStatusBadge");
+      if (modelsOfflineStatusBadge) {
+        modelsOfflineStatusBadge.textContent = data.offline_ready ? "100% Offline Ready" : "Missing Models";
+      }
+
       const badgeBase = document.getElementById("badgeModelBase");
       const badgeTiny = document.getElementById("badgeModelTiny");
       const badgeSmall = document.getElementById("badgeModelSmall");
@@ -4569,13 +4715,17 @@ class WhoSaidApp {
       if (btnOpenModelsFolder && !btnOpenModelsFolder._bound) {
         btnOpenModelsFolder._bound = true;
         btnOpenModelsFolder.addEventListener("click", () => {
-          if (window.electronAPI && window.electronAPI.openModelsFolder) {
+          const dir = this.currentModelsPath || data.models_dir;
+          if (window.electronAPI && window.electronAPI.showInFolder && dir) {
+            window.electronAPI.showInFolder(dir);
+          } else if (window.electronAPI && window.electronAPI.openModelsFolder) {
             window.electronAPI.openModelsFolder();
           } else {
-            this.showToast(`Models directory: ${data.models_dir}`, "info");
+            this.showToast(`Models directory: ${dir}`, "info");
           }
         });
       }
+
 
       document.querySelectorAll(".link-external-hf").forEach(link => {
         if (!link._bound) {

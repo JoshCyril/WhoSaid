@@ -1022,200 +1022,215 @@
                     </section>
 
                     <!-- Backend & Database Settings View -->
-                    <section id="backendSettingsView" class="backend-settings-view hidden">
-                        <div class="db-view-header">
-                            <div class="db-title-group">
-                                <div class="db-badge-pill">
-                                    <span class="db-live-dot"></span> SQLite 3 Engine
+                    <section id="backendSettingsView" class="backend-settings-view hidden p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
+                        
+                        <!-- Top Header Strip -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+                            <div>
+                                <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 mb-2">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                    <span>SQLite 3 &amp; Speech AI Engine</span>
                                 </div>
-                                <h2 class="db-main-title">Backend &amp; Database Explorer</h2>
-                                <p class="db-subtitle">Directly inspect tables, storage utilization, and run read-only
-                                    queries against local SQLite database.</p>
+                                <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">Backend &amp; Database Explorer</h2>
+                                <p class="text-xs sm:text-sm text-dark-muted mt-1">Directly inspect tables, storage utilization, and configure local offline models &amp; database.</p>
                             </div>
-                            <div class="db-header-actions">
-                                <button id="btnDbRefresh" class="btn btn-secondary btn-sm"
-                                    title="Refresh stats & active table">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        class="icon-xs">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <button id="btnDbRefresh" class="ws-btn-pill-outline" title="Refresh stats & active table">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
                                         <polyline points="23 4 23 10 17 10"></polyline>
                                         <polyline points="1 20 1 14 7 14"></polyline>
-                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15">
-                                        </path>
+                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
                                     </svg>
-                                    Refresh
+                                    <span>Refresh</span>
                                 </button>
-                                <button id="btnDbCleanCache" class="btn btn-secondary btn-sm"
-                                    title="Clean temp audio & uploads cache">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        class="icon-xs">
+                                <button id="btnDbCleanCache" class="ws-btn-pill-outline" title="Clean temp audio & uploads cache">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
                                         <polyline points="3 6 5 6 21 6"></polyline>
-                                        <path
-                                            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
-                                        </path>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                                     </svg>
-                                    Purge Cache
+                                    <span>Purge Cache</span>
                                 </button>
-                                <a id="btnDbDownload" href="/api/db/download" download="whosaid.db"
-                                    class="btn btn-primary btn-sm" title="Download SQLite database file">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        class="icon-xs">
+                                <a id="btnDbDownload" href="/api/db/download" download="whosaid.db" class="ws-btn-pill-primary" title="Download SQLite database file">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                         <polyline points="7 10 12 15 17 10"></polyline>
                                         <line x1="12" y1="15" x2="12" y2="3"></line>
                                     </svg>
-                                    Download .db
+                                    <span>Download .db</span>
                                 </a>
                             </div>
                         </div>
 
-                        <!-- Database File Location & Custom Path Selector -->
-                        <div class="db-config-banner" id="dbConfigBanner">
-                            <div class="db-config-top">
-                                <div class="db-config-title-group">
-                                    <div class="db-config-icon-wrap">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                            class="icon-sm">
-                                            <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
-                                            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
-                                            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
-                                        </svg>
-                                    </div>
-                                    <div class="db-config-text">
-                                        <div class="db-config-label-row">
-                                            <span class="db-config-heading">Active SQLite Database File</span>
-                                            <span id="dbStorageTypeBadge" class="db-type-badge default">Default
-                                                Storage</span>
-                                            <span class="db-live-status-pill"><span class="db-live-dot"></span>
-                                                Live</span>
+                        <!-- Storage & Engine Directories (Side-by-Side Grid) -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            
+                            <!-- 1. SQLite Database Location Card -->
+                            <div class="ws-card bg-dark-card border border-white/10 rounded-xl p-4 sm:p-5 flex flex-col justify-between gap-3.5 shadow-sm" id="dbConfigBanner">
+                                <div>
+                                    <div class="flex items-center justify-between gap-2 mb-2">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-8 h-8 rounded-lg bg-brand-500/10 text-brand-400 flex items-center justify-center shrink-0">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+                                                    <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                                                    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                                                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                                                </svg>
+                                            </div>
+                                            <h3 class="text-sm sm:text-base font-semibold text-white">SQLite Database File</h3>
                                         </div>
-                                        <p class="db-config-desc">Decouple and store your database anywhere (e.g.
-                                            external drive, Documents, custom project directory). The app connects
-                                            dynamically and retains settings across restarts.</p>
+                                        <div class="flex items-center gap-1.5 shrink-0">
+                                            <span id="dbStorageTypeBadge" class="px-2 py-0.5 rounded text-[11px] font-mono bg-white/5 border border-white/10 text-dark-muted">Default</span>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/15 text-emerald-400">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                                <span>Live</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-dark-muted leading-relaxed">
+                                        Store your database anywhere (external drive, Documents, etc.). Retains settings across restarts.
+                                    </p>
+                                </div>
+
+                                <div class="space-y-2.5">
+                                    <div class="relative flex items-center">
+                                        <input type="text" id="inputActiveDbPath" class="w-full bg-dark-base border border-white/10 rounded-lg pl-3 pr-10 py-1.5 text-xs font-mono text-dark-text focus:outline-none focus:border-brand-400/50" spellcheck="false" placeholder="Enter or select SQLite database file (*.db)..." />
+                                        <button id="btnCopyActiveDbPath" class="absolute right-1 ws-btn-icon text-dark-muted hover:text-white" title="Copy path">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+                                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <button id="btnBrowseDbFile" class="ws-btn-pill-outline text-xs" title="Select an existing SQLite database file (.db, .sqlite)">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3">
+                                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                                            </svg>
+                                            <span>Select DB File</span>
+                                        </button>
+                                        <button id="btnCreateNewDbFile" class="ws-btn-pill-outline text-xs" title="Create or specify a new database file">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3">
+                                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                            </svg>
+                                            <span>New DB...</span>
+                                        </button>
+                                        <button id="btnApplyDbPath" class="ws-btn-pill-primary text-xs" title="Connect and switch active database">
+                                            <span>Connect</span>
+                                        </button>
+                                        <button id="btnResetDefaultDb" class="ws-btn-pill-ghost text-xs ml-auto" title="Reset to standard app data storage">
+                                            <span>Reset Default</span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="db-config-input-row">
-                                <div class="db-path-input-wrap">
-                                    <input type="text" id="inputActiveDbPath"
-                                        class="form-input form-input-mono db-path-input" spellcheck="false"
-                                        placeholder="Enter or select SQLite database file (*.db)..." />
-                                    <button id="btnCopyActiveDbPath" class="btn-copy-path"
-                                        title="Copy database path to clipboard">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                            class="icon-xs">
-                                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                        </svg>
-                                    </button>
+                            <!-- 2. AI Models & Offline Speech Engine Folder Card -->
+                            <div class="ws-card bg-dark-card border border-white/10 rounded-xl p-4 sm:p-5 flex flex-col justify-between gap-3.5 shadow-sm" id="modelsConfigBanner">
+                                <div>
+                                    <div class="flex items-center justify-between gap-2 mb-2">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+                                                    <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                                                    <rect x="9" y="9" width="6" height="6"></rect>
+                                                    <line x1="9" y1="1" x2="9" y2="4"></line>
+                                                    <line x1="15" y1="1" x2="15" y2="4"></line>
+                                                    <line x1="9" y1="20" x2="9" y2="23"></line>
+                                                    <line x1="15" y1="20" x2="15" y2="23"></line>
+                                                    <line x1="20" y1="9" x2="23" y2="9"></line>
+                                                    <line x1="20" y1="14" x2="23" y2="14"></line>
+                                                    <line x1="1" y1="9" x2="4" y2="9"></line>
+                                                    <line x1="1" y1="14" x2="4" y2="14"></line>
+                                                </svg>
+                                            </div>
+                                            <h3 class="text-sm sm:text-base font-semibold text-white">AI Models Folder</h3>
+                                        </div>
+                                        <div class="flex items-center gap-1.5 shrink-0">
+                                            <span id="modelsStorageTypeBadge" class="px-2 py-0.5 rounded text-[11px] font-mono bg-white/5 border border-white/10 text-dark-muted">Bundled</span>
+                                            <span id="modelsOfflineStatusBadge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                                                100% Offline Ready
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-dark-muted leading-relaxed">
+                                        Directory for Faster-Whisper, Pyannote diarization &amp; CAM++ voice embedding models.
+                                    </p>
                                 </div>
-                                <div class="db-config-buttons">
-                                    <button id="btnBrowseDbFile" class="btn btn-secondary btn-sm"
-                                        title="Select an existing SQLite database file (.db, .sqlite)">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                            class="icon-xs">
-                                            <path
-                                                d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
-                                            </path>
-                                        </svg>
-                                        Select DB File
-                                    </button>
-                                    <button id="btnCreateNewDbFile" class="btn btn-secondary btn-sm"
-                                        title="Create or specify a new database file">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                            class="icon-xs">
-                                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                                        </svg>
-                                        New DB...
-                                    </button>
-                                    <button id="btnApplyDbPath" class="btn btn-primary btn-sm"
-                                        title="Connect and switch active database">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                            class="icon-xs">
-                                            <polyline points="20 6 9 17 4 12"></polyline>
-                                        </svg>
-                                        Connect
-                                    </button>
-                                    <button id="btnResetDefaultDb" class="btn btn-ghost btn-sm"
-                                        title="Reset to standard app data storage">
-                                        Reset Default
-                                    </button>
+
+                                <div class="space-y-2.5">
+                                    <div class="relative flex items-center">
+                                        <input type="text" id="inputActiveModelsPath" class="w-full bg-dark-base border border-white/10 rounded-lg pl-3 pr-10 py-1.5 text-xs font-mono text-dark-text focus:outline-none focus:border-brand-400/50" spellcheck="false" placeholder="Path to AI models folder..." />
+                                        <button id="btnCopyActiveModelsPath" class="absolute right-1 ws-btn-icon text-dark-muted hover:text-white" title="Copy path">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+                                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <button id="btnBrowseModelsFolder" class="ws-btn-pill-outline text-xs" title="Select a custom folder containing AI models">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3">
+                                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                                            </svg>
+                                            <span>Select Models Folder</span>
+                                        </button>
+                                        <button id="btnOpenModelsFolder" class="ws-btn-pill-outline text-xs" title="Open folder in Windows Explorer">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3">
+                                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                                <polyline points="15 3 21 3 21 9"></polyline>
+                                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                                            </svg>
+                                            <span>Open in Explorer</span>
+                                        </button>
+                                        <button id="btnApplyModelsPath" class="ws-btn-pill-primary text-xs" title="Set and load models from this directory">
+                                            <span>Apply</span>
+                                        </button>
+                                        <button id="btnResetDefaultModels" class="ws-btn-pill-ghost text-xs ml-auto" title="Reset to standard models folder">
+                                            <span>Reset Default</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- AI Models & Offline Speech Engine Status -->
-                        <div class="db-config-banner models-config-banner" id="modelsConfigBanner"
-                            style="margin-top: 14px;">
-                            <div class="db-config-top">
-                                <div class="db-config-title-group">
-                                    <div class="db-config-icon-wrap"
-                                        style="color: #60a5fa; background: rgba(96, 165, 250, 0.1);">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                            class="icon-sm">
-                                            <path
-                                                d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z">
-                                            </path>
-                                            <circle cx="12" cy="12" r="3"></circle>
-                                        </svg>
-                                    </div>
-                                    <div class="db-config-text">
-                                        <div class="db-config-label-row">
-                                            <span class="db-config-heading">AI Models & Offline Speech Engine</span>
-                                            <span id="modelsOfflineStatusBadge" class="db-type-badge default"
-                                                style="border-color: rgba(34, 197, 94, 0.4); color: #4ade80;">100%
-                                                Offline Ready</span>
-                                        </div>
-                                        <p class="db-config-desc">Bundled with <strong>base</strong> and
-                                            <strong>tiny</strong> Faster-Whisper models, plus Pyannote diarization &
-                                            CAM++ voice embeddings. Larger models (small, medium) can be downloaded from
-                                            Hugging Face and placed in your models folder.</p>
-                                    </div>
+                        <!-- Compact Models Status Strip -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div class="bg-dark-surface/60 border border-white/5 rounded-xl p-3 flex flex-col justify-between gap-1.5">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-white">Whisper Tiny</span>
+                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-400" id="badgeModelTiny">Installed</span>
                                 </div>
-                                <div class="db-config-buttons">
-                                    <button id="btnOpenModelsFolder" class="btn btn-secondary btn-sm"
-                                        title="Open local AI models directory in Windows Explorer">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                            class="icon-xs">
-                                            <path
-                                                d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
-                                            </path>
-                                        </svg>
-                                        Open Models Folder
-                                    </button>
-                                </div>
+                                <span class="text-[11px] text-dark-muted">Bundled &bull; ~75 MB &bull; Fast CPU</span>
                             </div>
 
-                            <div class="models-status-table-wrap">
-                                <div class="model-item-row">
-                                    <span class="model-name">Whisper Base</span>
-                                    <span class="model-badge installed" id="badgeModelBase">Installed (Offline)</span>
-                                    <span class="model-desc">General accuracy, ~145 MB</span>
+                            <div class="bg-dark-surface/60 border border-white/5 rounded-xl p-3 flex flex-col justify-between gap-1.5">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-white">Whisper Base</span>
+                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/10 text-dark-text" id="badgeModelBase">Available</span>
                                 </div>
-                                <div class="model-item-row">
-                                    <span class="model-name">Whisper Tiny</span>
-                                    <span class="model-badge installed" id="badgeModelTiny">Installed (Offline)</span>
-                                    <span class="model-desc">Ultra-fast, ~75 MB</span>
+                                <span class="text-[11px] text-dark-muted">Optional &bull; ~145 MB &bull; Balanced</span>
+                            </div>
+
+                            <div class="bg-dark-surface/60 border border-white/5 rounded-xl p-3 flex flex-col justify-between gap-1.5">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-white">Whisper Small</span>
+                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/5 text-dark-subtle" id="badgeModelSmall">Optional</span>
                                 </div>
-                                <div class="model-item-row">
-                                    <span class="model-name">Whisper Small</span>
-                                    <span class="model-badge optional" id="badgeModelSmall">Optional</span>
-                                    <a href="https://huggingface.co/Systran/faster-whisper-small" target="_blank"
-                                        class="model-link link-external-hf"
-                                        data-url="https://huggingface.co/Systran/faster-whisper-small">Download from
-                                        Hugging Face ↗</a>
+                                <a href="https://huggingface.co/Systran/faster-whisper-small" target="_blank" class="text-[11px] text-brand-400 hover:text-brand-300 truncate">Hugging Face ↗</a>
+                            </div>
+
+                            <div class="bg-dark-surface/60 border border-white/5 rounded-xl p-3 flex flex-col justify-between gap-1.5">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-white">Diarization Engine</span>
+                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-400">Ready</span>
                                 </div>
-                                <div class="model-item-row">
-                                    <span class="model-name">Whisper Medium</span>
-                                    <span class="model-badge optional" id="badgeModelMedium">Optional</span>
-                                    <a href="https://huggingface.co/Systran/faster-whisper-medium" target="_blank"
-                                        class="model-link link-external-hf"
-                                        data-url="https://huggingface.co/Systran/faster-whisper-medium">Download from
-                                        Hugging Face ↗</a>
-                                </div>
+                                <span class="text-[11px] text-dark-muted">Pyannote + CAM++ ONNX</span>
                             </div>
                         </div>
+
 
                         <!-- KPI Metric Cards Grid -->
                         <div class="db-kpi-grid">

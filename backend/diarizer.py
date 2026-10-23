@@ -24,6 +24,13 @@ MODELS_DIR = next((p for p in _model_candidates if p and os.path.exists(p)), os.
 SEG_MODEL_PATH = os.path.join(MODELS_DIR, "model.onnx")
 EMB_MODEL_PATH = os.path.join(MODELS_DIR, "3dspeaker_speech_campplus_sv_zh_en_16k-common_advanced.onnx")
 
+def update_models_dir(new_dir: str):
+    global MODELS_DIR, SEG_MODEL_PATH, EMB_MODEL_PATH
+    MODELS_DIR = os.path.abspath(new_dir)
+    SEG_MODEL_PATH = os.path.join(MODELS_DIR, "model.onnx")
+    EMB_MODEL_PATH = os.path.join(MODELS_DIR, "3dspeaker_speech_campplus_sv_zh_en_16k-common_advanced.onnx")
+
+
 SPEAKER_COLORS = [
     "#fb7185",  # 1. Warm Coral / Rose (~350° on color wheel)
     "#2dd4bf",  # 2. Crisp Teal / Cyan (~175° - OPPOSITE on color wheel for main speakers)
