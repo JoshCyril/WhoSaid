@@ -29,6 +29,7 @@ from backend.transcriber import (
     TranscriberService, get_whisper_models_status, MODELS_DIR,
     get_models_dir, get_default_models_dir, set_models_dir
 )
+from backend.diarizer import DiarizerService
 from backend.exporter import export_srt, export_vtt, export_json, export_txt
 
 

@@ -65,6 +65,20 @@
                         Workspace
                         <span id="navWorkspaceDot" class="nav-dot hidden"></span>
                     </button>
+                    <button id="navProfiles" class="nav-tab" title="Enrolled Voice Profiles">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        Voice Profiles
+                    </button>
+                    <button id="navHistory" class="nav-tab" title="Transcription History">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        History
+                    </button>
                     <button id="navBackendSettings" class="nav-tab" title="Backend Settings & Database Explorer">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
                             <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
@@ -1546,6 +1560,149 @@
 
                     </section>
 
+                
+                    <!-- Voice Profiles Tab View -->
+                    <section id="profilesView" class="profiles-view hidden p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
+                        <!-- Top Header Strip -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-surface-border">
+                            <div>
+                                <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 mb-2">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                    <span>Speaker Diarization &amp; Voice Clustering</span>
+                                </div>
+                                <h2 class="text-xl sm:text-2xl font-bold tracking-tight">Enrolled Voice Profiles</h2>
+                                <p class="text-xs sm:text-sm text-text-muted mt-1">
+                                    Who Said extracts a unique 192-dim vocal embedding vector for each speaker to automatically recognize and name recurring voices across new files.
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <button id="btnAddNewProfile" class="btn btn-primary btn-sm" title="Enroll a new voice profile">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                    <span>+ Enroll New Voice</span>
+                                </button>
+                                <button id="btnProfilesRefresh" class="btn btn-secondary btn-sm" title="Refresh profiles list">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+                                        <polyline points="23 4 23 10 17 10"></polyline>
+                                        <polyline points="1 20 1 14 7 14"></polyline>
+                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                    </svg>
+                                    <span>Refresh</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Enroll Form Card (Toggleable) -->
+                        <div id="enrollNewProfileCard" class="enroll-form-card hidden bg-surface-card border border-surface-border rounded-xl p-5 shadow-sm space-y-4">
+                            <div class="flex items-center justify-between pb-3 border-b border-surface-border">
+                                <h4 class="font-semibold text-base">Enroll Voice from Audio Sample</h4>
+                                <span class="text-xs text-text-dim">Minimum 1-2 sec of clear speech</span>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="space-y-1.5">
+                                    <label for="newProfileName" class="form-label text-xs font-semibold">Person Name</label>
+                                    <input type="text" id="newProfileName" class="form-input w-full" placeholder="e.g. Alice, Host, Interviewer">
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label for="newProfileAudio" class="form-label text-xs font-semibold">Voice Sample (WAV / MP3 / M4A / MP4)</label>
+                                    <input type="file" id="newProfileAudio" accept="audio/*,video/*" class="form-file-input w-full">
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-end gap-2 pt-2">
+                                <button id="btnCancelEnroll" class="btn btn-secondary btn-sm">Cancel</button>
+                                <button id="btnSubmitEnroll" class="btn btn-primary btn-sm">Extract &amp; Save Voice Profile</button>
+                            </div>
+                        </div>
+
+                        <!-- Section Header & Count -->
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-semibold uppercase tracking-wider text-text-muted">
+                                Saved Offline Voices (<span id="modalProfileCount">0</span>)
+                            </h3>
+                        </div>
+
+                        <!-- Enrolled Profiles Grid -->
+                        <div id="enrolledProfilesList" class="enrolled-profiles-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Dynamic profile cards -->
+                        </div>
+                    </section>
+
+                    <!-- Transcription History Tab View -->
+                    <section id="historyView" class="history-view hidden p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
+                        <!-- Top Header Strip -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-surface-border">
+                            <div>
+                                <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 mb-2">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                                    <span>SQLite Database Storage</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <h2 class="text-xl sm:text-2xl font-bold tracking-tight">Transcription History</h2>
+                                    <span id="modalHistoryCountBadge" class="badge">0 jobs</span>
+                                </div>
+                                <p class="text-xs sm:text-sm text-text-muted mt-1">
+                                    Previously transcribed media files. Load any past session directly into your workspace or export captions.
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <div class="relative">
+                                    <input type="text" id="historySearchInput" class="form-input form-input-sm text-xs" style="padding-left: 32px !important;" placeholder="Filter history...">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-text-dim">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>
+                                </div>
+                                <button id="btnHistoryRefresh" class="btn btn-secondary btn-sm" title="Refresh transcription history">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+                                        <polyline points="23 4 23 10 17 10"></polyline>
+                                        <polyline points="1 20 1 14 7 14"></polyline>
+                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                    </svg>
+                                    <span>Refresh</span>
+                                </button>
+                                <button id="btnHistoryGoWorkspace" class="btn btn-secondary btn-sm hidden" title="Return to Active Workspace">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+                                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                        <line x1="8" y1="21" x2="16" y2="21"></line>
+                                        <line x1="12" y1="17" x2="12" y2="21"></line>
+                                    </svg>
+                                    <span>Active Workspace</span>
+                                </button>
+                                <button id="btnClearAllHistory" class="btn btn-secondary btn-sm text-red-400 hover:text-red-300" title="Delete all history jobs">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    </svg>
+                                    <span>Clear All</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div id="historyLoading" class="history-loading hidden py-12 flex flex-col items-center justify-center gap-3 text-text-muted">
+                            <div class="spinner"></div>
+                            <span class="text-sm">Loading history...</span>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div id="historyEmpty" class="history-empty hidden py-16 flex flex-col items-center justify-center gap-3 text-center">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-12 h-12 text-text-dim">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <p class="text-sm font-medium text-text-muted">No transcription history found yet.</p>
+                            <p class="text-xs text-text-dim max-w-sm">Transcribe video or audio files from the Home view or file explorer to see them here.</p>
+                            <button id="btnHistoryUploadNow" class="btn btn-primary btn-sm mt-2">Transcribe First Media</button>
+                        </div>
+
+                        <!-- Dynamic History Items Grid -->
+                        <div id="historyListContainer" class="history-list-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Dynamic history items -->
+                        </div>
+                    </section>
+
                 </main>
             </div><!-- /.workbench-main-viewport -->
         </div><!-- /.app-workbench-layout -->
@@ -1739,42 +1896,8 @@
             </div>
         </div>
 
-        <!-- Transcription History Modal (Feature 3) -->
-        <div id="historyModal" class="modal-backdrop hidden">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-header">
-                    <div class="title-with-badge">
-                        <h3 class="modal-title">Transcription History</h3>
-                        <span id="modalHistoryCountBadge" class="badge">0 jobs</span>
-                    </div>
-                    <button id="btnCloseHistoryModal" class="btn-close" aria-label="Close">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p class="modal-desc">
-                        Previously transcribed media files. You can load any session back into the workspace or export
-                        captions.
-                    </p>
-                    <div id="historyLoading" class="history-loading hidden">
-                        <div class="spinner"></div>
-                        <span>Loading history...</span>
-                    </div>
-                    <div id="historyEmpty" class="history-empty hidden">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                            class="empty-icon">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
-                        </svg>
-                        <p>No transcription history found yet.</p>
-                    </div>
-                    <div id="historyListContainer" class="history-list-grid">
-                        <!-- Dynamic history items -->
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button id="btnCloseHistoryBottom" class="btn btn-secondary">Close</button>
-                </div>
-            </div>
-        </div>
+        <!-- History Tab View is mounted in main workspace -->
+        <div id="historyModal" class="hidden" style="display:none !important"></div>
 
         <!-- Custom In-App Delete Confirmation Modal -->
         <div id="deleteConfirmModal" class="modal-backdrop hidden">
@@ -1966,55 +2089,8 @@
             </div>
         </div>
 
-        <!-- Voice Profiles Manager Modal (Requirement F4) -->
-        <div id="profilesModal" class="modal-backdrop hidden">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-header">
-                    <div class="title-with-badge">
-                        <h3 class="modal-title">Enrolled Voice Profiles</h3>
-                        <span class="badge">Stored Offline</span>
-                    </div>
-                    <button id="btnCloseProfilesModal" class="btn-close">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p class="modal-desc">
-                        Who Said extracts a unique vocal embedding vector (192-dim) for each speaker. Enrolled profiles
-                        are matched across new files using cosine similarity.
-                    </p>
-
-                    <div class="profiles-section-header">
-                        <h4>Enrolled Voices (<span id="modalProfileCount">0</span>)</h4>
-                        <button id="btnAddNewProfile" class="btn btn-sm btn-outline">+ Enroll New Voice</button>
-                    </div>
-
-                    <div id="enrolledProfilesList" class="enrolled-profiles-grid">
-                        <!-- Dynamic profile cards -->
-                    </div>
-
-                    <!-- Enroll New Voice Form (collapsible) -->
-                    <div id="enrollNewProfileCard" class="enroll-form-card hidden">
-                        <h4>Enroll Voice from Audio Sample</h4>
-                        <div class="form-group">
-                            <label for="newProfileName" class="form-label">Person Name</label>
-                            <input type="text" id="newProfileName" class="form-input" placeholder="e.g. Alice">
-                        </div>
-                        <div class="form-group">
-                            <label for="newProfileAudio" class="form-label">Voice Sample (WAV/MP3/M4A, min 1-2 sec
-                                speech)</label>
-                            <input type="file" id="newProfileAudio" accept="audio/*,video/*" class="form-file-input">
-                        </div>
-                        <div class="card-actions">
-                            <button id="btnCancelEnroll" class="btn btn-secondary btn-sm">Cancel</button>
-                            <button id="btnSubmitEnroll" class="btn btn-primary btn-sm">Extract & Save Profile</button>
-                        </div>
-                    </div>
-
-                </div>
-                <div class="modal-footer">
-                    <button id="btnCloseProfilesBottom" class="btn btn-secondary">Done</button>
-                </div>
-            </div>
-        </div>
+        <!-- Voice Profiles Tab View is mounted in main workspace -->
+        <div id="profilesModal" class="hidden" style="display:none !important"></div>
 
         <!-- Two-Column Speaker Directory & Folder Viewer Modal (User Request) -->
         <div id="speakerFolderModal" class="modal-backdrop hidden">

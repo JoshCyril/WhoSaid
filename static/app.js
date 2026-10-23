@@ -25,8 +25,12 @@ class WhoSaidApp {
     this.homeView = document.getElementById("homeView");
     this.workspaceView = document.getElementById("workspaceView");
     this.backendSettingsView = document.getElementById("backendSettingsView");
+    this.profilesView = document.getElementById("profilesView");
+    this.historyView = document.getElementById("historyView");
     this.navHome = document.getElementById("navHome");
     this.navWorkspace = document.getElementById("navWorkspace");
+    this.navProfiles = document.getElementById("navProfiles");
+    this.navHistory = document.getElementById("navHistory");
     this.navBackendSettings = document.getElementById("navBackendSettings");
     this.currentDbTable = "jobs";
     this.currentDbPage = 1;
@@ -413,8 +417,12 @@ class WhoSaidApp {
     if (this.homeView) this.homeView.classList.remove("hidden");
     if (this.workspaceView) this.workspaceView.classList.add("hidden");
     if (this.backendSettingsView) this.backendSettingsView.classList.add("hidden");
+    if (this.profilesView) this.profilesView.classList.add("hidden");
+    if (this.historyView) this.historyView.classList.add("hidden");
     if (this.navHome) this.navHome.classList.add("active");
     if (this.navWorkspace) this.navWorkspace.classList.remove("active");
+    if (this.navProfiles) this.navProfiles.classList.remove("active");
+    if (this.navHistory) this.navHistory.classList.remove("active");
     if (this.navBackendSettings) this.navBackendSettings.classList.remove("active");
     this.updateActivityBar("home");
 
@@ -428,19 +436,64 @@ class WhoSaidApp {
     if (this.homeView) this.homeView.classList.add("hidden");
     if (this.workspaceView) this.workspaceView.classList.remove("hidden");
     if (this.backendSettingsView) this.backendSettingsView.classList.add("hidden");
+    if (this.profilesView) this.profilesView.classList.add("hidden");
+    if (this.historyView) this.historyView.classList.add("hidden");
     if (this.navHome) this.navHome.classList.remove("active");
     if (this.navWorkspace) this.navWorkspace.classList.add("active");
+    if (this.navProfiles) this.navProfiles.classList.remove("active");
+    if (this.navHistory) this.navHistory.classList.remove("active");
     if (this.navBackendSettings) this.navBackendSettings.classList.remove("active");
     this.updateActivityBar("workspace");
     this.renderWorkspaceTabs();
+  }
+
+  showProfilesView() {
+    if (this.homeView) this.homeView.classList.add("hidden");
+    if (this.workspaceView) this.workspaceView.classList.add("hidden");
+    if (this.backendSettingsView) this.backendSettingsView.classList.add("hidden");
+    if (this.historyView) this.historyView.classList.add("hidden");
+    if (this.profilesView) this.profilesView.classList.remove("hidden");
+
+    if (this.navHome) this.navHome.classList.remove("active");
+    if (this.navWorkspace) this.navWorkspace.classList.remove("active");
+    if (this.navProfiles) this.navProfiles.classList.add("active");
+    if (this.navHistory) this.navHistory.classList.remove("active");
+    if (this.navBackendSettings) this.navBackendSettings.classList.remove("active");
+    this.updateActivityBar("profiles");
+    this.loadVoiceProfilesList();
+  }
+
+  showHistoryView() {
+    if (this.homeView) this.homeView.classList.add("hidden");
+    if (this.workspaceView) this.workspaceView.classList.add("hidden");
+    if (this.backendSettingsView) this.backendSettingsView.classList.add("hidden");
+    if (this.profilesView) this.profilesView.classList.add("hidden");
+    if (this.historyView) this.historyView.classList.remove("hidden");
+
+    if (this.navHome) this.navHome.classList.remove("active");
+    if (this.navWorkspace) this.navWorkspace.classList.remove("active");
+    if (this.navProfiles) this.navProfiles.classList.remove("active");
+    if (this.navHistory) this.navHistory.classList.add("active");
+    if (this.navBackendSettings) this.navBackendSettings.classList.remove("active");
+    this.updateActivityBar("history");
+
+    const btnGoWs = document.getElementById("btnHistoryGoWorkspace");
+    if (btnGoWs) {
+      btnGoWs.classList.toggle("hidden", !this.currentTranscript);
+    }
+    this.loadHistoryList();
   }
 
   showBackendSettingsView() {
     if (this.homeView) this.homeView.classList.add("hidden");
     if (this.workspaceView) this.workspaceView.classList.add("hidden");
     if (this.backendSettingsView) this.backendSettingsView.classList.remove("hidden");
+    if (this.profilesView) this.profilesView.classList.add("hidden");
+    if (this.historyView) this.historyView.classList.add("hidden");
     if (this.navHome) this.navHome.classList.remove("active");
     if (this.navWorkspace) this.navWorkspace.classList.remove("active");
+    if (this.navProfiles) this.navProfiles.classList.remove("active");
+    if (this.navHistory) this.navHistory.classList.remove("active");
     if (this.navBackendSettings) this.navBackendSettings.classList.add("active");
     this.updateActivityBar("backend");
     this.loadDbStats();
@@ -601,8 +654,37 @@ class WhoSaidApp {
         }
       });
     }
+    if (this.navProfiles) {
+      this.navProfiles.addEventListener("click", () => this.showProfilesView());
+    }
+    if (this.navHistory) {
+      this.navHistory.addEventListener("click", () => this.showHistoryView());
+    }
     if (this.navBackendSettings) {
       this.navBackendSettings.addEventListener("click", () => this.showBackendSettingsView());
+    }
+
+    // Profiles View extra controls
+    const btnProfRefresh = document.getElementById("btnProfilesRefresh");
+    if (btnProfRefresh) btnProfRefresh.addEventListener("click", () => this.loadVoiceProfilesList());
+
+    // History View extra controls
+    const btnHistRefresh = document.getElementById("btnHistoryRefresh");
+    if (btnHistRefresh) btnHistRefresh.addEventListener("click", () => this.loadHistoryList());
+    const btnHistGoWs = document.getElementById("btnHistoryGoWorkspace");
+    if (btnHistGoWs) btnHistGoWs.addEventListener("click", () => this.showWorkspaceView());
+    const btnHistUploadNow = document.getElementById("btnHistoryUploadNow");
+    if (btnHistUploadNow) btnHistUploadNow.addEventListener("click", () => this.openUploadModal());
+    const histSearchInput = document.getElementById("historySearchInput");
+    if (histSearchInput) {
+      histSearchInput.addEventListener("input", (e) => {
+        const q = e.target.value.toLowerCase().trim();
+        const cards = document.querySelectorAll("#historyListContainer .history-card");
+        cards.forEach((c) => {
+          const text = c.textContent.toLowerCase();
+          c.style.display = (!q || text.includes(q)) ? "" : "none";
+        });
+      });
     }
 
     // Homepage CTA buttons
@@ -830,16 +912,25 @@ class WhoSaidApp {
     document.getElementById("btnCancelRename").addEventListener("click", () => this.closeRenameModal());
     this.btnSaveSpeakerRename.addEventListener("click", () => this.saveSpeakerRename());
 
-    // Profiles Modal events
-    document.getElementById("btnCloseProfilesModal").addEventListener("click", () => this.closeProfilesModal());
-    document.getElementById("btnCloseProfilesBottom").addEventListener("click", () => this.closeProfilesModal());
-    document.getElementById("btnAddNewProfile").addEventListener("click", () => {
-      this.enrollNewProfileCard.classList.toggle("hidden");
-    });
-    document.getElementById("btnCancelEnroll").addEventListener("click", () => {
-      this.enrollNewProfileCard.classList.add("hidden");
-    });
-    document.getElementById("btnSubmitEnroll").addEventListener("click", () => this.submitNewVoiceProfile());
+    // Profiles View & Modal events
+    const btnCloseProf = document.getElementById("btnCloseProfilesModal");
+    if (btnCloseProf) btnCloseProf.addEventListener("click", () => this.closeProfilesModal());
+    const btnCloseProfBtm = document.getElementById("btnCloseProfilesBottom");
+    if (btnCloseProfBtm) btnCloseProfBtm.addEventListener("click", () => this.closeProfilesModal());
+    const btnAddProf = document.getElementById("btnAddNewProfile");
+    if (btnAddProf) {
+      btnAddProf.addEventListener("click", () => {
+        if (this.enrollNewProfileCard) this.enrollNewProfileCard.classList.toggle("hidden");
+      });
+    }
+    const btnCancelEnr = document.getElementById("btnCancelEnroll");
+    if (btnCancelEnr) {
+      btnCancelEnr.addEventListener("click", () => {
+        if (this.enrollNewProfileCard) this.enrollNewProfileCard.classList.add("hidden");
+      });
+    }
+    const btnSubEnr = document.getElementById("btnSubmitEnroll");
+    if (btnSubEnr) btnSubEnr.addEventListener("click", () => this.submitNewVoiceProfile());
 
     // Merge Misclassified Speakers Modal events
     if (this.btnOpenMergeModal) {
@@ -2476,15 +2567,17 @@ class WhoSaidApp {
     }
   }
 
-  // --- Voice Profiles Modal (F4) ---
+  // --- Voice Profiles Tab (F4) ---
   async openProfilesModal() {
-    this.profilesModal.classList.remove("hidden");
-    this.enrollNewProfileCard.classList.add("hidden");
-    await this.loadVoiceProfilesList();
+    this.showProfilesView();
   }
 
   closeProfilesModal() {
-    this.profilesModal.classList.add("hidden");
+    if (this.currentTranscript) {
+      this.showWorkspaceView();
+    } else {
+      this.showHomeView();
+    }
   }
 
   async fetchProfileCount() {
@@ -2636,17 +2729,16 @@ class WhoSaidApp {
 
 
 
-  // --- Transcription History Modal (Feature 3) ---
+  // --- Transcription History Tab (Feature 3) ---
   openHistoryModal() {
-    if (this.historyModal) {
-      this.historyModal.classList.remove("hidden");
-      this.loadHistoryList();
-    }
+    this.showHistoryView();
   }
 
   closeHistoryModal() {
-    if (this.historyModal) {
-      this.historyModal.classList.add("hidden");
+    if (this.currentTranscript) {
+      this.showWorkspaceView();
+    } else {
+      this.showHomeView();
     }
   }
 
@@ -3489,6 +3581,8 @@ class WhoSaidApp {
   updateActivityBar(activeTab) {
     if (this.actBarHome) this.actBarHome.classList.toggle("active", activeTab === "home");
     if (this.actBarWorkspace) this.actBarWorkspace.classList.toggle("active", activeTab === "workspace");
+    if (this.actBarProfiles) this.actBarProfiles.classList.toggle("active", activeTab === "profiles");
+    if (this.actBarHistory) this.actBarHistory.classList.toggle("active", activeTab === "history");
   }
 
   initSidebarResizer() {

@@ -4329,7 +4329,9 @@ body {
 /* ==========================================================================
    BACKEND SETTINGS & DATABASE EXPLORER
    ========================================================================== */
-.backend-settings-view {
+.backend-settings-view,
+.profiles-view,
+.history-view {
     padding: 24px 32px;
     max-width: 1400px;
     margin: 0 auto;
@@ -4337,6 +4339,7 @@ body {
     flex-direction: column;
     gap: 20px;
     animation: fadeIn 0.2s ease;
+    width: 100%;
 }
 
 .db-view-header {
