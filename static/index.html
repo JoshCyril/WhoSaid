@@ -314,8 +314,9 @@
                 <div class="explorer-group-bar">
                     <span class="explorer-group-label">Group:</span>
                     <select id="explorerGroupBySelect" class="explorer-group-select"
-                        title="Group files by Date, Size, or Duration">
+                        title="Group files by Tag, Date, Size, or Duration">
                         <option value="none" selected>Folders (Default)</option>
+                        <option value="tag">Group by Tags</option>
                         <option value="date">Date Modified</option>
                         <option value="size">File Size</option>
                         <option value="duration">Media Duration</option>
@@ -432,6 +433,18 @@
                                 <div class="prop-table-row prop-row-location">
                                     <span class="prop-key">Location</span>
                                     <span class="prop-value prop-val-path" id="propFilePath" title="">--</span>
+                                </div>
+                            </div>
+                            <!-- File Tags Section -->
+                            <div class="prop-tags-section">
+                                <div class="prop-tags-header">
+                                    <span class="prop-key">Custom Tags</span>
+                                    <span id="propTagsCount" class="prop-tags-count">0</span>
+                                </div>
+                                <div id="propTagsList" class="prop-tags-list"></div>
+                                <div class="prop-add-tag-row">
+                                    <input id="propNewTagInput" type="text" placeholder="Add custom tag (Enter)..." class="prop-tag-input" maxlength="25">
+                                    <button id="btnPropAddTag" class="btn btn-xs btn-secondary" title="Add custom tag">+</button>
                                 </div>
                             </div>
                             <div class="prop-footer-actions">
@@ -769,7 +782,15 @@
                                                 </div>
                                             </div>
 
-                                            <!-- Floating Playback Control Buttons (Hides when playing) -->
+                                            <!-- Minimal Caption Option: Top-Left Speaker Pill (<Avatar><Name>) -->
+                                            <div class="player-minimal-caption hidden" id="playerMinimalCaption">
+                                                <div class="minimal-caption-pill">
+                                                    <div id="minimalCaptionAvatar" class="minimal-avatar-slot"></div>
+                                                    <span id="minimalCaptionSpeaker" class="minimal-speaker-name">Speaker</span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Floating Playback Control Buttons (Hides when playing or collapsed) -->
                                             <div class="video-ctrl-bottom-bar" id="videoCtrlBottomBar">
                                                 <div class="video-ctrl-left">
                                                     <button id="btnVideoPlayPause" class="btn-ctrl-circle"
@@ -828,14 +849,32 @@
                                                     <input id="vVolumeSlider" type="range" min="0" max="1" step="0.05"
                                                         value="1" class="volume-slider" title="Volume">
 
-                                                    <button id="btnToggleCaptions" class="btn-ctrl-icon active"
-                                                        title="Toggle Subtitles">
-                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                            stroke-width="2">
-                                                            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-                                                            <path d="M7 15h4M15 15h2M7 11h2M13 11h4"></path>
-                                                        </svg>
-                                                    </button>
+                                                    <!-- Subtitle Mode Dropdown Wrapper -->
+                                                    <div class="caption-ctrl-group relative" id="captionCtrlGroup">
+                                                        <button id="btnToggleCaptions" class="btn-ctrl-icon active"
+                                                            title="Toggle Subtitles / Choose Mode">
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                                stroke-width="2">
+                                                                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                                                <path d="M7 15h4M15 15h2M7 11h2M13 11h4"></path>
+                                                            </svg>
+                                                        </button>
+                                                        <div id="captionModeDropdown" class="caption-mode-dropdown hidden">
+                                                            <div class="caption-mode-header">Caption Style</div>
+                                                            <button class="caption-mode-item active" data-mode="regular">
+                                                                <div class="mode-item-title">Regular (Default)</div>
+                                                                <div class="mode-item-desc">Synced dialogue row below player &amp; fullscreen CC</div>
+                                                            </button>
+                                                            <button class="caption-mode-item" data-mode="minimal">
+                                                                <div class="mode-item-title">Minimal</div>
+                                                                <div class="mode-item-desc">Discreet top-left speaker badge &lt;Avatar&gt;&lt;Name&gt;</div>
+                                                            </button>
+                                                            <button class="caption-mode-item" data-mode="off">
+                                                                <div class="mode-item-title">Off</div>
+                                                                <div class="mode-item-desc">Disable on-screen captions</div>
+                                                            </button>
+                                                        </div>
+                                                    </div>
 
                                                     <button id="btnFullscreen" class="btn-ctrl-icon"
                                                         title="Toggle Fullscreen">
@@ -846,8 +885,23 @@
                                                             </path>
                                                         </svg>
                                                     </button>
+
+                                                    <!-- Collapse Controls Button -->
+                                                    <button id="btnCollapseControls" class="btn-ctrl-icon"
+                                                        title="Collapse Player Controls">
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+                                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                                        </svg>
+                                                    </button>
                                                 </div>
                                             </div>
+
+                                            <!-- Discreet Expand Button (Small arrow on the right, less opacity) -->
+                                            <button id="btnExpandControls" class="btn-expand-controls hidden" title="Show Player Controls">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-3.5 h-3.5">
+                                                    <polyline points="18 15 12 9 6 15"></polyline>
+                                                </svg>
+                                            </button>
                                         </div>
 
                                         <!-- Dedicated Full-Width Waveform Progress Bar (Below video screen, ALWAYS ACTIVE) -->
@@ -948,6 +1002,100 @@
 
                         <!-- Right Column: Speakers Bar & Synced Transcript Panel (Requirement F8) -->
                         <div class="workspace-right" id="workspaceRightCol">
+
+                            <!-- Untranscribed Media Action Panel (Opened on double-clicking raw media) -->
+                            <div id="untranscribedOptionsPanel" class="untranscribed-panel hidden">
+                                <div class="untranscribed-header-box">
+                                    <div class="untranscribed-badge">
+                                        <span class="untranscribed-dot"></span>
+                                        <span>Preview Mode</span>
+                                    </div>
+                                    <h3 id="untranscribedMediaTitle" class="untranscribed-title">Media File</h3>
+                                    <p class="untranscribed-desc">You are previewing raw media. Configure offline speech parameters below to transcribe with speaker identification.</p>
+                                </div>
+
+                                <div class="untranscribed-specs-grid">
+                                    <div class="untranscribed-spec-item">
+                                        <span class="spec-label">Duration</span>
+                                        <span id="untranscribedDuration" class="spec-value">--:--</span>
+                                    </div>
+                                    <div class="untranscribed-spec-item">
+                                        <span class="spec-label">Size</span>
+                                        <span id="untranscribedSize" class="spec-value">--</span>
+                                    </div>
+                                    <div class="untranscribed-spec-item">
+                                        <span class="spec-label">Format</span>
+                                        <span id="untranscribedFormat" class="spec-value">--</span>
+                                    </div>
+                                    <div class="untranscribed-spec-item">
+                                        <span class="spec-label">Engine</span>
+                                        <span class="spec-value text-emerald-400">100% Local CPU</span>
+                                    </div>
+                                </div>
+
+                                <div class="untranscribed-config-card">
+                                    <label class="untranscribed-section-label">Whisper AI Model</label>
+                                    <div class="untranscribed-models-grid">
+                                        <label class="ws-model-card">
+                                            <input type="radio" name="wsPanelModel" value="tiny" checked>
+                                            <div class="ws-card-body">
+                                                <span class="ws-card-title">Tiny</span>
+                                                <span class="ws-card-sub">Fastest (~39M)</span>
+                                            </div>
+                                        </label>
+                                        <label class="ws-model-card">
+                                            <input type="radio" name="wsPanelModel" value="base">
+                                            <div class="ws-card-body">
+                                                <span class="ws-card-title">Base</span>
+                                                <span class="ws-card-sub">Balanced (~74M)</span>
+                                            </div>
+                                        </label>
+                                        <label class="ws-model-card">
+                                            <input type="radio" name="wsPanelModel" value="small">
+                                            <div class="ws-card-body">
+                                                <span class="ws-card-title">Small</span>
+                                                <span class="ws-card-sub">Accurate (~244M)</span>
+                                            </div>
+                                        </label>
+                                        <label class="ws-model-card">
+                                            <input type="radio" name="wsPanelModel" value="medium">
+                                            <div class="ws-card-body">
+                                                <span class="ws-card-title">Medium</span>
+                                                <span class="ws-card-sub">Precision (~769M)</span>
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                    <label class="untranscribed-section-label mt-4">Spoken Language</label>
+                                    <div class="untranscribed-lang-group">
+                                        <label class="ws-lang-card">
+                                            <input type="radio" name="wsPanelLang" value="en" checked>
+                                            <span>English (Fastest CPU)</span>
+                                        </label>
+                                        <label class="ws-lang-card">
+                                            <input type="radio" name="wsPanelLang" value="auto">
+                                            <span>Multilingual / Auto-Detect</span>
+                                        </label>
+                                    </div>
+
+                                    <button id="btnStartWsTranscribe" class="btn btn-primary btn-block btn-lg mt-5">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+                                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                        </svg>
+                                        <span>Start Transcription &amp; Diarization</span>
+                                    </button>
+
+                                    <div id="wsTranscribeProgressBox" class="ws-transcribe-progress-box hidden mt-4">
+                                        <div class="ws-progress-bar-track">
+                                            <div id="wsTranscribeProgressBar" class="ws-progress-bar-indicator" style="width: 0%;"></div>
+                                        </div>
+                                        <div class="flex items-center justify-between text-xs mt-2">
+                                            <span id="wsTranscribeProgressStatus" class="text-brand-300 font-medium">Processing audio...</span>
+                                            <span id="wsTranscribeProgressPct" class="text-text-muted font-mono">0%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
                             <!-- Workspace Right Action Controls Bar (Requirement 3: Controls moved to right panel) -->
                             <div class="workspace-right-toolbar" id="workspaceRightToolbar">

@@ -103,6 +103,16 @@ def init_db():
     )
     """)
 
+    # File tags table for Explorer tagging, filtering, and sorting
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS file_tags (
+        file_path TEXT NOT NULL,
+        tag TEXT NOT NULL,
+        created_at TEXT,
+        PRIMARY KEY(file_path, tag)
+    )
+    """)
+
     # Add language_mode column if missing
     try:
         cursor.execute("ALTER TABLE jobs ADD COLUMN language_mode TEXT DEFAULT 'en'")
@@ -353,11 +363,12 @@ def get_db_stats() -> Dict[str, Any]:
         "jobs_count": tables_info.get("jobs", {}).get("count", 0),
         "transcripts_count": tables_info.get("transcripts", {}).get("count", 0),
         "profiles_count": tables_info.get("voice_profiles", {}).get("count", 0),
+        "tags_count": tables_info.get("file_tags", {}).get("count", 0),
         "tables": tables_info
     }
 
 def get_table_rows(table_name: str, limit: int = 100, offset: int = 0) -> Dict[str, Any]:
-    valid_tables = {"jobs", "transcripts", "voice_profiles"}
+    valid_tables = {"jobs", "transcripts", "voice_profiles", "file_tags"}
     if table_name not in valid_tables:
         raise ValueError(f"Invalid table name: {table_name}")
     conn = get_connection()
@@ -397,3 +408,69 @@ def run_readonly_query(sql_query: str) -> Dict[str, Any]:
         "row_count": len(rows),
         "rows": rows
     }
+
+# --- File Tags Operations ---
+
+def get_file_tags(file_path: str) -> List[str]:
+    if not file_path:
+        return []
+    clean_path = os.path.abspath(file_path)
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT tag FROM file_tags WHERE file_path = ? ORDER BY tag ASC", (clean_path,))
+    tags = [r["tag"] for r in cursor.fetchall()]
+    conn.close()
+    return tags
+
+def add_file_tag(file_path: str, tag: str) -> List[str]:
+    clean_tag = tag.strip()
+    if not clean_tag or not file_path:
+        return get_file_tags(file_path)
+    clean_path = os.path.abspath(file_path)
+    now = datetime.now(timezone.utc).isoformat()
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT OR IGNORE INTO file_tags (file_path, tag, created_at) VALUES (?, ?, ?)",
+        (clean_path, clean_tag, now)
+    )
+    conn.commit()
+    conn.close()
+    return get_file_tags(clean_path)
+
+def remove_file_tag(file_path: str, tag: str) -> List[str]:
+    if not file_path or not tag:
+        return get_file_tags(file_path)
+    clean_path = os.path.abspath(file_path)
+    clean_tag = tag.strip()
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "DELETE FROM file_tags WHERE file_path = ? AND tag = ?",
+        (clean_path, clean_tag)
+    )
+    conn.commit()
+    conn.close()
+    return get_file_tags(clean_path)
+
+def get_all_file_tags_map() -> Dict[str, List[str]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT file_path, tag FROM file_tags ORDER BY tag ASC")
+    res = {}
+    for r in cursor.fetchall():
+        p = r["file_path"]
+        if p not in res:
+            res[p] = []
+        res[p].append(r["tag"])
+    conn.close()
+    return res
+
+def get_all_unique_tags() -> List[str]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT DISTINCT tag FROM file_tags ORDER BY tag ASC")
+    tags = [r["tag"] for r in cursor.fetchall()]
+    conn.close()
+    return tags
+

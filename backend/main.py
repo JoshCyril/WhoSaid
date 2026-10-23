@@ -19,7 +19,8 @@ from backend.db import (
     get_all_voice_profiles, save_voice_profile, delete_voice_profile,
     get_transcription_history, delete_job_and_transcript,
     get_db_stats, get_table_rows, run_readonly_query, DB_PATH,
-    get_db_path, get_default_db_path, set_db_path
+    get_db_path, get_default_db_path, set_db_path,
+    get_file_tags, add_file_tag, remove_file_tag, get_all_file_tags_map, get_all_unique_tags
 )
 from backend.audio import (
     extract_audio_16k, compute_file_hash, generate_waveform_peaks, load_audio_samples, get_media_duration
@@ -365,6 +366,11 @@ async def scan_filesystem_folder(folder_path: Optional[str] = None):
         if conn:
             conn.close()
 
+    try:
+        tags_map = get_all_file_tags_map()
+    except Exception:
+        tags_map = {}
+
     def build_tree(current_dir: str, depth: int = 0, max_depth: int = 4):
         dir_name = os.path.basename(current_dir) or current_dir
         node = {
@@ -420,6 +426,7 @@ async def scan_filesystem_folder(folder_path: Optional[str] = None):
                                 }
                                 break
 
+                file_tags = tags_map.get(entry_path, [])
                 node["children"].append({
                     "name": entry.name,
                     "path": entry_path,
@@ -430,7 +437,8 @@ async def scan_filesystem_folder(folder_path: Optional[str] = None):
                     "is_media": is_media,
                     "is_subtitle": is_sub,
                     "duration": (cached_info.get("duration") if cached_info else None) or (get_media_duration(entry_path) if is_media else None),
-                    "cached_job": cached_info
+                    "cached_job": cached_info,
+                    "tags": file_tags
                 })
 
 
@@ -442,6 +450,94 @@ async def scan_filesystem_folder(folder_path: Optional[str] = None):
         "folder_path": target_dir,
         "folder_name": os.path.basename(target_dir) or target_dir
     })
+
+# --- Explorer Tags Endpoints ---
+@app.get("/api/fs/tags")
+async def get_all_tags_endpoint():
+    return JSONResponse({"tags": get_all_unique_tags()})
+
+@app.post("/api/fs/tags")
+async def add_file_tag_endpoint(request: Request):
+    try:
+        data = await request.json()
+    except Exception:
+        data = {}
+    file_path = data.get("file_path")
+    tag = data.get("tag")
+    if not file_path or not tag:
+        raise HTTPException(status_code=400, detail="file_path and tag are required")
+    updated = add_file_tag(file_path, tag)
+    return JSONResponse({"status": "success", "file_path": file_path, "tags": updated})
+
+@app.delete("/api/fs/tags")
+async def remove_file_tag_endpoint(request: Request):
+    try:
+        data = await request.json()
+    except Exception:
+        data = {}
+    file_path = data.get("file_path")
+    tag = data.get("tag")
+    if not file_path or not tag:
+        raise HTTPException(status_code=400, detail="file_path and tag are required")
+    updated = remove_file_tag(file_path, tag)
+    return JSONResponse({"status": "success", "file_path": file_path, "tags": updated})
+
+# --- Filesystem Media Streaming (HTTP 206 Byte Range) ---
+@app.get("/api/fs/stream-media")
+async def stream_fs_media_file(file_path: str, request: Request):
+    if not file_path:
+        raise HTTPException(status_code=400, detail="file_path parameter is required")
+    clean_path = os.path.abspath(file_path)
+    if not os.path.exists(clean_path) or os.path.isdir(clean_path):
+        raise HTTPException(status_code=404, detail="Media file not found on disk")
+
+    ext = os.path.splitext(clean_path)[1].lower()
+    content_types = {
+        ".mp4": "video/mp4",
+        ".webm": "video/webm",
+        ".mov": "video/quicktime",
+        ".mkv": "video/x-matroska",
+        ".avi": "video/x-msvideo",
+        ".mp3": "audio/mpeg",
+        ".wav": "audio/wav",
+        ".m4a": "audio/mp4",
+        ".aac": "audio/aac",
+        ".flac": "audio/flac",
+        ".ogg": "audio/ogg"
+    }
+    media_type = content_types.get(ext, "video/mp4")
+    file_size = os.path.getsize(clean_path)
+    range_header = request.headers.get("Range")
+
+    if not range_header:
+        return FileResponse(clean_path, media_type=media_type)
+
+    range_val = range_header.replace("bytes=", "").split("-")
+    start = int(range_val[0])
+    end = int(range_val[1]) if range_val[1] else file_size - 1
+    content_length = end - start + 1
+
+    def iterfile():
+        with open(clean_path, "rb") as f:
+            f.seek(start)
+            remaining = content_length
+            chunk_size = 1024 * 512
+            while remaining > 0:
+                bytes_to_read = min(remaining, chunk_size)
+                data = f.read(bytes_to_read)
+                if not data:
+                    break
+                remaining -= len(data)
+                yield data
+
+    headers = {
+        "Content-Range": f"bytes {start}-{end}/{file_size}",
+        "Accept-Ranges": "bytes",
+        "Content-Length": str(content_length),
+        "Content-Type": media_type,
+    }
+    return StreamingResponse(iterfile(), status_code=206, headers=headers)
+
 
 @app.post("/api/fs/choose-folder")
 async def choose_folder_dialog(request: Request):

@@ -83,6 +83,18 @@ class WhoSaidApp {
     this.volMuteIcon = document.getElementById("volMuteIcon");
     this.vVolumeSlider = document.getElementById("vVolumeSlider");
     this.btnFullscreen = document.getElementById("btnFullscreen");
+    this.btnCollapseControls = document.getElementById("btnCollapseControls");
+    this.btnExpandControls = document.getElementById("btnExpandControls");
+    this.isControlsCollapsed = false;
+
+    // Caption Mode & Minimal Caption
+    this.playerMinimalCaption = document.getElementById("playerMinimalCaption");
+    this.minimalCaptionAvatar = document.getElementById("minimalCaptionAvatar");
+    this.minimalCaptionSpeaker = document.getElementById("minimalCaptionSpeaker");
+    this.captionCtrlGroup = document.getElementById("captionCtrlGroup");
+    this.captionModeDropdown = document.getElementById("captionModeDropdown");
+    this.captionMode = localStorage.getItem("whosaid_caption_mode") || "regular";
+    this.lastCaptionMode = this.captionMode === "off" ? "regular" : this.captionMode;
 
     this.waveformContainer = document.getElementById("waveform");
     this.timeCurrent = document.getElementById("timeCurrent");
@@ -256,6 +268,24 @@ class WhoSaidApp {
     this.selectedPropertyItem = null;
     this.explorerGroupBySelect = document.getElementById("explorerGroupBySelect");
     this.btnBarMerge = document.getElementById("btnBarMerge");
+
+    // Explorer Properties Tags
+    this.propTagsList = document.getElementById("propTagsList");
+    this.propTagsCount = document.getElementById("propTagsCount");
+    this.propNewTagInput = document.getElementById("propNewTagInput");
+    this.btnPropAddTag = document.getElementById("btnPropAddTag");
+
+    // Untranscribed Media Action Panel (Right Side)
+    this.untranscribedOptionsPanel = document.getElementById("untranscribedOptionsPanel");
+    this.untranscribedMediaTitle = document.getElementById("untranscribedMediaTitle");
+    this.untranscribedDuration = document.getElementById("untranscribedDuration");
+    this.untranscribedSize = document.getElementById("untranscribedSize");
+    this.untranscribedFormat = document.getElementById("untranscribedFormat");
+    this.btnStartWsTranscribe = document.getElementById("btnStartWsTranscribe");
+    this.wsTranscribeProgressBox = document.getElementById("wsTranscribeProgressBox");
+    this.wsTranscribeProgressBar = document.getElementById("wsTranscribeProgressBar");
+    this.wsTranscribeProgressStatus = document.getElementById("wsTranscribeProgressStatus");
+    this.wsTranscribeProgressPct = document.getElementById("wsTranscribeProgressPct");
 
     // Transcribe Path Modal
     this.transcribePathModal = document.getElementById("transcribePathModal");
@@ -998,6 +1028,20 @@ class WhoSaidApp {
     if (this.btnFullscreen) {
       this.btnFullscreen.addEventListener("click", () => this.toggleFullscreen());
     }
+    if (this.btnCollapseControls) {
+      this.btnCollapseControls.addEventListener("click", () => {
+        if (this.videoCtrlBottomBar) this.videoCtrlBottomBar.classList.add("is-collapsed");
+        if (this.btnExpandControls) this.btnExpandControls.classList.remove("hidden");
+        this.isControlsCollapsed = true;
+      });
+    }
+    if (this.btnExpandControls) {
+      this.btnExpandControls.addEventListener("click", () => {
+        if (this.videoCtrlBottomBar) this.videoCtrlBottomBar.classList.remove("is-collapsed");
+        if (this.btnExpandControls) this.btnExpandControls.classList.add("hidden");
+        this.isControlsCollapsed = false;
+      });
+    }
 
     this.playbackSpeedSelect.addEventListener("change", (e) => {
       const rate = parseFloat(e.target.value);
@@ -1016,7 +1060,34 @@ class WhoSaidApp {
       }
     });
 
-    this.btnToggleCaptions.addEventListener("click", () => this.toggleCaptions());
+    if (this.btnToggleCaptions) {
+      this.btnToggleCaptions.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (this.captionModeDropdown) {
+          this.captionModeDropdown.classList.toggle("hidden");
+        }
+      });
+    }
+
+    if (this.captionModeDropdown) {
+      this.captionModeDropdown.querySelectorAll(".caption-mode-item").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const mode = btn.dataset.mode;
+          this.setCaptionMode(mode);
+          this.captionModeDropdown.classList.add("hidden");
+        });
+      });
+    }
+
+    document.addEventListener("click", (e) => {
+      if (this.captionModeDropdown && !e.target.closest("#captionCtrlGroup")) {
+        this.captionModeDropdown.classList.add("hidden");
+      }
+      if (!e.target.closest(".turn-reassign-menu") && !e.target.closest(".btn-reassign-turn")) {
+        document.querySelectorAll(".turn-reassign-menu").forEach((m) => m.remove());
+      }
+    });
 
     // Global Keyboard Shortcuts Suite
     window.addEventListener("keydown", (e) => {
@@ -1244,13 +1315,15 @@ class WhoSaidApp {
       });
     }
 
-    // Fullscreen state listener
-    document.addEventListener("fullscreenchange", () => {
-      const isFs = !!document.fullscreenElement;
+    // Fullscreen state listener (Standard & WebKit)
+    const onFsChange = () => {
+      const isFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
       if (this.videoWrapper) {
         this.videoWrapper.classList.toggle("is-fullscreen", isFs);
       }
-    });
+    };
+    document.addEventListener("fullscreenchange", onFsChange);
+    document.addEventListener("webkitfullscreenchange", onFsChange);
   }
 
   // --- Smooth Playback Synchronization Loop ---
@@ -1436,29 +1509,64 @@ class WhoSaidApp {
 
   toggleFullscreen() {
     const target = this.videoWrapper || this.mediaVideo;
-    if (!document.fullscreenElement) {
+    const isFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+    if (!isFs) {
       if (target.requestFullscreen) {
-        target.requestFullscreen();
+        target.requestFullscreen().catch(() => {
+          if (this.mediaVideo?.requestFullscreen) this.mediaVideo.requestFullscreen();
+        });
       } else if (target.webkitRequestFullscreen) {
         target.webkitRequestFullscreen();
       }
     } else {
       if (document.exitFullscreen) {
         document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
       }
     }
   }
 
   toggleCaptions() {
-    this.captionsVisible = !this.captionsVisible;
+    if (this.captionMode === "off") {
+      this.setCaptionMode(this.lastCaptionMode || "regular");
+    } else {
+      this.lastCaptionMode = this.captionMode;
+      this.setCaptionMode("off");
+    }
+  }
+
+  setCaptionMode(mode) {
+    this.captionMode = mode;
+    localStorage.setItem("whosaid_caption_mode", mode);
+    this.captionsVisible = (mode !== "off");
+
     if (this.btnToggleCaptions) {
       this.btnToggleCaptions.classList.toggle("active", this.captionsVisible);
     }
-    if (this.captionOverlay) {
-      this.captionOverlay.classList.toggle("hidden", !this.captionsVisible);
+
+    if (this.captionModeDropdown) {
+      this.captionModeDropdown.querySelectorAll(".caption-mode-item").forEach((b) => {
+        b.classList.toggle("active", b.dataset.mode === mode);
+      });
     }
-    if (this.playerCcOverlay) {
-      this.playerCcOverlay.classList.toggle("hidden", !this.captionsVisible);
+
+    if (mode === "minimal") {
+      if (this.captionOverlay) this.captionOverlay.classList.add("hidden");
+      if (this.playerCcOverlay) this.playerCcOverlay.classList.add("hidden");
+      if (this.activeTurnId && this.playerMinimalCaption) {
+        this.playerMinimalCaption.classList.remove("hidden");
+      }
+      this.showToast("Caption style: Minimal (<Avatar><Name>)", "info");
+    } else if (mode === "regular") {
+      if (this.playerMinimalCaption) this.playerMinimalCaption.classList.add("hidden");
+      if (this.captionOverlay) this.captionOverlay.classList.remove("hidden");
+      this.showToast("Caption style: Regular Subtitles (Default)", "info");
+    } else {
+      if (this.playerMinimalCaption) this.playerMinimalCaption.classList.add("hidden");
+      if (this.captionOverlay) this.captionOverlay.classList.add("hidden");
+      if (this.playerCcOverlay) this.playerCcOverlay.classList.add("hidden");
+      this.showToast("Captions hidden", "info");
     }
   }
 
@@ -1549,61 +1657,90 @@ class WhoSaidApp {
     }
 
     if (activeSeg) {
-      // 1. Update Caption Overlay with <Avatar><Name>: <Text>
       if (this.captionsVisible) {
-        if (this.captionOverlay) this.captionOverlay.classList.remove("hidden");
-        if (this.playerCcOverlay) this.playerCcOverlay.classList.remove("hidden");
-
-        // If active speaker segment changed, update avatar, speaker name, and base word spans
-        if (this.currentActiveCaptionTurnId !== activeSeg.id) {
-          this.currentActiveCaptionTurnId = activeSeg.id;
-          const avatarHtml = this.getDicebearAvatarHtml(
-            activeSeg.speaker_label,
-            activeSeg.speaker_id,
-            activeSeg.speaker_color,
-            24,
-            activeSeg.speaker_avatar_seed
-          );
-
-          if (this.captionAvatarWrap) this.captionAvatarWrap.innerHTML = avatarHtml;
-          if (this.playerCcAvatarWrap) this.playerCcAvatarWrap.innerHTML = avatarHtml;
-
-          if (this.captionSpeakerTag) {
-            this.captionSpeakerTag.textContent = `${activeSeg.speaker_label}:`;
-            this.captionSpeakerTag.style.color = activeSeg.speaker_color;
+        if (this.captionMode === "minimal") {
+          // Minimal mode: show <Avatar><Name> in top left of video stage
+          if (this.captionOverlay) this.captionOverlay.classList.add("hidden");
+          if (this.playerCcOverlay) this.playerCcOverlay.classList.add("hidden");
+          if (this.playerMinimalCaption) {
+            this.playerMinimalCaption.classList.remove("hidden");
+            if (this.currentActiveCaptionTurnId !== activeSeg.id) {
+              this.currentActiveCaptionTurnId = activeSeg.id;
+              const avatarHtml = this.getDicebearAvatarHtml(
+                activeSeg.speaker_label,
+                activeSeg.speaker_id,
+                activeSeg.speaker_color || '#f6c48f',
+                22,
+                activeSeg.speaker_avatar_seed
+              );
+              if (this.minimalCaptionAvatar) this.minimalCaptionAvatar.innerHTML = avatarHtml;
+              if (this.minimalCaptionSpeaker) {
+                this.minimalCaptionSpeaker.textContent = activeSeg.speaker_label;
+                this.minimalCaptionSpeaker.style.color = activeSeg.speaker_color || '#f6c48f';
+              }
+            }
           }
-          if (this.playerCcSpeakerTag) {
-            this.playerCcSpeakerTag.textContent = `${activeSeg.speaker_label}:`;
-            this.playerCcSpeakerTag.style.color = activeSeg.speaker_color;
+        } else if (this.captionMode === "regular") {
+          // Regular mode (Default): show bottom subtitle banner & fullscreen CC
+          if (this.playerMinimalCaption) this.playerMinimalCaption.classList.add("hidden");
+          if (this.captionOverlay) this.captionOverlay.classList.remove("hidden");
+          if (this.playerCcOverlay) this.playerCcOverlay.classList.remove("hidden");
+
+          // If active speaker segment changed, update avatar, speaker name, and base word spans
+          if (this.currentActiveCaptionTurnId !== activeSeg.id) {
+            this.currentActiveCaptionTurnId = activeSeg.id;
+            const avatarHtml = this.getDicebearAvatarHtml(
+              activeSeg.speaker_label,
+              activeSeg.speaker_id,
+              activeSeg.speaker_color,
+              24,
+              activeSeg.speaker_avatar_seed
+            );
+
+            if (this.captionAvatarWrap) this.captionAvatarWrap.innerHTML = avatarHtml;
+            if (this.playerCcAvatarWrap) this.playerCcAvatarWrap.innerHTML = avatarHtml;
+
+            if (this.captionSpeakerTag) {
+              this.captionSpeakerTag.textContent = `${activeSeg.speaker_label}:`;
+              this.captionSpeakerTag.style.color = activeSeg.speaker_color;
+            }
+            if (this.playerCcSpeakerTag) {
+              this.playerCcSpeakerTag.textContent = `${activeSeg.speaker_label}:`;
+              this.playerCcSpeakerTag.style.color = activeSeg.speaker_color;
+            }
+
+            let baseTextHtml = "";
+            if (activeSeg.words && activeSeg.words.length > 0) {
+              baseTextHtml = activeSeg.words
+                .map((w, idx) => `<span class="caption-word-span" data-idx="${idx}">${this.escapeHtml(w.word)}</span>`)
+                .join(" ");
+            } else {
+              baseTextHtml = this.escapeHtml(activeSeg.text);
+            }
+
+            if (this.captionText) this.captionText.innerHTML = baseTextHtml;
+            if (this.playerCcText) this.playerCcText.innerHTML = baseTextHtml;
           }
 
-          let baseTextHtml = "";
+          // Word-to-word smooth transitions: toggle class without recreating DOM nodes
           if (activeSeg.words && activeSeg.words.length > 0) {
-            baseTextHtml = activeSeg.words
-              .map((w, idx) => `<span class="caption-word-span" data-idx="${idx}">${this.escapeHtml(w.word)}</span>`)
-              .join(" ");
-          } else {
-            baseTextHtml = this.escapeHtml(activeSeg.text);
+            const updateWordHighlight = (container) => {
+              if (!container) return;
+              const spans = container.querySelectorAll(".caption-word-span");
+              spans.forEach((span, i) => {
+                const w = activeSeg.words[i];
+                const isWordActive = w && time >= w.start && time <= (w.end + 0.05);
+                span.classList.toggle("word-highlight", isWordActive);
+              });
+            };
+            updateWordHighlight(this.captionText);
+            updateWordHighlight(this.playerCcText);
           }
-
-          if (this.captionText) this.captionText.innerHTML = baseTextHtml;
-          if (this.playerCcText) this.playerCcText.innerHTML = baseTextHtml;
         }
-
-        // Word-to-word smooth transitions: toggle class without recreating DOM nodes
-        if (activeSeg.words && activeSeg.words.length > 0) {
-          const updateWordHighlight = (container) => {
-            if (!container) return;
-            const spans = container.querySelectorAll(".caption-word-span");
-            spans.forEach((span, i) => {
-              const w = activeSeg.words[i];
-              const isWordActive = w && time >= w.start && time <= (w.end + 0.05);
-              span.classList.toggle("word-highlight", isWordActive);
-            });
-          };
-          updateWordHighlight(this.captionText);
-          updateWordHighlight(this.playerCcText);
-        }
+      } else {
+        if (this.playerMinimalCaption) this.playerMinimalCaption.classList.add("hidden");
+        if (this.captionOverlay) this.captionOverlay.classList.add("hidden");
+        if (this.playerCcOverlay) this.playerCcOverlay.classList.add("hidden");
       }
 
       // 2. Highlight Transcript Section (Section/Turn highlighting only - no word-for-word highlight)
@@ -1631,10 +1768,11 @@ class WhoSaidApp {
       document.querySelectorAll(".transcript-turn-card.active-turn").forEach((c) => c.classList.remove("active-turn"));
 
       this.currentActiveCaptionTurnId = null;
+      if (this.playerMinimalCaption) this.playerMinimalCaption.classList.add("hidden");
       if (this.playerCcOverlay) this.playerCcOverlay.classList.add("hidden");
 
       // In default view: keep subtitle section under player VISIBLE even when there is no text/active speech!
-      if (this.captionOverlay && this.captionsVisible) {
+      if (this.captionOverlay && this.captionsVisible && this.captionMode === "regular") {
         this.captionOverlay.classList.remove("hidden");
         if (this.captionText) {
           this.captionText.querySelectorAll(".caption-word-span.word-highlight").forEach((el) => {
@@ -1707,7 +1845,7 @@ class WhoSaidApp {
     }
 
     // 3. Render Transcribe Turns Matching Compact Horizontal Row Design
-    segments.forEach((seg) => {
+    segments.forEach((seg, index) => {
       const card = document.createElement("div");
       card.className = "transcript-turn-card";
       card.id = seg.id;
@@ -1734,8 +1872,17 @@ class WhoSaidApp {
         </div>
         <div class="turn-body">
           <div class="turn-meta-row">
-            <span class="turn-speaker-name" style="color: ${seg.speaker_color || '#f6c48f'}">${this.escapeHtml(seg.speaker_label)}</span>
-            <span class="turn-timestamp" title="Click to jump to turn">${this.formatTime(seg.start)} - ${this.formatTime(seg.end)}</span>
+            <div class="turn-meta-left">
+              <span class="turn-index-pill" title="Turn #${index + 1}">Turn #${index + 1}</span>
+              <span class="turn-speaker-name" style="color: ${seg.speaker_color || '#f6c48f'}">${this.escapeHtml(seg.speaker_label)}</span>
+            </div>
+            <div class="turn-meta-right">
+              <button type="button" class="btn-reassign-turn" data-seg-id="${seg.id}" data-turn-idx="${index + 1}" title="Move Turn #${index + 1} to another or new speaker">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"></path></svg>
+                <span>Move</span>
+              </button>
+              <span class="turn-timestamp" title="Click to jump to turn">${this.formatTime(seg.start)} - ${this.formatTime(seg.end)}</span>
+            </div>
           </div>
           <div class="turn-content" contenteditable="true" spellcheck="false" title="Click to edit text">
             ${wordsHtml}
@@ -1749,6 +1896,15 @@ class WhoSaidApp {
         timeBadge.addEventListener("click", () => {
           this.mediaVideo.currentTime = seg.start;
           this.mediaVideo.play();
+        });
+      }
+
+      // Move / Reassign speaker button
+      const reassignBtn = card.querySelector(".btn-reassign-turn");
+      if (reassignBtn) {
+        reassignBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          this.openTurnReassignMenu(reassignBtn, seg, index + 1);
         });
       }
 
@@ -1776,6 +1932,95 @@ class WhoSaidApp {
 
       this.transcriptContainer.appendChild(card);
     });
+  }
+
+  openTurnReassignMenu(anchorBtn, seg, turnNumber) {
+    document.querySelectorAll(".turn-reassign-menu").forEach((m) => m.remove());
+
+    const menu = document.createElement("div");
+    menu.className = "turn-reassign-menu";
+
+    const speakers = this.currentTranscript.speakers || [];
+    menu.innerHTML = `
+      <div class="turn-reassign-header">
+        <span>Move Turn #${turnNumber}</span>
+        <span style="font-size:10px;opacity:0.6;">Current: ${this.escapeHtml(seg.speaker_label)}</span>
+      </div>
+      <div class="turn-reassign-list" style="display:flex;flex-direction:column;gap:3px;max-height:190px;overflow-y:auto;">
+        ${speakers.map((spk) => {
+          const isCurrent = spk.id === seg.speaker_id;
+          const avatarHtml = this.getDicebearAvatarHtml(spk.label, spk.id, spk.color || '#f6c48f', 22, spk.avatar_seed);
+          return `
+            <button type="button" class="reassign-speaker-opt ${isCurrent ? 'active' : ''}" data-speaker-id="${spk.id}">
+              <div class="reassign-avatar-mini">${avatarHtml}</div>
+              <span class="reassign-name" style="color:${spk.color || '#eaeaea'}">${this.escapeHtml(spk.label)}</span>
+              ${isCurrent ? '<span style="font-size:10px;opacity:0.7;">(Current)</span>' : ''}
+            </button>
+          `;
+        }).join('')}
+      </div>
+      <button type="button" class="reassign-new-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span>+ Move to New Speaker...</span>
+      </button>
+    `;
+
+    // Click on existing speaker
+    menu.querySelectorAll(".reassign-speaker-opt").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        const spkId = btn.dataset.speakerId;
+        const targetSpk = (this.currentTranscript.speakers || []).find((s) => s.id === spkId);
+        menu.remove();
+        if (targetSpk && targetSpk.id !== seg.speaker_id) {
+          await this.reassignTurnSpeaker(seg, targetSpk, turnNumber);
+        }
+      });
+    });
+
+    // Click "+ Move to New Speaker..."
+    const newSpkBtn = menu.querySelector(".reassign-new-btn");
+    if (newSpkBtn) {
+      newSpkBtn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        menu.remove();
+        const currentCount = (this.currentTranscript.speakers || []).length;
+        const defaultName = `Speaker ${currentCount + 1}`;
+        const name = prompt(`Enter name for new speaker:`, defaultName);
+        if (!name || !name.trim()) return;
+
+        const cleanName = name.trim();
+        const newId = `spk_${Date.now()}`;
+        const color = PALETTE[currentCount % PALETTE.length];
+        const seed = cleanName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+
+        const newSpeaker = {
+          id: newId,
+          label: cleanName,
+          color: color,
+          avatar_seed: seed
+        };
+
+        this.currentTranscript.speakers.push(newSpeaker);
+        await this.reassignTurnSpeaker(seg, newSpeaker, turnNumber);
+      });
+    }
+
+    anchorBtn.parentElement.style.position = "relative";
+    anchorBtn.parentElement.appendChild(menu);
+  }
+
+  async reassignTurnSpeaker(seg, targetSpeaker, turnNumber) {
+    seg.speaker_id = targetSpeaker.id;
+    seg.speaker_label = targetSpeaker.label;
+    seg.speaker_color = targetSpeaker.color;
+    seg.speaker_avatar_seed = targetSpeaker.avatar_seed;
+
+    await this.saveTranscriptEdits();
+    this.renderTranscript(this.currentTranscript);
+    this.renderSpeakerAvatarGrid(this.currentTranscript.speakers);
+    this.renderWaveformRegions();
+    this.showToast(`Moved Turn #${turnNumber} to ${targetSpeaker.label}`, "success");
   }
 
   // --- Render Clean Single-Row Speaker Avatar Grid (Max 4-5 items) ---
@@ -3138,7 +3383,9 @@ class WhoSaidApp {
     this.activeTabId = tabId;
     this.renderWorkspaceTabs();
     this.updateOpenEditors();
-    if (tab.data) {
+    if (tab.isUntranscribed) {
+      this.applyUntranscribedMedia(tab.item);
+    } else if (tab.data) {
       this.applyActiveTranscript(tab.data);
     } else {
       this.loadTranscript(tab.transcriptId);
@@ -3159,7 +3406,9 @@ class WhoSaidApp {
         this.activeTabId = nextTab.id;
         this.renderWorkspaceTabs();
         this.updateOpenEditors();
-        if (nextTab.data) {
+        if (nextTab.isUntranscribed) {
+          this.applyUntranscribedMedia(nextTab.item);
+        } else if (nextTab.data) {
           this.applyActiveTranscript(nextTab.data);
         } else {
           this.loadTranscript(nextTab.transcriptId);
@@ -3171,11 +3420,19 @@ class WhoSaidApp {
           this.mediaVideo.pause();
           this.mediaVideo.removeAttribute("src");
         }
+        if (this.untranscribedOptionsPanel) this.untranscribedOptionsPanel.classList.add("hidden");
+        const rightToolbar = document.getElementById("workspaceRightToolbar");
+        if (rightToolbar) rightToolbar.classList.remove("hidden");
+        const spkPanel = document.querySelector(".speakers-panel");
+        if (spkPanel) spkPanel.classList.remove("hidden");
+        const trPanel = document.querySelector(".transcript-panel");
+        if (trPanel) trPanel.classList.remove("hidden");
         if (this.transcriptContainer) this.transcriptContainer.innerHTML = "";
         if (this.speakersAvatarGrid) this.speakersAvatarGrid.innerHTML = "";
         if (this.waveformContainer) this.waveformContainer.innerHTML = "";
         if (this.navWorkspaceDot) this.navWorkspaceDot.classList.add("hidden");
         if (this.actBarWorkspaceDot) this.actBarWorkspaceDot.classList.add("hidden");
+        if (this.activeFileIndicator) this.activeFileIndicator.classList.add("hidden");
         this.renderWorkspaceTabs();
         this.updateOpenEditors();
       }
@@ -3188,6 +3445,15 @@ class WhoSaidApp {
   applyActiveTranscript(data) {
     this.currentTranscript = data;
     this.currentAudioPeaks = data.peaks || [];
+
+    // Hide untranscribed panel, restore right toolbar & transcript
+    if (this.untranscribedOptionsPanel) this.untranscribedOptionsPanel.classList.add("hidden");
+    const rightToolbar = document.getElementById("workspaceRightToolbar");
+    if (rightToolbar) rightToolbar.classList.remove("hidden");
+    const spkPanel = document.querySelector(".speakers-panel");
+    if (spkPanel) spkPanel.classList.remove("hidden");
+    const trPanel = document.querySelector(".transcript-panel");
+    if (trPanel) trPanel.classList.remove("hidden");
 
     // Hide empty tabs watermark, reveal player container
     if (this.workspaceEmptyTabsState) this.workspaceEmptyTabsState.classList.add("hidden");
@@ -3263,6 +3529,212 @@ class WhoSaidApp {
         this.waveformContainer.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);font-size:0.85rem">Audio waveform unavailable</div>';
       }
     }
+  }
+
+  openMediaTabUntranscribed(item) {
+    if (!item || !item.is_media) return;
+    const tabId = `untranscribed-${encodeURIComponent(item.path)}`;
+    let existing = this.openTabs.find((t) => t.id === tabId);
+    if (!existing) {
+      existing = {
+        id: tabId,
+        filename: item.name,
+        modelSize: "Preview",
+        filePath: item.path,
+        isUntranscribed: true,
+        item: item
+      };
+      this.openTabs.push(existing);
+    }
+    this.activeTabId = tabId;
+    this.renderWorkspaceTabs();
+    this.updateOpenEditors();
+    this.applyUntranscribedMedia(item);
+  }
+
+  applyUntranscribedMedia(item) {
+    this.currentTranscript = null;
+    this.currentAudioPeaks = [];
+
+    // Switch view to workspace
+    this.showWorkspaceView();
+    if (this.navWorkspaceDot) this.navWorkspaceDot.classList.remove("hidden");
+    if (this.btnHomeWorkspace) this.btnHomeWorkspace.classList.remove("hidden");
+    if (this.activeFileIndicator) this.activeFileIndicator.classList.remove("hidden");
+    if (this.activeFileName) this.activeFileName.textContent = item.name;
+    if (this.activeModelBadge) this.activeModelBadge.textContent = "RAW MEDIA";
+
+    if (this.workspaceEmptyTabsState) this.workspaceEmptyTabsState.classList.add("hidden");
+    if (this.workspacePlayerContainer) this.workspacePlayerContainer.classList.remove("hidden");
+
+    // Toggle panels: show untranscribed, hide standard transcript panels
+    if (this.untranscribedOptionsPanel) this.untranscribedOptionsPanel.classList.remove("hidden");
+    const rightToolbar = document.getElementById("workspaceRightToolbar");
+    if (rightToolbar) rightToolbar.classList.add("hidden");
+    const spkPanel = document.querySelector(".speakers-panel");
+    if (spkPanel) spkPanel.classList.add("hidden");
+    const trPanel = document.querySelector(".transcript-panel");
+    if (trPanel) trPanel.classList.add("hidden");
+
+    // Populate untranscribed panel specs
+    const titleEl = document.getElementById("untranscribedMediaTitle");
+    if (titleEl) titleEl.textContent = item.name;
+    const durEl = document.getElementById("untranscribedDuration");
+    if (durEl) durEl.textContent = item.duration ? this.formatTime(item.duration) : "--:--";
+    const sizeEl = document.getElementById("untranscribedSize");
+    if (sizeEl) sizeEl.textContent = this.formatFileSize(item.size || 0);
+    const fmtEl = document.getElementById("untranscribedFormat");
+    if (fmtEl) fmtEl.textContent = (item.ext || "file").replace(".", "").toUpperCase();
+
+    // Reset progress box
+    const progBox = document.getElementById("wsTranscribeProgressBox");
+    if (progBox) progBox.classList.add("hidden");
+    const btnStart = document.getElementById("btnStartWsTranscribe");
+    if (btnStart) {
+      btnStart.disabled = false;
+      btnStart.onclick = () => this.startWorkspaceTranscribe(item);
+    }
+
+    // Media Video streaming
+    if (this.mediaExpiredBanner) this.mediaExpiredBanner.classList.add("hidden");
+    if (this.mediaVideo) {
+      this.mediaVideo.classList.remove("hidden");
+      this.mediaVideo.src = `/api/fs/stream-media?file_path=${encodeURIComponent(item.path)}`;
+      this.mediaVideo.load();
+      this.mediaVideo.onloadedmetadata = () => {
+        if (this.mediaVideo.duration) {
+          const dur = this.formatTime(this.mediaVideo.duration);
+          if (this.timeDuration) this.timeDuration.textContent = dur;
+          if (this.vTimeDuration) this.vTimeDuration.textContent = dur;
+          if (durEl) durEl.textContent = dur;
+        }
+      };
+    }
+
+    // Waveform placeholder for raw preview
+    if (this.waveformContainer) {
+      this.waveformContainer.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);font-size:0.85rem">Audio waveform will generate automatically once transcribed</div>';
+    }
+
+    this.highlightActiveTreeFile(item.path);
+  }
+
+  async startWorkspaceTranscribe(item) {
+    if (!item || !item.path) return;
+    const modelSize = document.querySelector('input[name="wsPanelModel"]:checked')?.value || "tiny";
+    const langMode = document.querySelector('input[name="wsPanelLang"]:checked')?.value || "en";
+
+    const progBox = document.getElementById("wsTranscribeProgressBox");
+    const progBar = document.getElementById("wsTranscribeProgressBar");
+    const progStatus = document.getElementById("wsTranscribeProgressStatus");
+    const progPct = document.getElementById("wsTranscribeProgressPct");
+    const btnStart = document.getElementById("btnStartWsTranscribe");
+
+    if (btnStart) btnStart.disabled = true;
+    if (progBox) progBox.classList.remove("hidden");
+    if (progBar) progBar.style.width = "5%";
+    if (progPct) progPct.textContent = "5%";
+    if (progStatus) progStatus.textContent = "Starting transcription job...";
+
+    try {
+      const resp = await fetch("/api/process-path", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          file_path: item.path,
+          model_size: modelSize,
+          language_mode: langMode
+        })
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json();
+        throw new Error(err.detail || "Transcription request failed");
+      }
+
+      const res = await resp.json();
+      if (res.cached && res.transcript_id) {
+        this.showToast(res.message, "success");
+        this.closeWorkspaceTab(`untranscribed-${encodeURIComponent(item.path)}`);
+        this.loadTranscript(res.transcript_id);
+      } else if (res.job_id) {
+        this.subscribeWorkspaceTranscribeProgress(res.job_id, item);
+      }
+    } catch (e) {
+      if (btnStart) btnStart.disabled = false;
+      if (progStatus) progStatus.textContent = `Failed: ${e.message}`;
+      this.showToast(e.message || "Failed to transcribe", "error");
+    }
+  }
+
+  subscribeWorkspaceTranscribeProgress(jobId, item) {
+    const progBar = document.getElementById("wsTranscribeProgressBar");
+    const progStatus = document.getElementById("wsTranscribeProgressStatus");
+    const progPct = document.getElementById("wsTranscribeProgressPct");
+    const btnStart = document.getElementById("btnStartWsTranscribe");
+
+    let pollTimer = null;
+    let ws = null;
+
+    const stopTracking = () => {
+      if (pollTimer) clearInterval(pollTimer);
+      if (ws) {
+        try { ws.close(); } catch(e) {}
+        ws = null;
+      }
+    };
+
+    const handleUpdate = async (data) => {
+      if (!data) return;
+      const pct = data.progress !== undefined ? data.progress : 5;
+      if (progBar) progBar.style.width = `${pct}%`;
+      if (progPct) progPct.textContent = `${Math.round(pct)}%`;
+      if (progStatus) progStatus.textContent = data.message || "Transcribing...";
+
+      if (data.status === "completed") {
+        stopTracking();
+        setTimeout(async () => {
+          try {
+            const jobResp = await fetch(`/api/jobs/${jobId}`);
+            const jobData = await jobResp.json();
+            if (jobData.transcript_id) {
+              this.closeWorkspaceTab(`untranscribed-${encodeURIComponent(item.path)}`);
+              this.loadTranscript(jobData.transcript_id);
+            }
+          } catch (err) {
+            console.error("Error loading completed job:", err);
+          }
+        }, 400);
+      } else if (data.status === "failed") {
+        stopTracking();
+        if (btnStart) btnStart.disabled = false;
+        if (progStatus) progStatus.textContent = `Error: ${data.message || "Failed"}`;
+        this.showToast(`Error: ${data.message || "Pipeline failed"}`, "error");
+      }
+    };
+
+    // Polling
+    pollTimer = setInterval(async () => {
+      try {
+        const resp = await fetch(`/api/jobs/${jobId}`);
+        if (resp.ok) {
+          const d = await resp.json();
+          await handleUpdate(d);
+        }
+      } catch (e) {}
+    }, 1000);
+
+    // WebSocket
+    try {
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      ws = new WebSocket(`${protocol}//${window.location.host}/api/ws/${jobId}`);
+      ws.onmessage = (event) => {
+        try {
+          const d = JSON.parse(event.data);
+          handleUpdate(d);
+        } catch (e) {}
+      };
+    } catch (e) {}
   }
 
   // --- Subtitle & Data Exports (F10) ---
@@ -3505,7 +3977,32 @@ class WhoSaidApp {
           this.loadTranscript(item.cached_job.transcript_id);
           this.highlightActiveTreeFile(item.path);
         } else if (item.is_media) {
-          this.openTranscribePathModal(item);
+          this.openMediaTabUntranscribed(item);
+        }
+      });
+    }
+
+    // Explorer Properties Custom Tags
+    if (this.btnPropAddTag) {
+      this.btnPropAddTag.addEventListener("click", () => {
+        if (!this.selectedPropertyItem || !this.propNewTagInput) return;
+        const val = this.propNewTagInput.value.trim();
+        if (val) {
+          this.addTagToFile(this.selectedPropertyItem, val);
+          this.propNewTagInput.value = "";
+        }
+      });
+    }
+    if (this.propNewTagInput) {
+      this.propNewTagInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          if (!this.selectedPropertyItem) return;
+          const val = this.propNewTagInput.value.trim();
+          if (val) {
+            this.addTagToFile(this.selectedPropertyItem, val);
+            this.propNewTagInput.value = "";
+          }
         }
       });
     }
@@ -3945,6 +4442,14 @@ class WhoSaidApp {
 
     allFiles.forEach((f) => {
       let gName = "Other";
+      if (groupBy === "tag") {
+        const fileTags = (f.tags && f.tags.length > 0) ? f.tags : ["Untagged"];
+        fileTags.forEach((tg) => {
+          if (!groups[tg]) groups[tg] = [];
+          groups[tg].push(f);
+        });
+        return;
+      }
       if (groupBy === "date") {
         const timestamp = (f.mtime && Number(f.mtime) > 0) ? Number(f.mtime) * 1000 : 0;
         let sortKey = 0;
@@ -3992,7 +4497,13 @@ class WhoSaidApp {
     });
 
     let order = Object.keys(groups);
-    if (groupBy === "date") {
+    if (groupBy === "tag") {
+      order.sort((a, b) => {
+        if (a === "Untagged") return 1;
+        if (b === "Untagged") return -1;
+        return a.localeCompare(b);
+      });
+    } else if (groupBy === "date") {
       order.sort((a, b) => {
         const keyA = groups[a][0]?._groupSortKey ?? 0;
         const keyB = groups[b][0]?._groupSortKey ?? 0;
@@ -4066,6 +4577,7 @@ class WhoSaidApp {
     row.dataset.name = (item.name || "").toLowerCase();
     row.dataset.isMedia = item.is_media ? "true" : "false";
     row.dataset.isDir = "false";
+    row.dataset.tags = (item.tags || []).join(" ").toLowerCase();
 
     let iconSvg = "";
     let iconClass = "icon-file";
@@ -4088,6 +4600,10 @@ class WhoSaidApp {
 
     const cachedBadge = item.cached_job ? `<span class="tree-badge-cached" title="Transcribed with Whisper ${item.cached_job.model_size}">✓ Ready</span>` : "";
 
+    const tagsHtml = (item.tags && item.tags.length > 0)
+      ? `<div class="tree-node-tags-wrap">${item.tags.map((t) => `<span class="tree-file-tag" title="Tag: ${this.escapeHtml(t)}">${this.escapeHtml(t)}</span>`).join("")}</div>`
+      : "";
+
     let actionButtons = "";
     if (item.is_media) {
       const btnLabel = item.cached_job ? "Open" : "Transcribe";
@@ -4102,6 +4618,7 @@ class WhoSaidApp {
     row.innerHTML = `
       <span class="tree-icon ${iconClass}">${iconSvg}</span>
       <span class="item-name" title="${item.path}">${this.escapeHtml(item.name)}</span>
+      ${tagsHtml}
       ${cachedBadge}
       ${actionButtons}
     `;
@@ -4125,7 +4642,7 @@ class WhoSaidApp {
           if (item.cached_job && item.cached_job.transcript_id) {
             this.loadTranscript(item.cached_job.transcript_id);
           } else {
-            this.openTranscribePathModal(item);
+            this.openMediaTabUntranscribed(item);
           }
         }
       }
@@ -4137,7 +4654,7 @@ class WhoSaidApp {
         if (item.cached_job && item.cached_job.transcript_id) {
           this.loadTranscript(item.cached_job.transcript_id);
         } else {
-          this.openTranscribePathModal(item);
+          this.openMediaTabUntranscribed(item);
         }
       }
     });
@@ -4276,6 +4793,7 @@ class WhoSaidApp {
     }
 
     this.highlightActiveTreeFile(item.path);
+    this.renderPropTags(item);
 
     // Asynchronously fetch extra properties from backend
     if (item.path) {
@@ -4310,11 +4828,129 @@ class WhoSaidApp {
     }
   }
 
+  renderPropTags(item) {
+    if (!this.propTagsList) return;
+    this.propTagsList.innerHTML = "";
+
+    const tags = item.tags || [];
+    if (this.propTagsCount) {
+      this.propTagsCount.textContent = tags.length;
+    }
+
+    if (tags.length === 0) {
+      this.propTagsList.innerHTML = `<span class="prop-tag-empty text-xs text-text-muted italic">No custom tags</span>`;
+      return;
+    }
+
+    tags.forEach((tag) => {
+      const chip = document.createElement("span");
+      chip.className = "prop-tag-chip";
+      chip.innerHTML = `
+        <span class="prop-tag-label">${this.escapeHtml(tag)}</span>
+        <button class="prop-tag-del-btn" title="Remove tag">&times;</button>
+      `;
+
+      chip.querySelector(".prop-tag-del-btn").addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.removeTagFromFile(item, tag);
+      });
+
+      this.propTagsList.appendChild(chip);
+    });
+  }
+
+  async addTagToFile(item, tag) {
+    if (!item || !item.path || !tag) return;
+    const cleanTag = tag.trim().replace(/[^\w\s\-_]/g, "").slice(0, 30);
+    if (!cleanTag) return;
+
+    if (!item.tags) item.tags = [];
+    if (item.tags.includes(cleanTag)) {
+      this.showToast(`Tag "${cleanTag}" already exists`, "info");
+      return;
+    }
+
+    try {
+      const resp = await fetch("/api/fs/tags", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ file_path: item.path, tag: cleanTag })
+      });
+      if (!resp.ok) {
+        const err = await resp.json();
+        throw new Error(err.detail || "Failed to add tag");
+      }
+
+      item.tags.push(cleanTag);
+      this.renderPropTags(item);
+      this.updateTreeNodeTags(item);
+      this.showToast(`Added tag "${cleanTag}"`, "success");
+    } catch (e) {
+      this.showToast(e.message || "Could not add tag", "error");
+    }
+  }
+
+  async removeTagFromFile(item, tag) {
+    if (!item || !item.path || !tag) return;
+
+    try {
+      const resp = await fetch("/api/fs/tags", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ file_path: item.path, tag: tag })
+      });
+      if (!resp.ok) {
+        const err = await resp.json();
+        throw new Error(err.detail || "Failed to remove tag");
+      }
+
+      if (item.tags) {
+        item.tags = item.tags.filter((t) => t !== tag);
+      }
+      this.renderPropTags(item);
+      this.updateTreeNodeTags(item);
+      this.showToast(`Removed tag "${tag}"`, "info");
+    } catch (e) {
+      this.showToast(e.message || "Could not remove tag", "error");
+    }
+  }
+
+  updateTreeNodeTags(item) {
+    if (!this.explorerTreeView || !item || !item.path) return;
+    const nodes = this.explorerTreeView.querySelectorAll(`.tree-node.file-node`);
+    nodes.forEach((row) => {
+      if (row.dataset.path === item.path) {
+        row.dataset.tags = (item.tags || []).join(" ").toLowerCase();
+        let tagsWrap = row.querySelector(".tree-node-tags-wrap");
+        if (item.tags && item.tags.length > 0) {
+          const tagsHtml = item.tags.map(t => `<span class="tree-file-tag" title="Tag: ${this.escapeHtml(t)}">${this.escapeHtml(t)}</span>`).join("");
+          if (!tagsWrap) {
+            tagsWrap = document.createElement("div");
+            tagsWrap.className = "tree-node-tags-wrap";
+            const nameEl = row.querySelector(".item-name");
+            if (nameEl) nameEl.after(tagsWrap);
+            else row.appendChild(tagsWrap);
+          }
+          tagsWrap.innerHTML = tagsHtml;
+        } else if (tagsWrap) {
+          tagsWrap.remove();
+        }
+      }
+    });
+
+    if (this.explorerGroupBySelect && this.explorerGroupBySelect.value === "tag") {
+      this.refreshExplorerTree(true);
+    }
+  }
+
   clearFileProperties() {
     this.selectedPropertyItem = null;
     if (this.propEmptyNotice) this.propEmptyNotice.classList.remove("hidden");
     if (this.propDetailsCard) this.propDetailsCard.classList.add("hidden");
     if (this.btnClearProperties) this.btnClearProperties.classList.add("hidden");
+    if (this.propTagsList) this.propTagsList.innerHTML = "";
+    if (this.propTagsCount) this.propTagsCount.textContent = "0";
+    if (this.propNewTagInput) this.propNewTagInput.value = "";
   }
 
   updateOpenEditors() {
@@ -4365,8 +5001,9 @@ class WhoSaidApp {
 
     this.explorerTreeView.querySelectorAll(".tree-node.file-node").forEach((row) => {
       const name = row.dataset.name || "";
+      const tags = row.dataset.tags || "";
       const isMedia = row.dataset.isMedia === "true";
-      const matchesQuery = !query || name.includes(query);
+      const matchesQuery = !query || name.includes(query) || tags.includes(query);
       const matchesMedia = !mediaOnly || isMedia;
 
       const visible = matchesQuery && matchesMedia;
