@@ -16,6 +16,8 @@
     <script src="/static/libs/regions.min.js"></script>
     <!-- Local DiceBear Cameo Engine (100% Offline from cameo.min.json) -->
     <script src="/static/libs/cameo.js"></script>
+    <!-- Tailwind CSS (Offline compiled) -->
+    <link rel="stylesheet" href="/static/tailwind.css">
     <!-- App Stylesheet -->
     <link rel="stylesheet" href="/static/app.css?v=shadcn_graphite2">
 </head>
@@ -26,6 +28,15 @@
         <!-- Top Header -->
         <header class="app-header">
             <div class="header-left">
+                <!-- Mobile Sidebar Toggle -->
+                <button id="btnHeaderToggleSidebar" class="md:hidden ws-btn-icon text-dark-muted hover:text-white" title="Toggle Explorer Sidebar (Ctrl+B)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+
                 <div class="brand-logo" id="navLogo" role="button" title="Go to Homepage">
                     <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -76,7 +87,7 @@
                         <polyline points="17 8 12 3 7 8"></polyline>
                         <line x1="12" y1="3" x2="12" y2="15"></line>
                     </svg>
-                    Upload Media
+                    <span class="hidden sm:inline">Upload Media</span>
                 </button>
 
                 <!-- Minimal More Actions Dropdown -->
