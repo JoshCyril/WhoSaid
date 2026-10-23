@@ -7,6 +7,9 @@ const PALETTE = [
 
 const CAMEO_PRESETS = ["Felix", "Daisy", "Jack", "Willow", "Leo", "Maya", "Milo", "Zoe"];
 
+const DEFAULT_AI_PROMPT = `Please provide a comprehensive summary of the following meeting/video transcript.
+Highlight the main discussion points, key decisions made, and action items assigned to each speaker.`;
+
 class WhoSaidApp {
   constructor() {
     this.currentJobId = null;
@@ -302,6 +305,12 @@ class WhoSaidApp {
     this.mediaOnlyFilter = false;
     this.selectedTranscribeFilePath = null;
 
+    // AI Summary Prompt Settings
+    this.settingAiPromptInput = document.getElementById("settingAiPromptInput");
+    this.btnSaveAiPrompt = document.getElementById("btnSaveAiPrompt");
+    this.btnResetAiPrompt = document.getElementById("btnResetAiPrompt");
+    this.aiPromptSavedNotice = document.getElementById("aiPromptSavedNotice");
+
     this.init();
   }
 
@@ -315,6 +324,7 @@ class WhoSaidApp {
     this.checkResponsiveSidebar();
     this.initVsCodeExplorer();
     this.initDbExplorer();
+    this.initSettingsAiPrompt();
   }
 
   // --- Homepage Mockup Cameo Avatars (Bob & Ruby with Pastel Colors) ---
@@ -1722,16 +1732,24 @@ class WhoSaidApp {
             if (this.playerCcText) this.playerCcText.innerHTML = baseTextHtml;
           }
 
-          // Word-to-word smooth transitions: toggle class without recreating DOM nodes
+          // Word-to-word smooth transitions: active & spoken words in bright color, not spoken in dimmer color
           if (activeSeg.words && activeSeg.words.length > 0) {
             const updateWordHighlight = (container) => {
               if (!container) return;
               const spans = container.querySelectorAll(".caption-word-span");
+              let activeSpanToScroll = null;
               spans.forEach((span, i) => {
                 const w = activeSeg.words[i];
-                const isWordActive = w && time >= w.start && time <= (w.end + 0.05);
-                span.classList.toggle("word-highlight", isWordActive);
+                if (!w) return;
+                const isSpoken = time >= w.start;
+                const isWordActive = time >= w.start && time <= (w.end + 0.05);
+                span.classList.toggle("word-spoken", isSpoken);
+                span.classList.toggle("word-active", isWordActive);
+                if (isWordActive) activeSpanToScroll = span;
               });
+              if (activeSpanToScroll) {
+                activeSpanToScroll.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+              }
             };
             updateWordHighlight(this.captionText);
             updateWordHighlight(this.playerCcText);
@@ -3743,14 +3761,56 @@ class WhoSaidApp {
       this.showToast("No active transcript to export", "error");
       return;
     }
-    const url = `/api/transcripts/${this.currentTranscript.id}/export/${fmt}`;
+    let url = `/api/transcripts/${this.currentTranscript.id}/export/${fmt}`;
+    if (fmt === "ai_summary" || fmt === "summary") {
+      const customPrompt = localStorage.getItem("whosaid_ai_summary_prompt") || DEFAULT_AI_PROMPT;
+      url += `?ai_prompt=${encodeURIComponent(customPrompt)}`;
+    }
     const link = document.createElement("a");
     link.href = url;
     link.setAttribute("download", "");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    this.showToast(`Exported .${fmt.toUpperCase()}`, "success");
+    const label = fmt === "ai_summary" ? "AI Summary (.txt)" : `.${fmt.toUpperCase()}`;
+    this.showToast(`Exported ${label}`, "success");
+  }
+
+  initSettingsAiPrompt() {
+    const saved = localStorage.getItem("whosaid_ai_summary_prompt") || DEFAULT_AI_PROMPT;
+    if (this.settingAiPromptInput) {
+      this.settingAiPromptInput.value = saved;
+    }
+
+    if (this.btnSaveAiPrompt) {
+      this.btnSaveAiPrompt.addEventListener("click", () => {
+        const val = this.settingAiPromptInput ? this.settingAiPromptInput.value.trim() : "";
+        localStorage.setItem("whosaid_ai_summary_prompt", val || DEFAULT_AI_PROMPT);
+        if (this.aiPromptSavedNotice) {
+          this.aiPromptSavedNotice.classList.remove("hidden");
+          setTimeout(() => {
+            if (this.aiPromptSavedNotice) this.aiPromptSavedNotice.classList.add("hidden");
+          }, 2500);
+        }
+        this.showToast("AI Summary prompt template saved", "success");
+      });
+    }
+
+    if (this.btnResetAiPrompt) {
+      this.btnResetAiPrompt.addEventListener("click", () => {
+        if (this.settingAiPromptInput) {
+          this.settingAiPromptInput.value = DEFAULT_AI_PROMPT;
+        }
+        localStorage.setItem("whosaid_ai_summary_prompt", DEFAULT_AI_PROMPT);
+        if (this.aiPromptSavedNotice) {
+          this.aiPromptSavedNotice.classList.remove("hidden");
+          setTimeout(() => {
+            if (this.aiPromptSavedNotice) this.aiPromptSavedNotice.classList.add("hidden");
+          }, 2500);
+        }
+        this.showToast("AI Summary prompt reset to default", "info");
+      });
+    }
   }
 
   // --- Search Filtering ---

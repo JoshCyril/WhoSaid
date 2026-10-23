@@ -31,7 +31,7 @@ from backend.transcriber import (
     get_models_dir, get_default_models_dir, set_models_dir
 )
 from backend.diarizer import DiarizerService
-from backend.exporter import export_srt, export_vtt, export_json, export_txt
+from backend.exporter import export_srt, export_vtt, export_json, export_txt, export_ai_summary
 
 
 
@@ -937,9 +937,9 @@ async def remove_profile(profile_id: str):
     delete_voice_profile(profile_id)
     return JSONResponse({"status": "success", "message": "Profile removed"})
 
-# --- Export Endpoint (SRT, VTT, JSON, TXT) ---
+# --- Export Endpoint (SRT, VTT, JSON, TXT, AI_SUMMARY) ---
 @app.get("/api/transcripts/{transcript_id}/export/{fmt}")
-async def export_transcript(transcript_id: str, fmt: str):
+async def export_transcript(transcript_id: str, fmt: str, ai_prompt: Optional[str] = None):
     transcript = get_transcript(transcript_id)
     if not transcript:
         raise HTTPException(status_code=404, detail="Transcript not found")
@@ -961,10 +961,15 @@ async def export_transcript(transcript_id: str, fmt: str):
         content = export_txt(transcript)
         media_type = "text/plain"
         ext = "txt"
+    elif fmt in ("ai_summary", "ai-summary", "summary"):
+        content = export_ai_summary(transcript, ai_prompt)
+        media_type = "text/plain"
+        ext = "txt"
     else:
-        raise HTTPException(status_code=400, detail=f"Invalid format {fmt}. Supported: srt, vtt, json, txt")
+        raise HTTPException(status_code=400, detail=f"Invalid format {fmt}. Supported: srt, txt, ai_summary")
 
-    filename = f"whosaid_transcript_{transcript_id[:8]}.{ext}"
+    clean_name = "ai_summary" if fmt in ("ai_summary", "ai-summary", "summary") else "transcript"
+    filename = f"whosaid_{clean_name}_{transcript_id[:8]}.{ext}"
     return Response(
         content=content,
         media_type=media_type,

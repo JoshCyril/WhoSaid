@@ -2035,13 +2035,16 @@ body {
     flex-direction: column;
     justify-content: center;
     min-height: 58px;
+    max-height: 110px;
+    overflow-y: auto;
+    scrollbar-width: thin;
     flex-shrink: 0;
     margin-top: 0;
 }
 
 .caption-dialogue-row {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
 }
 
@@ -2049,6 +2052,7 @@ body {
     width: 32px;
     height: 32px;
     flex-shrink: 0;
+    margin-top: 2px;
 }
 
 .caption-speaker-name {
@@ -2056,36 +2060,47 @@ body {
     font-weight: 700;
     white-space: nowrap;
     flex-shrink: 0;
+    margin-top: 2px;
 }
 
 .caption-dialogue-text {
     font-size: 0.95rem;
     line-height: 1.55;
-    color: #eaeaea;
+    color: rgba(255, 255, 255, 0.38);
     flex: 1;
+    max-height: 80px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    padding-right: 4px;
 }
 
-/* Synchronized Real-Time Word Highlighting (No word padding, normal weight) */
+/* Synchronized Real-Time Word Progression: Bright for spoken & active words, Dim for unspoken */
 .caption-word-span,
 .word-span {
-    padding: 0 !important;
+    padding: 0 1px !important;
     margin: 0 !important;
     display: inline;
-    border-radius: 3px;
-    transition: background 0.1s ease, color 0.1s ease;
+    border-radius: 2px;
+    color: rgba(255, 255, 255, 0.38); /* Unspoken: dimmer color */
+    background: transparent !important;
+    transition: color 0.12s ease, opacity 0.12s ease;
     cursor: pointer;
 }
 
-.caption-word-span.word-highlight,
-.word-span.word-highlight,
-.word-highlight {
-    background-color: rgba(246, 196, 143, 0.38) !important;
-    color: #ffffff !important;
-    font-weight: normal !important;
-    border-radius: 3px !important;
-    padding: 0 2px !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
+/* Spoken word: bright color */
+.caption-word-span.word-spoken,
+.word-span.word-spoken {
+    color: #f1f5f9 !important; /* Bright crisp white */
+    opacity: 0.96;
+}
+
+/* Active word: bright color with subtle emphasis */
+.caption-word-span.word-active,
+.word-span.word-active {
+    color: #ffffff !important; /* Peak bright */
+    font-weight: 600;
+    opacity: 1;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
 
 /* Active Transcript Turn Highlight (Clean seamless flow without card border) */
