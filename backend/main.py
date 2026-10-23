@@ -944,6 +944,17 @@ async def export_transcript(transcript_id: str, fmt: str, ai_prompt: Optional[st
     if not transcript:
         raise HTTPException(status_code=404, detail="Transcript not found")
 
+    job_id = transcript.get("job_id")
+    if job_id:
+        job = get_job(job_id)
+        if job:
+            if not transcript.get("filename"):
+                transcript["filename"] = job.get("filename")
+            if not transcript.get("duration"):
+                transcript["duration"] = job.get("duration")
+            if not transcript.get("created_at"):
+                transcript["created_at"] = job.get("created_at")
+
     fmt = fmt.lower()
     if fmt == "srt":
         content = export_srt(transcript)

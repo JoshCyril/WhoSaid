@@ -89,11 +89,15 @@ def export_ai_summary(transcript_data: Dict[str, Any], ai_prompt: str = None) ->
     except (ValueError, TypeError):
         duration_sec = 0.0
 
+    if duration_sec <= 0 and transcript_data.get("segments"):
+        duration_sec = max((float(s.get("end", 0)) for s in transcript_data["segments"]), default=0.0)
+
     mins = int(duration_sec // 60)
     secs = int(duration_sec % 60)
     duration_str = f"{mins:02d}:{secs:02d}"
 
-    created_at = transcript_data.get("created_at") or transcript_data.get("date") or "N/A"
+    raw_date = transcript_data.get("created_at") or transcript_data.get("date") or "N/A"
+    created_at = str(raw_date).replace("T", " ").split(".")[0]
 
     # Distinct speakers
     speakers = []
