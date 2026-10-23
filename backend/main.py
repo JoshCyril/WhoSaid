@@ -353,7 +353,7 @@ async def scan_filesystem_folder(folder_path: Optional[str] = None):
         from backend.db import get_connection
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT id, filename, file_path, file_hash, model_size, status FROM jobs")
+        cursor.execute("SELECT id, filename, file_path, file_hash, model_size, status, duration FROM jobs")
         all_jobs = [dict(r) for r in cursor.fetchall()]
         cursor.execute("SELECT id, job_id FROM transcripts")
         all_transcripts = {r["job_id"]: r["id"] for r in cursor.fetchall()}

@@ -3671,6 +3671,23 @@ class WhoSaidApp {
     this.applyTreeFilter();
   }
 
+  getAllFilesFromTree(node) {
+    if (!node) return [];
+    const files = [];
+    const traverse = (item) => {
+      if (!item) return;
+      if (item.is_dir) {
+        if (item.children && Array.isArray(item.children)) {
+          item.children.forEach(traverse);
+        }
+      } else {
+        files.push(item);
+      }
+    };
+    traverse(node);
+    return files;
+  }
+
   renderGroupedExplorer(rootNode, groupBy) {
     const allFiles = this.getAllFilesFromTree(rootNode);
     if (allFiles.length === 0) {
@@ -4109,6 +4126,9 @@ class WhoSaidApp {
 
       const visible = matchesQuery && matchesMedia;
       row.style.display = visible ? "flex" : "none";
+      if (row.parentElement && row.parentElement.classList.contains("tree-node-wrap")) {
+        row.parentElement.style.display = visible ? "" : "none";
+      }
     });
 
     // Handle directory visibility based on whether any child files are visible
