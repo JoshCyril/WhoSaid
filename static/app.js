@@ -3392,6 +3392,39 @@ class WhoSaidApp {
       if (btn) btn.addEventListener("click", () => this.selectFolderDialog());
     });
 
+    // Open Folder Modal events
+    const btnCloseFolderM = document.getElementById("btnCloseOpenFolderModal");
+    if (btnCloseFolderM) btnCloseFolderM.addEventListener("click", () => this.closeFolderModal());
+    const btnCancelFolderM = document.getElementById("btnCancelOpenFolder");
+    if (btnCancelFolderM) btnCancelFolderM.addEventListener("click", () => this.closeFolderModal());
+    const btnBrowseNative = document.getElementById("btnBrowseNativeSystemFolder");
+    if (btnBrowseNative) btnBrowseNative.addEventListener("click", () => this.browseNativeFolderFromModal());
+    const btnConfirmFolder = document.getElementById("btnConfirmOpenFolder");
+    if (btnConfirmFolder) {
+      btnConfirmFolder.addEventListener("click", () => {
+        const input = document.getElementById("openFolderManualInput");
+        const path = input ? input.value.trim() : "";
+        if (!path) {
+          this.showToast("Please enter or select a folder path", "warning");
+          return;
+        }
+        this.loadFolderTree(path);
+        this.closeFolderModal();
+      });
+    }
+    const openFolderManualInput = document.getElementById("openFolderManualInput");
+    if (openFolderManualInput) {
+      openFolderManualInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          const path = openFolderManualInput.value.trim();
+          if (path) {
+            this.loadFolderTree(path);
+            this.closeFolderModal();
+          }
+        }
+      });
+    }
+
     if (this.btnEmptyOpenSample) {
       this.btnEmptyOpenSample.addEventListener("click", () => this.openSampleFolder());
     }
@@ -3620,24 +3653,142 @@ class WhoSaidApp {
   }
 
   async selectFolderDialog() {
-    let chosenPath = null;
+    // 1. In Electron, invoke native dialog
     if (window.electronAPI?.openFolderDialog) {
       try {
-        chosenPath = await window.electronAPI.openFolderDialog();
+        const chosen = await window.electronAPI.openFolderDialog();
+        if (chosen) {
+          this.loadFolderTree(chosen);
+          return;
+        }
       } catch (err) {
         console.error("Electron folder dialog error:", err);
       }
     }
 
-    if (!chosenPath) {
-      const manual = prompt("Enter directory path (e.g. C:\\Videos or your folder path):", this.currentFolderPath || "");
-      if (manual && manual.trim()) {
-        chosenPath = manual.trim();
-      }
+    // 2. In Browser, open the in-app folder picker modal with quick shortcuts + native browse
+    this.openFolderModal();
+  }
+
+  async openFolderModal() {
+    const modal = document.getElementById("openFolderModal");
+    if (!modal) return;
+
+    const input = document.getElementById("openFolderManualInput");
+    if (input) {
+      input.value = this.currentFolderPath || "";
     }
 
-    if (chosenPath) {
-      this.loadFolderTree(chosenPath);
+    // Load and render quick locations
+    this.renderQuickDirectories();
+
+    // Render recent folders in modal
+    this.renderModalRecentFolders();
+
+    modal.classList.remove("hidden");
+    if (input) {
+      setTimeout(() => input.focus(), 100);
+    }
+  }
+
+  closeFolderModal() {
+    const modal = document.getElementById("openFolderModal");
+    if (modal) modal.classList.add("hidden");
+  }
+
+  async renderQuickDirectories() {
+    const container = document.getElementById("quickDirsContainer");
+    if (!container) return;
+    try {
+      const resp = await fetch("/api/fs/quick-directories");
+      if (!resp.ok) return;
+      const data = await resp.json();
+      container.innerHTML = "";
+
+      const iconMap = {
+        video: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 text-brand-400"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>`,
+        download: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 text-emerald-400"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`,
+        music: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 text-purple-400"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>`,
+        folder: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 text-amber-400"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`,
+        code: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 text-cyan-400"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>`
+      };
+
+      (data.directories || []).forEach((dir) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "flex items-center gap-2 p-2.5 rounded-lg border border-surface-border bg-surface-card hover:bg-surface-hover hover:border-brand-500/50 transition-all text-left group";
+        btn.innerHTML = `
+          <div class="shrink-0">${iconMap[dir.icon] || iconMap.folder}</div>
+          <div class="min-w-0">
+            <div class="text-xs font-semibold truncate text-text-main group-hover:text-brand-400">${this.escapeHtml(dir.name)}</div>
+            <div class="text-[10px] text-text-dim truncate" title="${this.escapeHtml(dir.path)}">${this.escapeHtml(dir.path)}</div>
+          </div>
+        `;
+        btn.addEventListener("click", () => {
+          this.loadFolderTree(dir.path);
+          this.closeFolderModal();
+        });
+        container.appendChild(btn);
+      });
+    } catch (e) {
+      console.warn("Failed to load quick directories:", e);
+    }
+  }
+
+  renderModalRecentFolders() {
+    const section = document.getElementById("modalRecentFoldersSection");
+    const container = document.getElementById("modalRecentFoldersList");
+    if (!section || !container) return;
+
+    try {
+      const stored = localStorage.getItem("whosaid_recent_folders");
+      const list = stored ? JSON.parse(stored) : [];
+      if (!list || list.length === 0) {
+        section.classList.add("hidden");
+        return;
+      }
+      section.classList.remove("hidden");
+      container.innerHTML = "";
+      list.slice(0, 5).forEach((p) => {
+        const item = document.createElement("div");
+        item.className = "flex items-center justify-between p-1.5 rounded hover:bg-surface-hover cursor-pointer group text-xs";
+        item.innerHTML = `
+          <span class="font-mono text-text-muted group-hover:text-text-main truncate mr-2">${this.escapeHtml(p)}</span>
+          <span class="text-[10px] text-brand-400 font-semibold shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">Open →</span>
+        `;
+        item.addEventListener("click", () => {
+          this.loadFolderTree(p);
+          this.closeFolderModal();
+        });
+        container.appendChild(item);
+      });
+    } catch (e) {
+      section.classList.add("hidden");
+    }
+  }
+
+  async browseNativeFolderFromModal() {
+    const btn = document.getElementById("btnBrowseNativeSystemFolder");
+    if (btn) btn.disabled = true;
+    try {
+      const input = document.getElementById("openFolderManualInput");
+      const current = input ? input.value.trim() : "";
+      const resp = await fetch("/api/fs/choose-folder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ initial_dir: current || this.currentFolderPath || null })
+      });
+      const data = await resp.json();
+      if (data.status === "success" && data.folder_path) {
+        if (input) input.value = data.folder_path;
+        this.loadFolderTree(data.folder_path);
+        this.closeFolderModal();
+      }
+    } catch (e) {
+      console.error("Browse native folder error:", e);
+      this.showToast("Could not open system dialog", "error");
+    } finally {
+      if (btn) btn.disabled = false;
     }
   }
 

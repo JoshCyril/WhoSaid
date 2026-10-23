@@ -443,6 +443,76 @@ async def scan_filesystem_folder(folder_path: Optional[str] = None):
         "folder_name": os.path.basename(target_dir) or target_dir
     })
 
+@app.post("/api/fs/choose-folder")
+async def choose_folder_dialog(request: Request):
+    data = {}
+    try:
+        data = await request.json()
+    except Exception:
+        pass
+    initial_dir = data.get("initial_dir") or os.path.expanduser("~/Videos")
+    if not os.path.exists(initial_dir):
+        initial_dir = BASE_DIR
+
+    def _open_picker():
+        # Try tkinter first
+        try:
+            import tkinter
+            import tkinter.filedialog
+            root = tkinter.Tk()
+            root.withdraw()
+            root.wm_attributes('-topmost', 1)
+            selected = tkinter.filedialog.askdirectory(
+                title="Select Folder to Open in Who Said",
+                initialdir=initial_dir
+            )
+            root.destroy()
+            if selected and os.path.isdir(selected):
+                return selected
+        except Exception:
+            pass
+
+        # Fallback to PowerShell FolderBrowserDialog on Windows
+        if sys.platform == "win32":
+            try:
+                import subprocess
+                ps_script = f"""
+                Add-Type -AssemblyName System.Windows.Forms
+                $f = New-Object System.Windows.Forms.FolderBrowserDialog
+                $f.Description = 'Select Media Folder to Open in Who Said'
+                $f.SelectedPath = '{initial_dir}'
+                if ($f.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {{
+                    Write-Output $f.SelectedPath
+                }}
+                """
+                res = subprocess.run(["powershell", "-NoProfile", "-Command", ps_script], capture_output=True, text=True, timeout=60)
+                path = res.stdout.strip()
+                if path and os.path.isdir(path):
+                    return path
+            except Exception:
+                pass
+        return None
+
+    loop = asyncio.get_event_loop()
+    selected_path = await loop.run_in_executor(None, _open_picker)
+    
+    if selected_path and os.path.isdir(selected_path):
+        return JSONResponse({"status": "success", "folder_path": os.path.abspath(selected_path)})
+    return JSONResponse({"status": "cancelled", "folder_path": None})
+
+@app.get("/api/fs/quick-directories")
+async def get_quick_directories():
+    home = os.path.expanduser("~")
+    dirs = [
+        {"name": "Videos", "path": os.path.join(home, "Videos"), "icon": "video"},
+        {"name": "Downloads", "path": os.path.join(home, "Downloads"), "icon": "download"},
+        {"name": "Music", "path": os.path.join(home, "Music"), "icon": "music"},
+        {"name": "Documents", "path": os.path.join(home, "Documents"), "icon": "folder"},
+        {"name": "Project Root", "path": BASE_DIR, "icon": "code"}
+    ]
+    valid_dirs = [d for d in dirs if os.path.isdir(d["path"])]
+    return JSONResponse({"directories": valid_dirs})
+
 @app.get("/api/fs/file-properties")
 async def get_file_properties(file_path: str):
     if not file_path or not os.path.exists(file_path):
