@@ -3302,15 +3302,173 @@ body {
     box-shadow: 0 0 0 1px hsl(var(--ring));
 }
 
-.folder-merge-strip {
+/* Upgraded Merge Speaker Card */
+.folder-merge-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 14px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(245, 158, 11, 0.04) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.folder-merge-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.folder-merge-title-group {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.folder-merge-icon {
+    width: 14px;
+    height: 14px;
+    color: #fbbf24;
+}
+
+.folder-merge-heading {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #f1f5f9;
+}
+
+.folder-merge-badge {
+    font-size: 0.6875rem;
+    color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 2px 7px;
+    border-radius: 9999px;
+}
+
+.folder-merge-controls {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 14px;
-    background: hsl(var(--muted) / 0.2);
-    border: 1px solid hsl(var(--border));
+}
+
+.folder-merge-select-wrap {
+    position: relative;
+    flex: 1;
+}
+
+.folder-merge-select {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    background: #1e2227;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: var(--radius-md);
+    color: #f8fafc;
+    font-size: 0.8125rem;
+    padding: 7px 30px 7px 11px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.folder-merge-select:hover {
+    border-color: rgba(245, 158, 11, 0.5);
+    background: #242930;
+}
+
+.folder-merge-select:focus {
+    outline: none;
+    border-color: #fbbf24;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+.folder-merge-chevron {
+    position: absolute;
+    right: 9px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 13px;
+    height: 13px;
+    color: rgba(255, 255, 255, 0.45);
+    pointer-events: none;
+}
+
+.btn-merge-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(245, 158, 11, 0.16);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    padding: 6px 14px;
     border-radius: var(--radius-md);
     font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+}
+
+.btn-merge-action:hover:not(:disabled) {
+    background: #f59e0b;
+    color: #000000;
+    border-color: #f59e0b;
+    box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
+}
+
+.btn-merge-action:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.icon-arrow-merge {
+    width: 13px;
+    height: 13px;
+    stroke-width: 2.2;
+}
+
+/* Move Turn in Manage Folder View */
+.folder-turn-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.folder-turn-badge {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: #f1f5f9;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+
+.btn-folder-move-turn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(56, 189, 248, 0.1);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.12s ease;
+}
+
+.btn-folder-move-turn:hover {
+    background: rgba(56, 189, 248, 0.22);
+    border-color: #38bdf8;
+    color: #ffffff;
 }
 
 .folder-turns-section {
@@ -5683,4 +5841,205 @@ body {
     background: linear-gradient(90deg, #38bdf8, #818cf8);
     transition: width 0.2s ease;
 }
+
+/* Upgraded Merge Speaker Card UI/UX */
+.folder-merge-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(20, 24, 30, 0.6) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: var(--radius-lg, 10px);
+    margin-bottom: 20px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.folder-merge-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.folder-merge-title-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.folder-merge-icon {
+    width: 15px;
+    height: 15px;
+    color: #38bdf8;
+    flex-shrink: 0;
+}
+
+.folder-merge-heading {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #f1f5f9;
+    text-transform: uppercase;
+}
+
+.folder-merge-badge {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-dim, #94a3b8);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 7px;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.folder-merge-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.folder-merge-select-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+}
+
+.folder-merge-select {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 8px 32px 8px 12px;
+    border-radius: 7px;
+    background: rgba(15, 18, 24, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f8fafc;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.folder-merge-select:hover {
+    border-color: rgba(56, 189, 248, 0.4);
+    background: rgba(20, 25, 34, 0.95);
+}
+
+.folder-merge-select:focus {
+    outline: none;
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+}
+
+.folder-merge-select option {
+    background: #181d24;
+    color: #f8fafc;
+    padding: 8px;
+}
+
+.folder-merge-chevron {
+    position: absolute;
+    right: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    color: var(--text-dim, #94a3b8);
+    pointer-events: none;
+    transition: transform 0.15s ease;
+}
+
+.btn-merge-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 15px;
+    border-radius: 7px;
+    background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
+    transition: all 0.18s ease;
+    flex-shrink: 0;
+}
+
+.btn-merge-action:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0369a1 0%, #1d4ed8 100%);
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.45);
+    transform: translateY(-1px);
+}
+
+.btn-merge-action:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-merge-action:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+    border-color: rgba(255, 255, 255, 0.08);
+    color: var(--text-dim, #94a3b8);
+}
+
+.icon-arrow-merge {
+    width: 13px;
+    height: 13px;
+    transition: transform 0.15s ease;
+}
+
+.btn-merge-action:hover:not(:disabled) .icon-arrow-merge {
+    transform: translateX(2px);
+}
+
+/* Folder Turn Actions & Move Turn Button */
+.folder-turn-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.folder-turn-badge {
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.22);
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+
+.btn-folder-move-turn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f1f5f9;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-folder-move-turn:hover {
+    background: rgba(56, 189, 248, 0.18);
+    border-color: rgba(56, 189, 248, 0.38);
+    color: #38bdf8;
+}
+
+.folder-turn-actions .turn-reassign-menu {
+    top: 30px;
+    right: 0;
+    left: auto;
+    z-index: 1000;
+}
+
 

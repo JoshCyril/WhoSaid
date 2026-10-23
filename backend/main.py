@@ -346,7 +346,7 @@ async def scan_filesystem_folder(folder_path: Optional[str] = None):
         target_dir = BASE_DIR
 
     ignored_dirs = {".git", ".svn", ".vscode", ".agent", ".agents", "node_modules", "__pycache__", "models", "storage", ".cache"}
-    media_exts = {".mp4", ".mkv", ".mov", ".webm", ".mp3", ".wav"}
+    media_exts = {".mp4", ".mkv", ".mov", ".webm", ".mp3", ".wav", ".wmv"}
     sub_exts = {".srt", ".vtt", ".json", ".txt"}
 
     # Fetch all completed jobs for fast cache lookup

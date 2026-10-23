@@ -2383,13 +2383,36 @@
                                 </div>
                             </div>
 
-                            <!-- Merge Section -->
-                            <div class="folder-merge-strip">
-                                <span class="folder-strip-label">Merge speaker:</span>
-                                <select id="folderMergeTargetSelect" class="form-input form-select form-input-sm">
-                                    <!-- Populated dynamically with other speakers -->
-                                </select>
-                                <button id="btnFolderExecuteMerge" class="btn btn-sm btn-outline">Merge Into</button>
+                            <!-- Merge Section (Upgraded UI/UX) -->
+                            <div class="folder-merge-card">
+                                <div class="folder-merge-header">
+                                    <div class="folder-merge-title-group">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="folder-merge-icon">
+                                            <circle cx="18" cy="18" r="3"></circle>
+                                            <circle cx="6" cy="6" r="3"></circle>
+                                            <path d="M6 9v12m12-9c0 3-2 6-6 6"></path>
+                                        </svg>
+                                        <span class="folder-merge-heading">Merge Speaker</span>
+                                    </div>
+                                    <span class="folder-merge-badge">Reassign all turns</span>
+                                </div>
+                                <div class="folder-merge-controls">
+                                    <div class="folder-merge-select-wrap">
+                                        <select id="folderMergeTargetSelect" class="folder-merge-select" title="Select target speaker to merge into">
+                                            <!-- Populated dynamically with other speakers -->
+                                        </select>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="folder-merge-chevron">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                    </div>
+                                    <button id="btnFolderExecuteMerge" class="btn-merge-action" title="Execute speaker merge">
+                                        <span>Merge Into</span>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-arrow-merge">
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                            <polyline points="12 5 19 12 12 19"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Folder Viewer for Turns (Files in Folder) -->

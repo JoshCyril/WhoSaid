@@ -1094,7 +1094,7 @@ class WhoSaidApp {
       if (this.captionModeDropdown && !e.target.closest("#captionCtrlGroup")) {
         this.captionModeDropdown.classList.add("hidden");
       }
-      if (!e.target.closest(".turn-reassign-menu") && !e.target.closest(".btn-reassign-turn")) {
+      if (!e.target.closest(".turn-reassign-menu") && !e.target.closest(".btn-reassign-turn") && !e.target.closest(".btn-folder-move-turn")) {
         document.querySelectorAll(".turn-reassign-menu").forEach((m) => m.remove());
       }
     });
@@ -1891,14 +1891,9 @@ class WhoSaidApp {
         <div class="turn-body">
           <div class="turn-meta-row">
             <div class="turn-meta-left">
-              <span class="turn-index-pill" title="Turn #${index + 1}">Turn #${index + 1}</span>
               <span class="turn-speaker-name" style="color: ${seg.speaker_color || '#f6c48f'}">${this.escapeHtml(seg.speaker_label)}</span>
             </div>
             <div class="turn-meta-right">
-              <button type="button" class="btn-reassign-turn" data-seg-id="${seg.id}" data-turn-idx="${index + 1}" title="Move Turn #${index + 1} to another or new speaker">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"></path></svg>
-                <span>Move</span>
-              </button>
               <span class="turn-timestamp" title="Click to jump to turn">${this.formatTime(seg.start)} - ${this.formatTime(seg.end)}</span>
             </div>
           </div>
@@ -1914,15 +1909,6 @@ class WhoSaidApp {
         timeBadge.addEventListener("click", () => {
           this.mediaVideo.currentTime = seg.start;
           this.mediaVideo.play();
-        });
-      }
-
-      // Move / Reassign speaker button
-      const reassignBtn = card.querySelector(".btn-reassign-turn");
-      if (reassignBtn) {
-        reassignBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          this.openTurnReassignMenu(reassignBtn, seg, index + 1);
         });
       }
 
@@ -2038,6 +2024,10 @@ class WhoSaidApp {
     this.renderTranscript(this.currentTranscript);
     this.renderSpeakerAvatarGrid(this.currentTranscript.speakers);
     this.renderWaveformRegions();
+    if (this.activeFolderSpeakerId) {
+      this.loadFolderSpeakersTable();
+      this.selectFolderSpeaker(this.activeFolderSpeakerId);
+    }
     this.showToast(`Moved Turn #${turnNumber} to ${targetSpeaker.label}`, "success");
   }
 
@@ -2364,16 +2354,25 @@ class WhoSaidApp {
     // 4. Populate merge target select
     if (this.folderMergeTargetSelect) {
       this.folderMergeTargetSelect.innerHTML = "";
-      (this.currentTranscript.speakers || [])
-        .filter((s) => s.id !== speakerId)
-        .forEach((other) => {
+      const otherSpeakers = (this.currentTranscript.speakers || []).filter((s) => s.id !== speakerId);
+      if (otherSpeakers.length === 0) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "No other speakers available to merge";
+        opt.disabled = true;
+        opt.selected = true;
+        this.folderMergeTargetSelect.appendChild(opt);
+        if (this.btnFolderExecuteMerge) this.btnFolderExecuteMerge.disabled = true;
+      } else {
+        otherSpeakers.forEach((other) => {
           const opt = document.createElement("option");
           opt.value = other.id;
-          opt.textContent = `${other.label} (${other.id})`;
+          opt.textContent = `Merge with ${other.label}`;
           this.folderMergeTargetSelect.appendChild(opt);
         });
-      if (this.btnFolderExecuteMerge) {
-        this.btnFolderExecuteMerge.disabled = (this.currentTranscript.speakers || []).length < 2;
+        if (this.btnFolderExecuteMerge) {
+          this.btnFolderExecuteMerge.disabled = false;
+        }
       }
     }
 
@@ -2387,6 +2386,8 @@ class WhoSaidApp {
         this.folderTurnsList.innerHTML = '<div style="color:#64748b;font-size:0.8rem;padding:8px;">No dialogue turns assigned to this speaker.</div>';
       } else {
         segments.forEach((seg, idx) => {
+          const globalTurnIdx = (this.currentTranscript.segments || []).indexOf(seg) + 1;
+          const turnNumber = globalTurnIdx > 0 ? globalTurnIdx : (idx + 1);
           const item = document.createElement("div");
           item.className = "folder-turn-item";
           item.innerHTML = `
@@ -2399,12 +2400,18 @@ class WhoSaidApp {
             </svg>
             <div class="folder-turn-body">
               <div class="folder-turn-meta">
-                <span style="font-weight:600;font-size:0.75rem;color:#f1f5f9;">Turn #${idx + 1}</span>
+                <span class="folder-turn-badge">Turn #${turnNumber}</span>
                 <span class="folder-turn-time">${this.formatTime(seg.start)} - ${this.formatTime(seg.end)}</span>
               </div>
               <p class="folder-turn-text">${this.escapeHtml(seg.text)}</p>
             </div>
-            <button class="btn-turn-jump" title="Play turn in player">▶ Play</button>
+            <div class="folder-turn-actions">
+              <button type="button" class="btn-turn-jump" title="Play turn in player">▶ Play</button>
+              <button type="button" class="btn-folder-move-turn" title="Move Turn #${turnNumber} to another speaker">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"></path></svg>
+                <span>Move</span>
+              </button>
+            </div>
           `;
           item.querySelector(".btn-turn-jump").addEventListener("click", () => {
             if (this.mediaVideo) {
@@ -2412,6 +2419,13 @@ class WhoSaidApp {
               this.mediaVideo.play();
             }
           });
+          const moveBtn = item.querySelector(".btn-folder-move-turn");
+          if (moveBtn) {
+            moveBtn.addEventListener("click", (e) => {
+              e.stopPropagation();
+              this.openTurnReassignMenu(moveBtn, seg, turnNumber);
+            });
+          }
           this.folderTurnsList.appendChild(item);
         });
       }
@@ -3573,6 +3587,8 @@ class WhoSaidApp {
   applyUntranscribedMedia(item) {
     this.currentTranscript = null;
     this.currentAudioPeaks = [];
+    this.activeTurnId = null;
+    this.currentActiveCaptionTurnId = null;
 
     // Switch view to workspace
     this.showWorkspaceView();
@@ -3594,6 +3610,31 @@ class WhoSaidApp {
     const trPanel = document.querySelector(".transcript-panel");
     if (trPanel) trPanel.classList.add("hidden");
 
+    // Clear and reset speakers panel & avatar grid
+    if (this.speakersAvatarGrid) this.speakersAvatarGrid.innerHTML = "";
+    if (this.speakersList) this.speakersList.innerHTML = "";
+    if (this.speakerCountBadge) this.speakerCountBadge.textContent = "0";
+    if (this.transcriptContainer) this.transcriptContainer.innerHTML = "";
+
+    // Clear and reset subtitles
+    if (this.captionAvatarWrap) this.captionAvatarWrap.innerHTML = "";
+    if (this.captionSpeakerTag) {
+      this.captionSpeakerTag.textContent = "";
+      this.captionSpeakerTag.style.color = "";
+    }
+    if (this.captionText) {
+      this.captionText.innerHTML = '<span style="color:var(--text-dim,#94a3b8);font-size:0.85rem;font-style:italic;">No subtitles available • Transcribe media to generate captions</span>';
+    }
+    if (this.playerCcAvatarWrap) this.playerCcAvatarWrap.innerHTML = "";
+    if (this.playerCcSpeakerTag) {
+      this.playerCcSpeakerTag.textContent = "";
+      this.playerCcSpeakerTag.style.color = "";
+    }
+    if (this.playerCcText) this.playerCcText.innerHTML = "";
+    if (this.playerMinimalCaption) this.playerMinimalCaption.classList.add("hidden");
+    if (this.minimalCaptionAvatar) this.minimalCaptionAvatar.innerHTML = "";
+    if (this.minimalCaptionSpeaker) this.minimalCaptionSpeaker.textContent = "";
+
     // Populate untranscribed panel specs
     const titleEl = document.getElementById("untranscribedMediaTitle");
     if (titleEl) titleEl.textContent = item.name;
@@ -3607,6 +3648,12 @@ class WhoSaidApp {
     // Reset progress box
     const progBox = document.getElementById("wsTranscribeProgressBox");
     if (progBox) progBox.classList.add("hidden");
+    const progBar = document.getElementById("wsTranscribeProgressBar");
+    if (progBar) progBar.style.width = "0%";
+    const progPct = document.getElementById("wsTranscribeProgressPct");
+    if (progPct) progPct.textContent = "0%";
+    const progStatus = document.getElementById("wsTranscribeProgressStatus");
+    if (progStatus) progStatus.textContent = "Ready to transcribe";
     const btnStart = document.getElementById("btnStartWsTranscribe");
     if (btnStart) {
       btnStart.disabled = false;
@@ -3627,6 +3674,31 @@ class WhoSaidApp {
           if (durEl) durEl.textContent = dur;
         }
       };
+    }
+
+    // Clear colored progress bar & render neutral seeker timeline for untranscribed preview
+    if (this.waveformSegmentedTrack) {
+      this.waveformSegmentedTrack.innerHTML = "";
+      const NUM_BARS = 160;
+      for (let i = 0; i < NUM_BARS; i++) {
+        const bar = document.createElement("div");
+        bar.className = "waveform-bar bar-unmarked";
+        bar.dataset.index = i;
+        bar.style.setProperty("--bar-h", "16%");
+        bar.style.backgroundColor = "rgba(255, 255, 255, 0.12)";
+        bar.title = "Preview Seeker";
+        bar.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (this.mediaVideo && this.mediaVideo.duration) {
+            this.mediaVideo.currentTime = (i / NUM_BARS) * this.mediaVideo.duration;
+            this.mediaVideo.play();
+          }
+        });
+        this.waveformSegmentedTrack.appendChild(bar);
+      }
+    }
+    if (this.waveformSeekerLine) {
+      this.waveformSeekerLine.style.left = "0%";
     }
 
     // Waveform placeholder for raw preview
