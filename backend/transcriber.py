@@ -14,7 +14,9 @@ else:
 _model_candidates = [
     os.environ.get("WHOSAID_MODELS_DIR"),
     os.path.join(ROOT_DIR, "models"),
-    os.path.join(APP_DIR, "models")
+    os.path.join(APP_DIR, "models"),
+    os.path.join(ROOT_DIR, "..", "models"),
+    os.path.join(APP_DIR, "_internal", "models")
 ]
 MODELS_DIR = next((p for p in _model_candidates if p and os.path.exists(p)), os.path.join(ROOT_DIR, "models"))
 
@@ -63,10 +65,10 @@ class TranscriberService:
     _models: Dict[str, faster_whisper.WhisperModel] = {}
 
     @classmethod
-    def get_model(cls, model_size: str = "base") -> faster_whisper.WhisperModel:
+    def get_model(cls, model_size: str = "tiny") -> faster_whisper.WhisperModel:
         valid_sizes = {"tiny", "base", "small", "medium"}
         if model_size not in valid_sizes:
-            model_size = "base"
+            model_size = "tiny"
         if model_size not in cls._models:
             print(f"[Transcriber] Resolving faster-whisper model '{model_size}' on CPU (int8)...")
             
@@ -80,14 +82,14 @@ class TranscriberService:
                 
             model_source = local_path
             if not model_source:
-                # If requested model (e.g. small/medium) is not present locally, fallback to bundled base
-                bundled_base = find_local_whisper_model("base", MODELS_DIR)
-                if bundled_base and model_size != "base":
-                    print(f"[Transcriber] Model '{model_size}' not found in local models directory. Falling back to bundled 'base' model.")
-                    return cls.get_model("base")
+                # If requested model is not present locally, fallback to bundled tiny
+                bundled_tiny = find_local_whisper_model("tiny", MODELS_DIR)
+                if bundled_tiny and model_size != "tiny":
+                    print(f"[Transcriber] Model '{model_size}' not found in local models directory. Falling back to bundled 'tiny' model.")
+                    return cls.get_model("tiny")
                 raise FileNotFoundError(
                     f"Local model '{model_size}' was not found in '{MODELS_DIR}'. "
-                    f"Please select 'base' or 'tiny' (bundled 100% offline inside the application) or place the '{model_size}' files in '{os.path.join(MODELS_DIR, model_size)}'."
+                    f"Please select 'tiny' (bundled 100% offline inside the application) or place the '{model_size}' files in '{os.path.join(MODELS_DIR, model_size)}'."
                 )
 
             print(f"[Transcriber] Loading 100% offline Whisper model '{model_size}' from: {model_source}")
@@ -110,7 +112,7 @@ class TranscriberService:
     def transcribe(
         cls,
         audio_samples: np.ndarray,
-        model_size: str = "base",
+        model_size: str = "tiny",
         language_mode: str = "en",
         progress_callback: Optional[Callable[[float, str], None]] = None
     ) -> List[Dict[str, Any]]:

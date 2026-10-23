@@ -87,11 +87,9 @@ function saveDbConfig(dbPath, alwaysAsk = false) {
 // Locate or provide path to bundled sample / starter SQLite DB
 function getDefaultSampleDbPath() {
   const candidates = [
-    path.join(PROJECT_ROOT, 'sample_whosaid.db'),
-    path.join(PROJECT_ROOT, 'storage', 'whosaid.db'),
-    path.join(PROJECT_ROOT, 'sample_data', 'sample_whosaid.db'),
-    path.join(app.getPath('userData'), 'sample_whosaid.db'),
-    path.join(app.getPath('userData'), 'storage', 'whosaid.db')
+    path.join(app.getPath('userData'), 'storage', 'whosaid.db'),
+    path.join(app.getPath('userData'), 'whosaid.db'),
+    path.join(PROJECT_ROOT, 'storage', 'whosaid.db')
   ];
   for (const c of candidates) {
     if (fs.existsSync(c)) return c;
@@ -171,7 +169,6 @@ async function ensureBackendRunning(customDbPath) {
   }
 
   const bundledDbCandidates = [
-    path.join(PROJECT_ROOT, 'sample_whosaid.db'),
     path.join(PROJECT_ROOT, 'storage', 'whosaid.db'),
     path.join(PROJECT_ROOT, 'whosaid-backend', 'storage', 'whosaid.db'),
     path.join(PROJECT_ROOT, 'dist_backend', 'whosaid-backend', 'storage', 'whosaid.db'),
@@ -371,7 +368,7 @@ ipcMain.handle('fs:saveRecentFolder', async (_event, folderPath) => {
   return saveRecentFolder(folderPath);
 });
 
-ipcMain.handle('app:getVersion', () => '1.0.0');
+ipcMain.handle('app:getVersion', () => 'v0.3-beta');
 
 // Open links safely in default OS browser
 ipcMain.handle('shell:openExternal', async (_event, url) => {

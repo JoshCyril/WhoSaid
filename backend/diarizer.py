@@ -16,7 +16,9 @@ else:
 _model_candidates = [
     os.environ.get("WHOSAID_MODELS_DIR"),
     os.path.join(ROOT_DIR, "models"),
-    os.path.join(APP_DIR, "models")
+    os.path.join(APP_DIR, "models"),
+    os.path.join(ROOT_DIR, "..", "models"),
+    os.path.join(APP_DIR, "_internal", "models")
 ]
 MODELS_DIR = next((p for p in _model_candidates if p and os.path.exists(p)), os.path.join(ROOT_DIR, "models"))
 SEG_MODEL_PATH = os.path.join(MODELS_DIR, "model.onnx")

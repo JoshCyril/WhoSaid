@@ -65,7 +65,7 @@ def init_db():
         file_path TEXT NOT NULL,
         audio_path TEXT,
         file_hash TEXT,
-        model_size TEXT DEFAULT 'base',
+        model_size TEXT DEFAULT 'tiny',
         status TEXT DEFAULT 'pending',
         progress REAL DEFAULT 0.0,
         message TEXT DEFAULT '',
@@ -114,7 +114,7 @@ def init_db():
 
 # --- Job Operations ---
 
-def create_job(filename: str, file_path: str, file_hash: str, model_size: str = "base", language_mode: str = "en") -> str:
+def create_job(filename: str, file_path: str, file_hash: str, model_size: str = "tiny", language_mode: str = "en") -> str:
     job_id = str(uuid.uuid4())
     now = datetime.now(timezone.utc).isoformat()
     conn = get_connection()

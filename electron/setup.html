@@ -326,16 +326,16 @@
     </p>
 
     <div class="options-grid">
-      <!-- Option 1: Sample DB -->
+      <!-- Option 1: Default DB -->
       <div class="option-card selected" id="cardSampleDb" onclick="selectOption('sample')">
         <div class="option-left">
           <input type="radio" name="dbOption" id="radioSample" class="option-radio" checked />
           <div class="option-info">
-            <h3>Sample / Starter Database <span class="badge-pill">Recommended</span></h3>
-            <p>Pre-populated with 2-speaker sample demo data and voice profiles.</p>
+            <h3>Default Application Database <span class="badge-pill">Recommended</span></h3>
+            <p>Automatic persistent storage in your local user data directory (whosaid.db).</p>
           </div>
         </div>
-        <span class="badge-pill" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border-color: rgba(16, 185, 129, 0.3);">Bundled</span>
+        <span class="badge-pill" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border-color: rgba(16, 185, 129, 0.3);">Default</span>
       </div>
 
       <!-- Option 2: Existing DB -->
@@ -482,7 +482,7 @@
       currentOption = opt;
       highlightCard(opt);
       if (opt === 'sample') {
-        chosenDbPath = sampleDbPath || 'sample_whosaid.db';
+        chosenDbPath = sampleDbPath || 'whosaid.db';
         targetDbInput.value = chosenDbPath;
       }
     }

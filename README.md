@@ -1,7 +1,7 @@
 # Who Said — Local Video Transcriber with Speaker Captions
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Beta Release](https://img.shields.io/badge/Release-v1.0.0--beta.2-orange.svg)](https://github.com/JoshCyril/WhoSaid/releases/tag/v1.0.0-beta.2)
+[![Beta Release](https://img.shields.io/badge/Release-v0.3--beta-orange.svg)](https://github.com/JoshCyril/WhoSaid/releases/tag/v0.3-beta)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Electron 44](https://img.shields.io/badge/Electron-44.7-47848F.svg)](https://www.electronjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg)](https://fastapi.tiangolo.com/)
@@ -16,19 +16,19 @@ Everything runs locally on your CPU with **zero cloud calls**.
 ## Screenshots
 
 <p align="center">
-  <img src="static/screenshots/01_hero.png" alt="Who Said Home Overview & Explorer" width="850" />
+  <img src="screenshots/01_hero.png" alt="Who Said Home Overview & Explorer" width="850" />
   <br>
   <em>Home Overview with local folder explorer, activity bar, and recent transcriptions with DiceBear avatars</em>
 </p>
 
 <p align="center">
-  <img src="static/screenshots/02_workspace.png" alt="Who Said Multi-Tab Workspace Player" width="850" />
+  <img src="screenshots/02_workspace.png" alt="Who Said Multi-Tab Workspace Player" width="850" />
   <br>
   <em>Multi-tab workspace with VS Code style tabs, synced OPEN EDITORS panel, video playback, and right-panel controls</em>
 </p>
 
 <p align="center">
-  <img src="static/screenshots/03_export_menu.png" alt="Who Said Subtitle & Script Exports" width="850" />
+  <img src="screenshots/03_export_menu.png" alt="Who Said Subtitle & Script Exports" width="850" />
   <br>
   <em>Clean action controls toolbar with one-click export to SubRip (.srt), WebVTT (.vtt), full JSON, and plain text dialogue</em>
 </p>
@@ -60,9 +60,8 @@ Everything runs locally on your CPU with **zero cloud calls**.
 
 You can download pre-compiled Windows executable binaries directly from [GitHub Releases](https://github.com/JoshCyril/WhoSaid/releases):
 
-- 📦 **[WhoSaid Setup 1.0.0-beta.2.exe (Installer)](https://github.com/JoshCyril/WhoSaid/releases/download/v1.0.0-beta.2/WhoSaid.Setup.1.0.0-beta.2.exe)** — Standard Windows installer.
-- 🚀 **[WhoSaid 1.0.0-beta.2.exe (Portable)](https://github.com/JoshCyril/WhoSaid/releases/download/v1.0.0-beta.2/WhoSaid.1.0.0-beta.2.exe)** — Zero-install standalone executable.
-- 🗄️ **[sample_whosaid.db (Starter Database)](https://github.com/JoshCyril/WhoSaid/releases/download/v1.0.0-beta.2/sample_whosaid.db)** — Bundled sample SQLite database with pre-loaded demo session & voice profiles.
+- 📦 **[WhoSaid Setup 0.3.0-beta.exe (Installer)](https://github.com/JoshCyril/WhoSaid/releases/download/v0.3-beta/WhoSaid.Setup.0.3.0-beta.exe)** — Standard Windows installer.
+- 🚀 **[WhoSaid 0.3.0-beta.exe (Portable)](https://github.com/JoshCyril/WhoSaid/releases/download/v0.3-beta/WhoSaid.0.3.0-beta.exe)** — Zero-install standalone executable.
 
 ---
 
@@ -150,16 +149,16 @@ WhoSaid/
 │   ├── main.js          # Electron desktop lifecycle & backend process manager
 │   └── preload.js       # Secure context bridge IPC API
 ├── models/
+│   ├── tiny/                                                  # Bundled Faster-Whisper tiny model (~75MB)
 │   ├── model.onnx                                             # Segmentation ONNX (~6MB)
 │   └── 3dspeaker_speech_campplus_sv_zh_en_16k-common_advanced.onnx # Embedding ONNX (~28MB)
+├── screenshots/         # Showcase screenshots
 ├── static/
 │   ├── index.html       # Single-page application UI
 │   ├── app.css          # Modern dark theme & responsive styles
 │   ├── app.js           # WaveSurfer sync, caption overlay & editor logic
-│   ├── libs/            # Offline WaveSurfer & Regions libraries
-│   └── screenshots/     # Showcase screenshots
-├── sample_data/         # Multi-speaker sample test files
-├── storage/             # SQLite seed DB, uploads, and extracted audio
+│   └── libs/            # Offline WaveSurfer & Regions libraries
+├── storage/             # Persistent SQLite DB, uploads, and extracted audio
 ├── build_backend.py     # Standalone PyInstaller backend packager
 ├── run.py               # Application launcher
 ├── requirements.txt     # Python dependencies

@@ -37,7 +37,7 @@ def cleanup_old_media(storage_dirs: Optional[List[str]] = None, max_age_seconds:
             continue
         try:
             for filename in os.listdir(directory):
-                if filename.startswith(".") or "two_speakers_demo" in filename or "demo" in filename.lower():
+                if filename.startswith("."):
                     continue
                 filepath = os.path.join(directory, filename)
                 if not os.path.isfile(filepath):

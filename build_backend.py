@@ -19,11 +19,9 @@ def build():
             except Exception as e:
                 print(f"Notice cleaning {d}: {e}")
 
-    # Collect package data and dynamic libraries
+    # Collect package data and dynamic libraries (models are bundled once in resources)
     datas = [
-        (os.path.join(BASE_DIR, "models"), "models"),
         (os.path.join(BASE_DIR, "static"), "static"),
-        (os.path.join(BASE_DIR, "storage"), "storage"),
     ]
 
     # Collect imageio_ffmpeg
@@ -123,6 +121,12 @@ def build():
         "playwright",
         "fitz",
         "PyMuPDF",
+        "PIL.ImageQt",
+        "pyreadline3",
+        "unittest",
+        "test",
+        "pyarrow",
+        "notebook",
     ]
 
     args = [

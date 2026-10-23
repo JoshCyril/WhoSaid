@@ -198,7 +198,7 @@ async def websocket_progress(websocket: WebSocket, job_id: str):
 @app.post("/api/upload")
 async def upload_file(
     file: UploadFile = File(...),
-    model_size: str = Form("base"),
+    model_size: str = Form("tiny"),
     language_mode: str = Form("en")
 ):
     valid_exts = {".mp4", ".mkv", ".mov", ".webm", ".mp3", ".wav"}
@@ -263,7 +263,10 @@ async def upload_file(
 async def load_demo_video(model_size: str = Form("tiny")):
     demo_path = os.path.join(BASE_DIR, "sample_data", "two_speakers_demo.mp4")
     if not os.path.exists(demo_path):
-        raise HTTPException(status_code=404, detail="Demo file not found.")
+        raise HTTPException(
+            status_code=404,
+            detail="Sample demo media is not bundled in this release. Please open or upload your own video/audio file."
+        )
 
     file_hash = compute_file_hash(demo_path)
 
@@ -307,7 +310,7 @@ async def process_local_path(request: Request):
         body = {}
     
     file_path = body.get("file_path")
-    model_size = body.get("model_size", "base")
+    model_size = body.get("model_size", "tiny")
     language_mode = body.get("language_mode", "en")
 
     if not file_path or not os.path.exists(file_path):
@@ -362,7 +365,8 @@ async def process_local_path(request: Request):
 @app.get("/api/fs/scan-folder")
 async def scan_filesystem_folder(folder_path: Optional[str] = None):
     if not folder_path or not folder_path.strip():
-        target_dir = os.path.join(BASE_DIR, "sample_data")
+        videos_dir = os.path.expanduser("~/Videos")
+        target_dir = videos_dir if os.path.isdir(videos_dir) else BASE_DIR
     else:
         candidate = folder_path.strip()
         if not os.path.isabs(candidate):
@@ -370,7 +374,8 @@ async def scan_filesystem_folder(folder_path: Optional[str] = None):
         if os.path.isdir(candidate):
             target_dir = candidate
         else:
-            target_dir = os.path.join(BASE_DIR, "sample_data")
+            videos_dir = os.path.expanduser("~/Videos")
+            target_dir = videos_dir if os.path.isdir(videos_dir) else BASE_DIR
 
     target_dir = os.path.abspath(target_dir)
 
@@ -445,7 +450,7 @@ async def scan_filesystem_folder(folder_path: Optional[str] = None):
                                 cached_info = {
                                     "job_id": j["id"],
                                     "transcript_id": t_id,
-                                    "model_size": j.get("model_size", "base"),
+                                    "model_size": j.get("model_size", "tiny"),
                                     "duration": j.get("duration")
                                 }
                                 break
@@ -701,7 +706,6 @@ async def rename_speaker(transcript_id: str, payload: Dict[str, Any]):
 
 # --- Merge Misclassified Speakers ---
 @app.post("/api/transcripts/{transcript_id}/merge-speakers")
-@app.post("/api/transcripts/{transcript_id}/merge_speakers")
 async def merge_speakers(transcript_id: str, payload: Dict[str, Any]):
     """
     Merges a misclassified source speaker into a target speaker.
@@ -926,7 +930,7 @@ async def api_db_stats():
     stats["uploads_size"] = folder_size(UPLOADS_DIR)
     stats["audio_size"] = folder_size(AUDIO_DIR)
     stats["server_port"] = 8000
-    stats["app_version"] = "1.0.0-beta.2"
+    stats["app_version"] = "v0.3-beta"
     stats["platform"] = sys.platform
     stats["frozen"] = getattr(sys, "frozen", False)
     return stats
@@ -1023,7 +1027,7 @@ async def api_get_models_info():
             "ready": seg_exists and emb_exists
         },
         "whisper_models": whisper_status,
-        "offline_ready": (seg_exists and emb_exists and whisper_status.get("base", {}).get("installed_locally", False))
+        "offline_ready": (seg_exists and emb_exists and whisper_status.get("tiny", {}).get("installed_locally", False))
     })
 
 @app.get("/favicon.ico")
