@@ -90,6 +90,70 @@
                     <span class="hidden sm:inline">Upload Media</span>
                 </button>
 
+                <!-- Theme Switcher (Light / Dark / System) -->
+                <div class="nav-dropdown-wrapper">
+                    <button id="btnThemeToggle" class="btn btn-secondary btn-icon" title="Theme: Light / Dark / System" aria-label="Toggle Theme">
+                        <svg id="themeIconDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                        <svg id="themeIconLight" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 hidden">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                        <svg id="themeIconSystem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 hidden">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                    </button>
+                    <div id="themeDropdownMenu" class="dropdown-menu nav-more-menu hidden" style="min-width: 140px;">
+                        <button class="dropdown-item theme-option-btn" data-theme="light">
+                            <div class="dropdown-item-row flex items-center justify-between w-full">
+                                <div class="flex items-center gap-2">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+                                        <circle cx="12" cy="12" r="5"></circle>
+                                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                                    </svg>
+                                    <span>Light</span>
+                                </div>
+                                <span class="theme-check text-brand-400 font-bold hidden" data-check-theme="light">✓</span>
+                            </div>
+                        </button>
+                        <button class="dropdown-item theme-option-btn" data-theme="dark">
+                            <div class="dropdown-item-row flex items-center justify-between w-full">
+                                <div class="flex items-center gap-2">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+                                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                                    </svg>
+                                    <span>Dark</span>
+                                </div>
+                                <span class="theme-check text-brand-400 font-bold hidden" data-check-theme="dark">✓</span>
+                            </div>
+                        </button>
+                        <button class="dropdown-item theme-option-btn" data-theme="system">
+                            <div class="dropdown-item-row flex items-center justify-between w-full">
+                                <div class="flex items-center gap-2">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+                                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                        <line x1="8" y1="21" x2="16" y2="21"></line>
+                                        <line x1="12" y1="17" x2="12" y2="21"></line>
+                                    </svg>
+                                    <span>System</span>
+                                </div>
+                                <span class="theme-check text-brand-400 font-bold hidden" data-check-theme="system">✓</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Minimal More Actions Dropdown -->
                 <div class="nav-dropdown-wrapper">
                     <button id="btnNavMore" class="btn btn-secondary btn-icon" title="Tools & Sessions">
@@ -100,15 +164,6 @@
                         </svg>
                     </button>
                     <div id="navMoreMenu" class="dropdown-menu nav-more-menu hidden">
-                        <button id="btnTryDemo" class="dropdown-item">
-                            <div class="dropdown-item-row">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    class="icon-sm">
-                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                                </svg>
-                                <span>Try Demo Session</span>
-                            </div>
-                        </button>
                         <button id="btnManageProfiles" class="dropdown-item">
                             <div class="dropdown-item-row">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -265,7 +320,7 @@
                     <div class="accordion-body" id="bodyOpenEditors">
                         <div id="openEditorsItem" class="tree-item file-item active hidden">
                             <span class="file-icon-wrap" id="openEditorIcon">🎬</span>
-                            <span class="item-name" id="openEditorName">demo.mp4</span>
+                            <span class="item-name" id="openEditorName">No file open</span>
                             <span class="active-dot">●</span>
                         </div>
                         <div id="noOpenEditors" class="tree-empty-hint">No active session</div>
@@ -407,7 +462,7 @@
                                     </p>
 
                                     <div class="hero-cta-group">
-                                        <button id="btnHomeOpenFolder" class="btn btn-pill-primary btn-lg">
+                                        <button id="btnHomeOpenFolder" class="btn btn-primary btn-lg">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                                 class="icon">
                                                 <path
@@ -416,7 +471,7 @@
                                             </svg>
                                             Open Media Folder
                                         </button>
-                                        <button id="btnHomeUpload" class="btn btn-pill-outline btn-lg">
+                                        <button id="btnHomeUpload" class="btn btn-outline btn-lg">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                                 class="icon">
                                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -424,13 +479,6 @@
                                                 <line x1="12" y1="3" x2="12" y2="15"></line>
                                             </svg>
                                             Upload File
-                                        </button>
-                                        <button id="btnHomeDemo" class="btn btn-pill-outline btn-lg">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                class="icon">
-                                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                                            </svg>
-                                            Try Sample Demo
                                         </button>
                                         <button id="btnHomeWorkspace" class="btn btn-secondary btn-lg hidden">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -1035,7 +1083,7 @@
                                 <p class="text-xs sm:text-sm text-dark-muted mt-1">Directly inspect tables, storage utilization, and configure local offline models &amp; database.</p>
                             </div>
                             <div class="flex items-center gap-2 flex-wrap">
-                                <button id="btnDbRefresh" class="ws-btn-pill-outline" title="Refresh stats & active table">
+                                <button id="btnDbRefresh" class="ws-btn-outline" title="Refresh stats & active table">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
                                         <polyline points="23 4 23 10 17 10"></polyline>
                                         <polyline points="1 20 1 14 7 14"></polyline>
@@ -1043,14 +1091,14 @@
                                     </svg>
                                     <span>Refresh</span>
                                 </button>
-                                <button id="btnDbCleanCache" class="ws-btn-pill-outline" title="Clean temp audio & uploads cache">
+                                <button id="btnDbCleanCache" class="ws-btn-outline" title="Clean temp audio & uploads cache">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
                                         <polyline points="3 6 5 6 21 6"></polyline>
                                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                                     </svg>
                                     <span>Purge Cache</span>
                                 </button>
-                                <a id="btnDbDownload" href="/api/db/download" download="whosaid.db" class="ws-btn-pill-primary" title="Download SQLite database file">
+                                <a id="btnDbDownload" href="/api/db/download" download="whosaid.db" class="ws-btn-primary" title="Download SQLite database file">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                         <polyline points="7 10 12 15 17 10"></polyline>
@@ -1103,23 +1151,23 @@
                                     </div>
 
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <button id="btnBrowseDbFile" class="ws-btn-pill-outline text-xs" title="Select an existing SQLite database file (.db, .sqlite)">
+                                        <button id="btnBrowseDbFile" class="ws-btn-outline text-xs" title="Select an existing SQLite database file (.db, .sqlite)">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3">
                                                 <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                                             </svg>
                                             <span>Select DB File</span>
                                         </button>
-                                        <button id="btnCreateNewDbFile" class="ws-btn-pill-outline text-xs" title="Create or specify a new database file">
+                                        <button id="btnCreateNewDbFile" class="ws-btn-outline text-xs" title="Create or specify a new database file">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3">
                                                 <line x1="12" y1="5" x2="12" y2="19"></line>
                                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                                             </svg>
                                             <span>New DB...</span>
                                         </button>
-                                        <button id="btnApplyDbPath" class="ws-btn-pill-primary text-xs" title="Connect and switch active database">
+                                        <button id="btnApplyDbPath" class="ws-btn-primary text-xs" title="Connect and switch active database">
                                             <span>Connect</span>
                                         </button>
-                                        <button id="btnResetDefaultDb" class="ws-btn-pill-ghost text-xs ml-auto" title="Reset to standard app data storage">
+                                        <button id="btnResetDefaultDb" class="ws-btn-ghost text-xs ml-auto" title="Reset to standard app data storage">
                                             <span>Reset Default</span>
                                         </button>
                                     </div>
@@ -1171,13 +1219,13 @@
                                     </div>
 
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <button id="btnBrowseModelsFolder" class="ws-btn-pill-outline text-xs" title="Select a custom folder containing AI models">
+                                        <button id="btnBrowseModelsFolder" class="ws-btn-outline text-xs" title="Select a custom folder containing AI models">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3">
                                                 <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                                             </svg>
                                             <span>Select Models Folder</span>
                                         </button>
-                                        <button id="btnOpenModelsFolder" class="ws-btn-pill-outline text-xs" title="Open folder in Windows Explorer">
+                                        <button id="btnOpenModelsFolder" class="ws-btn-outline text-xs" title="Open folder in Windows Explorer">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3">
                                                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                                                 <polyline points="15 3 21 3 21 9"></polyline>
@@ -1185,10 +1233,10 @@
                                             </svg>
                                             <span>Open in Explorer</span>
                                         </button>
-                                        <button id="btnApplyModelsPath" class="ws-btn-pill-primary text-xs" title="Set and load models from this directory">
+                                        <button id="btnApplyModelsPath" class="ws-btn-primary text-xs" title="Set and load models from this directory">
                                             <span>Apply</span>
                                         </button>
-                                        <button id="btnResetDefaultModels" class="ws-btn-pill-ghost text-xs ml-auto" title="Reset to standard models folder">
+                                        <button id="btnResetDefaultModels" class="ws-btn-ghost text-xs ml-auto" title="Reset to standard models folder">
                                             <span>Reset Default</span>
                                         </button>
                                     </div>

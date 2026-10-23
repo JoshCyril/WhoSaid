@@ -41,7 +41,6 @@ class WhoSaidApp {
     this.navWorkspaceDot = document.getElementById("navWorkspaceDot");
     this.navLogo = document.getElementById("navLogo");
     this.btnHomeUpload = document.getElementById("btnHomeUpload");
-    this.btnHomeDemo = document.getElementById("btnHomeDemo");
     this.btnHomeWorkspace = document.getElementById("btnHomeWorkspace");
     this.btnHomeRefreshHistory = document.getElementById("btnHomeRefreshHistory");
     this.homeRecentGrid = document.getElementById("homeRecentGrid");
@@ -491,7 +490,7 @@ class WhoSaidApp {
             <circle cx="12" cy="12" r="10"></circle>
             <polyline points="12 6 12 12 16 14"></polyline>
           </svg>
-          <p>No recent transcriptions found. Click "Upload Video / Audio" or "Try Sample Demo" above to start!</p>
+          <p>No recent transcriptions found. Click "Upload File" or open a folder to get started!</p>
         </div>
       `;
       return;
@@ -609,16 +608,41 @@ class WhoSaidApp {
     // Homepage CTA buttons
     if (this.btnHomeUpload) this.btnHomeUpload.addEventListener("click", () => this.openUploadModal());
     if (this.btnHomeSectionUpload) this.btnHomeSectionUpload.addEventListener("click", () => this.openUploadModal());
-    if (this.btnHomeDemo) this.btnHomeDemo.addEventListener("click", () => this.loadDemo());
     if (this.btnHomeWorkspace) this.btnHomeWorkspace.addEventListener("click", () => this.showWorkspaceView());
     if (this.btnHomeRefreshHistory) this.btnHomeRefreshHistory.addEventListener("click", () => this.loadHomeRecentSessions());
 
     // Header actions
-    document.getElementById("btnNewUpload").addEventListener("click", () => this.openUploadModal());
-    document.getElementById("btnTryDemo").addEventListener("click", () => this.loadDemo());
-    document.getElementById("btnManageProfiles").addEventListener("click", () => this.openProfilesModal());
+    const btnNewUpload = document.getElementById("btnNewUpload");
+    if (btnNewUpload) btnNewUpload.addEventListener("click", () => this.openUploadModal());
+    const btnManageProfiles = document.getElementById("btnManageProfiles");
+    if (btnManageProfiles) btnManageProfiles.addEventListener("click", () => this.openProfilesModal());
     if (this.btnHistory) {
       this.btnHistory.addEventListener("click", () => this.openHistoryModal());
+    }
+
+    // Theme Switcher (Light / Dark / System)
+    this.initTheme();
+    const btnThemeToggle = document.getElementById("btnThemeToggle");
+    const themeDropdownMenu = document.getElementById("themeDropdownMenu");
+    if (btnThemeToggle && themeDropdownMenu) {
+      btnThemeToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        themeDropdownMenu.classList.toggle("hidden");
+        const navMoreMenu = document.getElementById("navMoreMenu");
+        if (navMoreMenu) navMoreMenu.classList.add("hidden");
+      });
+      document.addEventListener("click", (e) => {
+        if (!btnThemeToggle.contains(e.target) && !themeDropdownMenu.contains(e.target)) {
+          themeDropdownMenu.classList.add("hidden");
+        }
+      });
+      themeDropdownMenu.querySelectorAll(".theme-option-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const selectedTheme = btn.getAttribute("data-theme");
+          this.setTheme(selectedTheme);
+          themeDropdownMenu.classList.add("hidden");
+        });
+      });
     }
 
     // Minimal Header More Actions Dropdown
@@ -2592,35 +2616,7 @@ class WhoSaidApp {
     }
   }
 
-  // --- Demo Video Loading ---
-  async loadDemo() {
-    this.openProgressModal();
-    try {
-      const formData = new FormData();
-      formData.append("model_size", "tiny");
-      formData.append("language_mode", "en");
 
-      const resp = await fetch("/api/demo", { method: "POST", body: formData });
-      if (!resp.ok) {
-        const errData = await resp.json().catch(() => ({}));
-        this.closeProgressModal();
-        this.showToast(errData.detail || "No sample demo media file bundled. Please open or upload your video/audio file.", "info");
-        return;
-      }
-      const res = await resp.json();
-
-      if (res.cached && res.transcript_id) {
-        this.showToast(res.message, "success");
-        this.closeProgressModal();
-        this.loadTranscript(res.transcript_id);
-      } else if (res.job_id) {
-        this.subscribeJobProgress(res.job_id);
-      }
-    } catch (e) {
-      this.closeProgressModal();
-      this.showToast("No sample demo media bundled. Please open your own file.", "info");
-    }
-  }
 
   // --- Transcription History Modal (Feature 3) ---
   openHistoryModal() {
@@ -3675,22 +3671,13 @@ class WhoSaidApp {
 
         if (timestamp > 0) {
           const fileDate = new Date(timestamp);
-          const today = new Date();
-          const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
-          const startOfYesterday = startOfToday - 86400000;
-          const startOfWeek = startOfToday - 6 * 86400000;
-          const startOfFileDay = new Date(fileDate.getFullYear(), fileDate.getMonth(), fileDate.getDate()).getTime();
+          const year = fileDate.getFullYear();
+          const month = fileDate.toLocaleString("en-US", { month: "short" });
+          const day = fileDate.getDate();
 
-          sortKey = startOfFileDay;
-          if (startOfFileDay >= startOfToday) {
-            gName = "Today";
-          } else if (startOfFileDay >= startOfYesterday) {
-            gName = "Yesterday";
-          } else if (startOfFileDay >= startOfWeek) {
-            gName = "This Week";
-          } else {
-            gName = fileDate.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
-          }
+          // Format requested: "2024 > May > 14"
+          gName = `${year} > ${month} > ${day}`;
+          sortKey = new Date(year, fileDate.getMonth(), day).getTime();
         } else {
           gName = "No Date";
           sortKey = -1;
@@ -5008,4 +4995,71 @@ class WhoSaidApp {
 // Bootstrap on DOM ready
 document.addEventListener("DOMContentLoaded", () => {
   window.app = new WhoSaidApp();
-});
+
+  // ==========================================================================
+  // THEME ENGINE (Light / Dark / System)
+  // ==========================================================================
+  initTheme() {
+    const savedTheme = localStorage.getItem("whosaid_theme") || "system";
+    this.currentThemeSetting = savedTheme;
+    this.applyTheme(savedTheme);
+
+    // Watch OS system preference changes in realtime
+    if (window.matchMedia) {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      mediaQuery.addEventListener("change", () => {
+        if (this.currentThemeSetting === "system") {
+          this.applyTheme("system");
+        }
+      });
+    }
+  }
+
+  setTheme(theme) {
+    this.currentThemeSetting = theme;
+    localStorage.setItem("whosaid_theme", theme);
+    this.applyTheme(theme);
+    const label = theme.charAt(0).toUpperCase() + theme.slice(1);
+    this.showToast(`Theme changed to ${label}`, "info");
+  }
+
+  applyTheme(theme) {
+    const root = document.documentElement;
+    let effectiveDark = true;
+
+    if (theme === "dark") {
+      effectiveDark = true;
+    } else if (theme === "light") {
+      effectiveDark = false;
+    } else {
+      // system mode
+      effectiveDark = !window.matchMedia || window.matchMedia("(prefers-color-scheme: dark)").matches;
+    }
+
+    if (effectiveDark) {
+      root.classList.add("dark");
+      root.classList.remove("light");
+      root.setAttribute("data-theme", "dark");
+    } else {
+      root.classList.remove("dark");
+      root.classList.add("light");
+      root.setAttribute("data-theme", "light");
+    }
+
+    // Update active icon on header button
+    const iconDark = document.getElementById("themeIconDark");
+    const iconLight = document.getElementById("themeIconLight");
+    const iconSystem = document.getElementById("themeIconSystem");
+    if (iconDark && iconLight && iconSystem) {
+      iconDark.classList.toggle("hidden", theme !== "dark");
+      iconLight.classList.toggle("hidden", theme !== "light");
+      iconSystem.classList.toggle("hidden", theme !== "system");
+    }
+
+    // Update checkmark indicators in dropdown
+    document.querySelectorAll("[data-check-theme]").forEach((indicator) => {
+      const t = indicator.getAttribute("data-check-theme");
+      indicator.classList.toggle("hidden", t !== theme);
+    });
+  }
+}

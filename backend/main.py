@@ -261,48 +261,6 @@ async def upload_file(
         "message": "Processing started"
     })
 
-# --- Demo Video Loader ---
-@app.post("/api/demo")
-async def load_demo_video(model_size: str = Form("tiny")):
-    demo_path = os.path.join(BASE_DIR, "sample_data", "two_speakers_demo.mp4")
-    if not os.path.exists(demo_path):
-        raise HTTPException(
-            status_code=404,
-            detail="Sample demo media is not bundled in this release. Please open or upload your own video/audio file."
-        )
-
-    file_hash = compute_file_hash(demo_path)
-
-    cached_job = get_job_by_hash_and_model(file_hash, model_size)
-    if cached_job:
-        transcript = get_transcript_by_job_id(cached_job["id"])
-        if transcript:
-            return JSONResponse({
-                "job_id": cached_job["id"],
-                "transcript_id": transcript["id"],
-                "cached": True,
-                "message": "Demo loaded from cache!"
-            })
-
-    job_id = create_job(
-        filename="two_speakers_demo.mp4",
-        file_path=demo_path,
-        file_hash=file_hash,
-        model_size=model_size
-    )
-
-    thread = threading.Thread(
-        target=process_media_pipeline,
-        args=(job_id, demo_path, model_size, file_hash),
-        daemon=True
-    )
-    thread.start()
-
-    return JSONResponse({
-        "job_id": job_id,
-        "cached": False,
-        "message": "Demo processing initiated"
-    })
 
 # --- Direct Local File Processing (Desktop / Electron) ---
 @app.post("/api/process-path")

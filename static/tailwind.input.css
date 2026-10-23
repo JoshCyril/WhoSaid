@@ -25,29 +25,141 @@
 }
 
 @layer components {
-  /* Common responsive pill button */
+  /* Common responsive rectangle button with subtle corner radius */
+  .ws-btn,
   .ws-btn-pill {
-    @apply inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-full transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-brand-400/40;
+    @apply inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-[5px] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-brand-400/40;
   }
+  .ws-btn-primary,
   .ws-btn-pill-primary {
-    @apply ws-btn-pill bg-brand-400 text-slate-950 hover:bg-brand-300 font-semibold shadow-sm hover:shadow active:scale-95;
+    @apply ws-btn bg-brand-400 text-slate-950 hover:bg-brand-300 font-semibold shadow-sm hover:shadow active:scale-95;
   }
+  .ws-btn-outline,
   .ws-btn-pill-outline {
-    @apply ws-btn-pill border border-white/10 text-dark-text hover:bg-white/5 hover:border-white/20 active:scale-95;
+    @apply ws-btn border border-white/10 text-dark-text hover:bg-white/5 hover:border-white/20 active:scale-95;
   }
+  .ws-btn-ghost,
   .ws-btn-pill-ghost {
-    @apply ws-btn-pill text-dark-muted hover:text-white hover:bg-white/5;
+    @apply ws-btn text-dark-muted hover:text-white hover:bg-white/5;
   }
   
-  /* Icon Button */
+  /* Icon Button (Square with subtle corner radius) */
   .ws-btn-icon {
-    @apply inline-flex items-center justify-center w-8 h-8 rounded-lg text-dark-muted hover:text-white hover:bg-white/10 transition-colors duration-150 focus:outline-none;
+    @apply inline-flex items-center justify-center w-8 h-8 rounded-[5px] text-dark-muted hover:text-white hover:bg-white/10 transition-colors duration-150 focus:outline-none;
   }
 
   /* Responsive card */
   .ws-card {
     @apply bg-dark-card border border-white/10 rounded-xl p-4 sm:p-5 transition-all duration-150;
   }
+}
+
+/* ==========================================================================
+   LIGHT MODE OVERRIDES
+   ========================================================================== */
+html.light body,
+html[data-theme="light"] body {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+html.light .bg-dark-base {
+  background-color: #f8fafc !important;
+}
+html.light .bg-dark-surface,
+html.light .bg-dark-surface\/60 {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+html.light .bg-dark-card {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+html.light .bg-dark-raised {
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+}
+html.light .text-dark-text,
+html.light .text-white {
+  color: #0f172a !important;
+}
+html.light .text-dark-heading {
+  color: #020617 !important;
+}
+html.light .text-dark-muted {
+  color: #64748b !important;
+}
+html.light .text-dark-subtle {
+  color: #94a3b8 !important;
+}
+html.light .border-white\/5,
+html.light .border-white\/10,
+html.light .border-white\/15,
+html.light .border-white\/20 {
+  border-color: #e2e8f0 !important;
+}
+html.light .hover\:bg-white\/5:hover,
+html.light .hover\:bg-white\/10:hover {
+  background-color: #f1f5f9 !important;
+}
+html.light .app-header {
+  background-color: #ffffff !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+html.light .vscode-activity-bar {
+  background-color: #f1f5f9 !important;
+  border-right-color: #e2e8f0 !important;
+}
+html.light .vscode-explorer-sidebar {
+  background-color: #ffffff !important;
+  border-right-color: #e2e8f0 !important;
+}
+html.light .app-status-bar {
+  background-color: #f1f5f9 !important;
+  border-top-color: #e2e8f0 !important;
+  color: #64748b !important;
+}
+html.light .tree-item:hover {
+  background-color: #f1f5f9 !important;
+}
+html.light .tree-item.active {
+  background-color: #e0f2fe !important;
+}
+html.light .dropdown-menu {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+}
+html.light .dropdown-item {
+  color: #334155 !important;
+}
+html.light .dropdown-item:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+html.light .db-kpi-card {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+html.light .table-inspector-shell {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+html.light .db-table-scroll th {
+  background-color: #f8fafc !important;
+  color: #475569 !important;
+  border-color: #e2e8f0 !important;
+}
+html.light .db-table-scroll td {
+  border-color: #f1f5f9 !important;
+  color: #334155 !important;
+}
+html.light .db-table-scroll tr:hover td {
+  background-color: #f8fafc !important;
+}
+html.light .modal-card {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
 }
 
 /* ==========================================================================
