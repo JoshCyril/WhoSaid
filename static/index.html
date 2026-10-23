@@ -1083,7 +1083,7 @@
                                 <p class="text-xs sm:text-sm text-dark-muted mt-1">Directly inspect tables, storage utilization, and configure local offline models &amp; database.</p>
                             </div>
                             <div class="flex items-center gap-2 flex-wrap">
-                                <button id="btnDbRefresh" class="ws-btn-outline" title="Refresh stats & active table">
+                                <button id="btnDbRefresh" class="btn btn-secondary btn-sm" title="Refresh stats & active table">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
                                         <polyline points="23 4 23 10 17 10"></polyline>
                                         <polyline points="1 20 1 14 7 14"></polyline>
@@ -1091,14 +1091,14 @@
                                     </svg>
                                     <span>Refresh</span>
                                 </button>
-                                <button id="btnDbCleanCache" class="ws-btn-outline" title="Clean temp audio & uploads cache">
+                                <button id="btnDbCleanCache" class="btn btn-secondary btn-sm" title="Clean temp audio & uploads cache">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
                                         <polyline points="3 6 5 6 21 6"></polyline>
                                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                                     </svg>
                                     <span>Purge Cache</span>
                                 </button>
-                                <a id="btnDbDownload" href="/api/db/download" download="whosaid.db" class="ws-btn-primary" title="Download SQLite database file">
+                                <a id="btnDbDownload" href="/api/db/download" download="whosaid.db" class="btn btn-primary btn-sm" title="Download SQLite database file">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                         <polyline points="7 10 12 15 17 10"></polyline>
@@ -1151,23 +1151,23 @@
                                     </div>
 
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <button id="btnBrowseDbFile" class="ws-btn-outline text-xs" title="Select an existing SQLite database file (.db, .sqlite)">
+                                        <button id="btnBrowseDbFile" class="btn btn-secondary btn-sm text-xs" title="Select an existing SQLite database file (.db, .sqlite)">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3">
                                                 <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                                             </svg>
                                             <span>Select DB File</span>
                                         </button>
-                                        <button id="btnCreateNewDbFile" class="ws-btn-outline text-xs" title="Create or specify a new database file">
+                                        <button id="btnCreateNewDbFile" class="btn btn-secondary btn-sm text-xs" title="Create or specify a new database file">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3">
                                                 <line x1="12" y1="5" x2="12" y2="19"></line>
                                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                                             </svg>
                                             <span>New DB...</span>
                                         </button>
-                                        <button id="btnApplyDbPath" class="ws-btn-primary text-xs" title="Connect and switch active database">
+                                        <button id="btnApplyDbPath" class="btn btn-primary btn-sm text-xs" title="Connect and switch active database">
                                             <span>Connect</span>
                                         </button>
-                                        <button id="btnResetDefaultDb" class="ws-btn-ghost text-xs ml-auto" title="Reset to standard app data storage">
+                                        <button id="btnResetDefaultDb" class="btn btn-outline btn-sm text-xs ml-auto" title="Reset to standard app data storage">
                                             <span>Reset Default</span>
                                         </button>
                                     </div>
@@ -1219,13 +1219,13 @@
                                     </div>
 
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <button id="btnBrowseModelsFolder" class="ws-btn-outline text-xs" title="Select a custom folder containing AI models">
+                                        <button id="btnBrowseModelsFolder" class="btn btn-secondary btn-sm text-xs" title="Select a custom folder containing AI models">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3">
                                                 <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                                             </svg>
                                             <span>Select Models Folder</span>
                                         </button>
-                                        <button id="btnOpenModelsFolder" class="ws-btn-outline text-xs" title="Open folder in Windows Explorer">
+                                        <button id="btnOpenModelsFolder" class="btn btn-secondary btn-sm text-xs" title="Open folder in Windows Explorer">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3">
                                                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                                                 <polyline points="15 3 21 3 21 9"></polyline>
@@ -1233,10 +1233,10 @@
                                             </svg>
                                             <span>Open in Explorer</span>
                                         </button>
-                                        <button id="btnApplyModelsPath" class="ws-btn-primary text-xs" title="Set and load models from this directory">
+                                        <button id="btnApplyModelsPath" class="btn btn-primary btn-sm text-xs" title="Set and load models from this directory">
                                             <span>Apply</span>
                                         </button>
-                                        <button id="btnResetDefaultModels" class="ws-btn-ghost text-xs ml-auto" title="Reset to standard models folder">
+                                        <button id="btnResetDefaultModels" class="btn btn-outline btn-sm text-xs ml-auto" title="Reset to standard models folder">
                                             <span>Reset Default</span>
                                         </button>
                                     </div>
@@ -1346,7 +1346,21 @@
                             </div>
                         </div>
 
-                        <!-- Database Subtabs Navigation -->
+                        <!-- Advanced Database & System Tools (Collapsed by Default) -->
+                        <div class="border border-white/10 rounded-xl overflow-hidden mt-6 bg-dark-card/40" id="advancedDbSectionWrap">
+                            <button id="btnToggleAdvancedDb" class="w-full flex items-center justify-between p-4 bg-dark-card/70 hover:bg-dark-card transition-colors text-left" type="button">
+                                <div class="flex items-center gap-2.5">
+                                    <svg id="advancedDbChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 transition-transform duration-200 text-dark-muted">
+                                        <polyline points="9 18 15 12 9 6"></polyline>
+                                    </svg>
+                                    <span class="text-sm font-semibold text-white">Advanced Database &amp; System Tools</span>
+                                    <span class="text-[10px] px-2 py-0.5 rounded font-mono bg-white/10 text-dark-muted" id="advancedDbStatusBadge">Collapsed</span>
+                                </div>
+                                <span class="text-xs text-dark-muted hidden sm:inline">Jobs, Transcripts, Profiles, SQL Console, Diagnostics</span>
+                            </button>
+
+                            <div id="advancedDbContent" class="hidden p-4 border-t border-white/10 space-y-4">
+<!-- Database Subtabs Navigation -->
                         <div class="db-subnav-strip">
                             <div class="db-tabs-left">
                                 <button class="db-subtab active" data-tab="jobs">
@@ -1527,6 +1541,8 @@
                                 </div>
                             </div>
                         </div>
+                            </div>
+                        </div>
 
                     </section>
 
@@ -1583,30 +1599,30 @@
 
                     <div class="model-selection-group">
                         <label class="section-label">Whisper Model Size</label>
-                        <div class="model-pills">
+                        <div class="model-pills" id="uploadModalModelPills">
                             <label class="model-pill">
-                                <input type="radio" name="pathModelSize" value="tiny" checked>
+                                <input type="radio" name="pathModelSize" value="tiny" checked data-path-model-size="tiny">
                                 <div class="pill-content">
                                     <span class="pill-name">Tiny</span>
                                     <span class="pill-desc">Ultra Fast (Offline Bundled)</span>
                                 </div>
                             </label>
                             <label class="model-pill">
-                                <input type="radio" name="pathModelSize" value="base">
+                                <input type="radio" name="pathModelSize" value="base" data-path-model-size="base">
                                 <div class="pill-content">
                                     <span class="pill-name">Base</span>
                                     <span class="pill-desc">Balanced (Custom)</span>
                                 </div>
                             </label>
                             <label class="model-pill">
-                                <input type="radio" name="pathModelSize" value="small">
+                                <input type="radio" name="pathModelSize" value="small" data-path-model-size="small">
                                 <div class="pill-content">
                                     <span class="pill-name">Small</span>
                                     <span class="pill-desc">High Accuracy (Custom)</span>
                                 </div>
                             </label>
                             <label class="model-pill">
-                                <input type="radio" name="pathModelSize" value="medium">
+                                <input type="radio" name="pathModelSize" value="medium" data-path-model-size="medium">
                                 <div class="pill-content">
                                     <span class="pill-name">Medium</span>
                                     <span class="pill-desc">Max Quality (Custom)</span>
@@ -1683,30 +1699,30 @@
                     <!-- Model Size Selection (Requirement Non-functional: Adjustable model size) -->
                     <div class="model-selection-group">
                         <label class="section-label">Whisper Model Size</label>
-                        <div class="model-pills">
+                        <div class="model-pills" id="uploadModalModelPills">
                             <label class="model-pill">
-                                <input type="radio" name="modelSize" value="tiny" checked>
+                                <input type="radio" name="modelSize" value="tiny" checked data-model-size="tiny">
                                 <div class="pill-content">
                                     <span class="pill-name">Tiny</span>
                                     <span class="pill-desc">Ultra Fast (Offline Bundled)</span>
                                 </div>
                             </label>
                             <label class="model-pill">
-                                <input type="radio" name="modelSize" value="base">
+                                <input type="radio" name="modelSize" value="base" data-model-size="base">
                                 <div class="pill-content">
                                     <span class="pill-name">Base</span>
                                     <span class="pill-desc">Balanced (Custom)</span>
                                 </div>
                             </label>
                             <label class="model-pill">
-                                <input type="radio" name="modelSize" value="small">
+                                <input type="radio" name="modelSize" value="small" data-model-size="small">
                                 <div class="pill-content">
                                     <span class="pill-name">Small</span>
                                     <span class="pill-desc">High Accuracy (Custom)</span>
                                 </div>
                             </label>
                             <label class="model-pill">
-                                <input type="radio" name="modelSize" value="medium">
+                                <input type="radio" name="modelSize" value="medium" data-model-size="medium">
                                 <div class="pill-content">
                                     <span class="pill-name">Medium</span>
                                     <span class="pill-desc">Max Quality (Custom)</span>

@@ -611,6 +611,24 @@ class WhoSaidApp {
     if (this.btnHomeWorkspace) this.btnHomeWorkspace.addEventListener("click", () => this.showWorkspaceView());
     if (this.btnHomeRefreshHistory) this.btnHomeRefreshHistory.addEventListener("click", () => this.loadHomeRecentSessions());
 
+    // Advanced Database Section Accordion Toggle
+    const btnToggleAdvancedDb = document.getElementById("btnToggleAdvancedDb");
+    const advancedDbContent = document.getElementById("advancedDbContent");
+    const advancedDbChevron = document.getElementById("advancedDbChevron");
+    const advancedDbStatusBadge = document.getElementById("advancedDbStatusBadge");
+
+    if (btnToggleAdvancedDb && advancedDbContent) {
+      btnToggleAdvancedDb.addEventListener("click", () => {
+        const isHidden = advancedDbContent.classList.toggle("hidden");
+        if (advancedDbChevron) {
+          advancedDbChevron.style.transform = isHidden ? "rotate(0deg)" : "rotate(90deg)";
+        }
+        if (advancedDbStatusBadge) {
+          advancedDbStatusBadge.textContent = isHidden ? "Collapsed" : "Expanded";
+        }
+      });
+    }
+
     // Header actions
     const btnNewUpload = document.getElementById("btnNewUpload");
     if (btnNewUpload) btnNewUpload.addEventListener("click", () => this.openUploadModal());
@@ -4990,11 +5008,6 @@ class WhoSaidApp {
     const modal = document.getElementById("dbDetailModal");
     if (modal) modal.classList.add("hidden");
   }
-}
-
-// Bootstrap on DOM ready
-document.addEventListener("DOMContentLoaded", () => {
-  window.app = new WhoSaidApp();
 
   // ==========================================================================
   // THEME ENGINE (Light / Dark / System)
@@ -5062,4 +5075,72 @@ document.addEventListener("DOMContentLoaded", () => {
       indicator.classList.toggle("hidden", t !== theme);
     });
   }
+
+  updateAvailableModelsInModals() {
+    if (!this.modelsInfo || !this.modelsInfo.models) return;
+
+    // 1. Upload modal: only show available models
+    const uploadPills = document.querySelectorAll("#uploadModalModelPills .model-pill");
+    let firstUploadFound = null;
+    let anyUploadChecked = false;
+
+    uploadPills.forEach((pill) => {
+      const radio = pill.querySelector("input[name='modelSize']");
+      if (!radio) return;
+      const modelKey = radio.value;
+      const isInstalled = Boolean(this.modelsInfo.models[modelKey]?.installed);
+
+      if (isInstalled) {
+        pill.style.display = "";
+        pill.classList.remove("hidden");
+        if (radio.checked) anyUploadChecked = true;
+        if (!firstUploadFound) {
+          firstUploadFound = radio;
+        }
+      } else {
+        pill.style.display = "none";
+        pill.classList.add("hidden");
+        radio.checked = false;
+      }
+    });
+
+    if (!anyUploadChecked && firstUploadFound) {
+      firstUploadFound.checked = true;
+    }
+
+    // 2. Transcribe Path modal: only show available models
+    const pathPills = document.querySelectorAll("#transcribePathModal .model-pills .model-pill");
+    let firstPathFound = null;
+    let anyPathChecked = false;
+
+    pathPills.forEach((pill) => {
+      const radio = pill.querySelector("input[name='pathModelSize']");
+      if (!radio) return;
+      const modelKey = radio.value;
+      const isInstalled = Boolean(this.modelsInfo.models[modelKey]?.installed);
+
+      if (isInstalled) {
+        pill.style.display = "";
+        pill.classList.remove("hidden");
+        if (radio.checked) anyPathChecked = true;
+        if (!firstPathFound) {
+          firstPathFound = radio;
+        }
+      } else {
+        pill.style.display = "none";
+        pill.classList.add("hidden");
+        radio.checked = false;
+      }
+    });
+
+    if (!anyPathChecked && firstPathFound) {
+      firstPathFound.checked = true;
+    }
+  }
 }
+
+// Bootstrap on DOM ready
+document.addEventListener("DOMContentLoaded", () => {
+  window.app = new WhoSaidApp();
+});
+
