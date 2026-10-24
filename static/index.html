@@ -17,197 +17,52 @@
     <!-- Local DiceBear Cameo Engine (100% Offline from cameo.min.json) -->
     <script src="/static/libs/cameo.js"></script>
     <!-- Unified Tailwind & Vega Design System (100% Offline Compiled) -->
-    <link rel="stylesheet" href="/static/tailwind.css">
+    <link rel="stylesheet" href="/static/tailwind.css?v=fullwidth1">
 </head>
 
 <body class="style-vega">
     <div id="app" class="app-container">
 
-        <!-- Top Header -->
-        <header class="app-header">
-            <div class="header-left">
-                <!-- Mobile Sidebar Toggle -->
-                <button id="btnHeaderToggleSidebar" class="md:hidden ws-btn-icon text-dark-muted hover:text-white" title="Toggle Explorer Sidebar (Ctrl+B)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5">
-                        <line x1="3" y1="12" x2="21" y2="12"></line>
-                        <line x1="3" y1="6" x2="21" y2="6"></line>
-                        <line x1="3" y1="18" x2="21" y2="18"></line>
-                    </svg>
-                </button>
-
-                <div class="brand-logo" id="navLogo" role="button" title="Go to Homepage">
-                    <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M12 2v20M17 5v14M7 5v14M22 10v4M2 10v4" />
-                    </svg>
-                    <div class="brand-info">
-                        <h1 class="brand-title">Who Said</h1>
-                        <span class="brand-badge">Local CPU</span>
-                    </div>
-                </div>
-
-                <nav class="header-nav">
-                    <button id="navHome" class="nav-tab active" title="Go to Homepage">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
-                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                        </svg>
-                        Home
-                    </button>
-                    <button id="navWorkspace" class="nav-tab" title="View Active Workspace">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
-                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                            <line x1="8" y1="21" x2="16" y2="21"></line>
-                            <line x1="12" y1="17" x2="12" y2="21"></line>
-                        </svg>
-                        Workspace
-                        <span id="navWorkspaceDot" class="nav-dot hidden"></span>
-                    </button>
-                    <button id="navProfiles" class="nav-tab" title="Enrolled Voice Profiles">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
-                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                        Voice Profiles
-                    </button>
-                    <button id="navHistory" class="nav-tab" title="Transcription History">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
-                        </svg>
-                        History
-                    </button>
-                    <button id="navBackendSettings" class="nav-tab" title="Settings">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
-                            <circle cx="12" cy="12" r="3"></circle>
-                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                        </svg>
-                        Settings
-                    </button>
-                </nav>
+        <!-- Electron Desktop Titlebar (Frameless Header with Brand & Window Controls) -->
+        <header class="electron-titlebar" id="electronTitlebar">
+            <!-- Left: App Icon, Brand Name, Version & Status Badges -->
+            <div class="titlebar-brand app-no-drag" id="navLogo" role="button" title="Who Said — Local CPU Speech AI (Click to go Home)">
+                <svg class="titlebar-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v20M17 5v14M7 5v14M22 10v4M2 10v4" />
+                </svg>
+                <span class="titlebar-app-name">Who Said</span>
+                <span class="titlebar-version-badge">v0.3.0 Beta</span>
+                <span class="titlebar-status-badge">
+                    <span class="status-pulse-dot"></span>
+                    Local CPU
+                </span>
             </div>
 
-            <div class="header-center">
-                <!-- Center title area cleaned: filename moved to tabs -->
-            </div>
+            <!-- Center: Draggable Window Region -->
+            <div class="titlebar-center app-drag-region" id="titlebarDragRegion"></div>
 
-            <div class="header-right">
-                <button id="btnNewUpload" class="btn btn-primary" title="Upload a video or audio file">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="17 8 12 3 7 8"></polyline>
-                        <line x1="12" y1="3" x2="12" y2="15"></line>
+            <!-- Right: Electron Window Controls (Minimize, Maximize/Restore, Close) -->
+            <div class="titlebar-controls app-no-drag" id="titlebarControls">
+                <button id="btnWinMinimize" class="titlebar-btn" title="Minimize" aria-label="Minimize">
+                    <svg viewBox="0 0 12 12" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="1.2">
+                        <line x1="1" y1="6" x2="11" y2="6"></line>
                     </svg>
-                    <span class="hidden sm:inline">Upload Media</span>
                 </button>
-
-                <!-- Theme Switcher (Light / Dark / System) -->
-                <div class="nav-dropdown-wrapper">
-                    <button id="btnThemeToggle" class="btn btn-secondary btn-icon" title="Theme: Light / Dark / System" aria-label="Toggle Theme">
-                        <svg id="themeIconDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
-                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                        </svg>
-                        <svg id="themeIconLight" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 hidden">
-                            <circle cx="12" cy="12" r="5"></circle>
-                            <line x1="12" y1="1" x2="12" y2="3"></line>
-                            <line x1="12" y1="21" x2="12" y2="23"></line>
-                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                            <line x1="1" y1="12" x2="3" y2="12"></line>
-                            <line x1="21" y1="12" x2="23" y2="12"></line>
-                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                        </svg>
-                        <svg id="themeIconSystem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 hidden">
-                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                            <line x1="8" y1="21" x2="16" y2="21"></line>
-                            <line x1="12" y1="17" x2="12" y2="21"></line>
-                        </svg>
-                    </button>
-                    <div id="themeDropdownMenu" class="dropdown-menu nav-more-menu hidden" style="min-width: 140px;">
-                        <button class="dropdown-item theme-option-btn" data-theme="light">
-                            <div class="dropdown-item-row flex items-center justify-between w-full">
-                                <div class="flex items-center gap-2">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
-                                        <circle cx="12" cy="12" r="5"></circle>
-                                        <line x1="12" y1="1" x2="12" y2="3"></line>
-                                        <line x1="12" y1="21" x2="12" y2="23"></line>
-                                    </svg>
-                                    <span>Light</span>
-                                </div>
-                                <span class="theme-check text-brand-400 font-bold hidden" data-check-theme="light">✓</span>
-                            </div>
-                        </button>
-                        <button class="dropdown-item theme-option-btn" data-theme="dark">
-                            <div class="dropdown-item-row flex items-center justify-between w-full">
-                                <div class="flex items-center gap-2">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
-                                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                                    </svg>
-                                    <span>Dark</span>
-                                </div>
-                                <span class="theme-check text-brand-400 font-bold hidden" data-check-theme="dark">✓</span>
-                            </div>
-                        </button>
-                        <button class="dropdown-item theme-option-btn" data-theme="system">
-                            <div class="dropdown-item-row flex items-center justify-between w-full">
-                                <div class="flex items-center gap-2">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
-                                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                                        <line x1="8" y1="21" x2="16" y2="21"></line>
-                                        <line x1="12" y1="17" x2="12" y2="21"></line>
-                                    </svg>
-                                    <span>System</span>
-                                </div>
-                                <span class="theme-check text-brand-400 font-bold hidden" data-check-theme="system">✓</span>
-                            </div>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Minimal More Actions Dropdown -->
-                <div class="nav-dropdown-wrapper">
-                    <button id="btnNavMore" class="btn btn-secondary btn-icon" title="Tools & Sessions">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon">
-                            <circle cx="12" cy="12" r="1.5"></circle>
-                            <circle cx="12" cy="5" r="1.5"></circle>
-                            <circle cx="12" cy="19" r="1.5"></circle>
-                        </svg>
-                    </button>
-                    <div id="navMoreMenu" class="dropdown-menu nav-more-menu hidden">
-                        <button id="btnManageProfiles" class="dropdown-item">
-                            <div class="dropdown-item-row">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    class="icon-sm">
-                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="12" cy="7" r="4"></circle>
-                                </svg>
-                                <span>Voice Profiles (<span id="profileCountBadge">0</span>)</span>
-                            </div>
-                        </button>
-                        <button id="btnHistory" class="dropdown-item">
-                            <div class="dropdown-item-row">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    class="icon-sm">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <polyline points="12 6 12 12 16 14"></polyline>
-                                </svg>
-                                <span>History (<span id="headerHistoryCountBadge">0</span>)</span>
-                            </div>
-                        </button>
-                        <button id="btnNavDbLocation" class="dropdown-item">
-                            <div class="dropdown-item-row">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    class="icon-sm">
-                                    <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
-                                    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
-                                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
-                                </svg>
-                                <span>Database File Location</span>
-                            </div>
-                        </button>
-                    </div>
-                </div>
+                <button id="btnWinMaximize" class="titlebar-btn" title="Maximize" aria-label="Maximize">
+                    <svg id="iconWinMax" viewBox="0 0 12 12" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="1.2">
+                        <rect x="1.5" y="1.5" width="9" height="9" rx="1"></rect>
+                    </svg>
+                    <svg id="iconWinRestore" viewBox="0 0 12 12" class="w-3 h-3 hidden" fill="none" stroke="currentColor" stroke-width="1.2">
+                        <rect x="3.5" y="1.5" width="7" height="7" rx="0.5"></rect>
+                        <path d="M1.5 3.5v7h7"></path>
+                    </svg>
+                </button>
+                <button id="btnWinClose" class="titlebar-btn titlebar-btn-close" title="Close" aria-label="Close">
+                    <svg viewBox="0 0 12 12" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="1.2">
+                        <line x1="2" y1="2" x2="10" y2="10"></line>
+                        <line x1="10" y1="2" x2="2" y2="10"></line>
+                    </svg>
+                </button>
             </div>
         </header>
 
@@ -217,42 +72,136 @@
             <!-- VS Code Activity Bar (Far Left Strip) -->
             <aside class="vscode-activity-bar" id="vscodeActivityBar">
                 <div class="activity-bar-top">
-                    <button class="activity-bar-item active" id="actBarExplorer"
-                        title="Explorer (Ctrl+Shift+E / Ctrl+B)">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            class="activity-icon">
-                            <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z">
-                            </path>
+                    <!-- Home -->
+                    <button class="activity-bar-item active" id="navHome" title="Home">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
                         </svg>
                         <span class="activity-active-indicator"></span>
                     </button>
-                    <button class="activity-bar-item" id="actBarProfiles" title="Voice Profiles">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            class="activity-icon">
+
+                    <!-- Workspace -->
+                    <button class="activity-bar-item" id="navWorkspace" title="Workspace">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                        <span id="navWorkspaceDot" class="nav-dot hidden"></span>
+                        <span class="activity-active-indicator"></span>
+                    </button>
+
+                    <!-- Explorer Toggle -->
+                    <button class="activity-bar-item" id="actBarExplorer" title="Explorer (Ctrl+Shift+E / Ctrl+B)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon">
+                            <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z"></path>
+                        </svg>
+                        <span class="activity-active-indicator"></span>
+                    </button>
+
+                    <!-- Voice Profiles -->
+                    <button class="activity-bar-item" id="navProfiles" title="Voice Profiles">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon">
                             <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
                             <circle cx="12" cy="7" r="4"></circle>
                         </svg>
+                        <span class="activity-active-indicator"></span>
                     </button>
-                    <button class="activity-bar-item" id="actBarHistory" title="History">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            class="activity-icon">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
+
+                    <div class="activity-bar-divider"></div>
+
+                    <!-- Upload Button -->
+                    <button class="activity-bar-item activity-upload-btn" id="btnNewUpload" title="Upload Media">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
                         </svg>
                     </button>
                 </div>
+
                 <div class="activity-bar-bottom">
+                    <!-- Theme Switcher (Flyout) -->
+                    <div class="activity-flyout-wrapper">
+                        <button id="btnThemeToggle" class="activity-bar-item" title="Theme (Light / Dark / System)" aria-label="Toggle Theme">
+                            <svg id="themeIconDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                            </svg>
+                            <svg id="themeIconLight" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon hidden">
+                                <circle cx="12" cy="12" r="5"></circle>
+                                <line x1="12" y1="1" x2="12" y2="3"></line>
+                                <line x1="12" y1="21" x2="12" y2="23"></line>
+                                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                                <line x1="1" y1="12" x2="3" y2="12"></line>
+                                <line x1="21" y1="12" x2="23" y2="12"></line>
+                                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                            </svg>
+                            <svg id="themeIconSystem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon hidden">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                <line x1="8" y1="21" x2="16" y2="21"></line>
+                                <line x1="12" y1="17" x2="12" y2="21"></line>
+                            </svg>
+                        </button>
+                        <div id="themeDropdownMenu" class="dropdown-menu activity-flyout-menu hidden" style="min-width: 140px;">
+                            <button class="dropdown-item theme-option-btn" data-theme="light">
+                                <div class="dropdown-item-row flex items-center justify-between w-full">
+                                    <div class="flex items-center gap-2">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+                                            <circle cx="12" cy="12" r="5"></circle>
+                                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                                        </svg>
+                                        <span>Light</span>
+                                    </div>
+                                    <span class="theme-check text-brand-400 font-bold hidden" data-check-theme="light">✓</span>
+                                </div>
+                            </button>
+                            <button class="dropdown-item theme-option-btn" data-theme="dark">
+                                <div class="dropdown-item-row flex items-center justify-between w-full">
+                                    <div class="flex items-center gap-2">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+                                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                                        </svg>
+                                        <span>Dark</span>
+                                    </div>
+                                    <span class="theme-check text-brand-400 font-bold hidden" data-check-theme="dark">✓</span>
+                                </div>
+                            </button>
+                            <button class="dropdown-item theme-option-btn" data-theme="system">
+                                <div class="dropdown-item-row flex items-center justify-between w-full">
+                                    <div class="flex items-center gap-2">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+                                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                                        </svg>
+                                        <span>System</span>
+                                    </div>
+                                    <span class="theme-check text-brand-400 font-bold hidden" data-check-theme="system">✓</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Settings -->
+                    <button class="activity-bar-item" id="navBackendSettings" title="Settings">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                        <span class="activity-active-indicator"></span>
+                    </button>
+
+
+
+                    <!-- CPU badge -->
                     <div class="activity-bar-badge" title="100% Offline CPU Speech Processing">
                         <span class="cpu-dot"></span>
                         <span class="cpu-text">CPU</span>
                     </div>
-                    <button class="activity-bar-item" id="actBarToggleSidebar" title="Toggle Explorer Sidebar (Ctrl+B)">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            class="activity-icon">
-                            <rect width="18" height="18" x="3" y="3" rx="2"></rect>
-                            <path d="M9 3v18"></path>
-                        </svg>
-                    </button>
                 </div>
             </aside>
 
@@ -641,17 +590,38 @@
                                 </div>
 
                             </div>
-                        </div>
-
-                        <!-- Recent Transcriptions Section -->
+                                        <!-- Recent Transcriptions Section (Combined Transcriptions & History) -->
                         <div class="home-section" id="homeRecentSection">
                             <div class="section-header">
                                 <div class="section-title-wrap">
                                     <h3 class="section-title">Recent Transcriptions</h3>
-                                    <p class="section-subtitle">Jump directly back into your recent transcripts or load
-                                        demo sessions</p>
+                                    <p class="section-subtitle">Browse your media transcriptions, view speaker rosters, and resume past workspace sessions</p>
                                 </div>
                                 <div class="section-header-actions" style="display:flex; align-items:center; gap:8px;">
+                                    <!-- View Mode Toggle: Gallery / Table (User Request) -->
+                                    <div class="recent-view-toggle-wrap" id="recentViewToggleWrap" style="display:inline-flex; align-items:center; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.12); border-radius:6px; padding:2px;">
+                                        <button id="btnToggleRecentGallery" class="btn-view-toggle active" title="Gallery View (Cards)" style="display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:4px; font-size:11.5px; font-weight:600; cursor:pointer; background:rgba(56,189,248,0.16); color:#38bdf8; border:none; transition:all 0.15s ease;">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;">
+                                                <rect x="3" y="3" width="7" height="7"></rect>
+                                                <rect x="14" y="3" width="7" height="7"></rect>
+                                                <rect x="14" y="14" width="7" height="7"></rect>
+                                                <rect x="3" y="14" width="7" height="7"></rect>
+                                            </svg>
+                                            <span>Gallery</span>
+                                        </button>
+                                        <button id="btnToggleRecentTable" class="btn-view-toggle" title="Table View" style="display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:4px; font-size:11.5px; font-weight:600; cursor:pointer; background:transparent; color:#94a3b8; border:none; transition:all 0.15s ease;">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;">
+                                                <line x1="8" y1="6" x2="21" y2="6"></line>
+                                                <line x1="8" y1="12" x2="21" y2="12"></line>
+                                                <line x1="8" y1="18" x2="21" y2="18"></line>
+                                                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                                                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                                                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                                            </svg>
+                                            <span>Table</span>
+                                        </button>
+                                    </div>
+
                                     <button id="btnHomeSectionUpload" class="btn btn-sm btn-primary hidden"
                                         title="Upload Media">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -677,6 +647,7 @@
                                 </div>
                             </div>
 
+                            <!-- 1. Gallery Mode (Cards Grid) -->
                             <div id="homeRecentGrid" class="home-recent-grid">
                                 <!-- Dynamic Cards Populated by JS -->
                                 <div class="recent-empty-state">
@@ -685,11 +656,30 @@
                                         <circle cx="12" cy="12" r="10"></circle>
                                         <polyline points="12 6 12 12 16 14"></polyline>
                                     </svg>
-                                    <p>No recent transcriptions found. Click "Upload Media" or "Try Demo" to get
-                                        started!</p>
+                                    <p>No recent transcriptions found. Click "Upload Media" or "Try Demo" to get started!</p>
                                 </div>
                             </div>
-                        </div>
+
+                            <!-- 2. Table Mode (Structured Data Table) -->
+                            <div id="homeRecentTableWrap" class="home-recent-table-wrap hidden bg-surface-card border border-surface-border rounded-xl shadow-sm overflow-hidden">
+                                <div class="overflow-x-auto">
+                                    <table id="homeRecentTable" class="w-full text-left border-collapse text-xs sm:text-sm">
+                                        <thead>
+                                            <tr class="border-b border-surface-border bg-surface-base/70 text-text-muted uppercase text-[11px] font-semibold tracking-wider">
+                                                <th class="py-3 px-4">Media File</th>
+                                                <th class="py-3 px-4">Speakers</th>
+                                                <th class="py-3 px-4">Tags</th>
+                                                <th class="py-3 px-4">Duration &amp; Date</th>
+                                                <th class="py-3 px-4 text-right">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="homeRecentTableBody" class="divide-y divide-surface-border">
+                                            <!-- Dynamic rows populated by JS -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>            </div>
                     </section>
 
                     <!-- Active Workspace View -->
@@ -773,9 +763,13 @@
                                             <!-- Floating In-Player CC / Fullscreen Subtitles -->
                                             <div class="player-cc-banner hidden" id="playerCcOverlay">
                                                 <div class="caption-dialogue-row" id="playerCcDialogueRow">
-                                                    <div id="playerCcAvatarWrap" class="caption-avatar-slot"></div>
-                                                    <span id="playerCcSpeakerTag" class="caption-speaker-name"></span>
-                                                    <p id="playerCcText" class="caption-dialogue-text"></p>
+                                                    <div class="caption-col-speaker">
+                                                        <div id="playerCcAvatarWrap" class="caption-avatar-slot"></div>
+                                                        <span id="playerCcSpeakerTag" class="caption-speaker-name"></span>
+                                                    </div>
+                                                    <div class="caption-col-text">
+                                                        <p id="playerCcText" class="caption-dialogue-text"></p>
+                                                    </div>
                                                 </div>
                                             </div>
 
@@ -787,73 +781,48 @@
                                                 </div>
                                             </div>
 
-                                            <!-- Floating Playback Control Buttons (Hides when playing or collapsed) -->
+                                            <!-- Two Floating Player Control Islands (Left & Right) -->
                                             <div class="video-ctrl-bottom-bar" id="videoCtrlBottomBar">
-                                                <div class="video-ctrl-left">
-                                                    <button id="btnVideoPlayPause" class="btn-ctrl-circle"
+                                                <!-- Left Floating Island: <Play/Pause> <Current Time / Duration> -->
+                                                <div class="video-ctrl-island video-ctrl-island-left" id="videoCtrlLeftIsland">
+                                                    <button id="btnVideoPlayPause" class="btn-ctrl-floating btn-ctrl-play"
                                                         title="Play/Pause (Space)">
-                                                        <svg id="vPlayIcon" viewBox="0 0 24 24" fill="currentColor">
-                                                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                                        <svg id="vPlayIcon" viewBox="0 0 24 24" fill="currentColor" class="ctrl-icon-sm">
+                                                            <polygon points="6 4 20 12 6 20 6 4"></polygon>
                                                         </svg>
-                                                        <svg id="vPauseIcon" viewBox="0 0 24 24" fill="currentColor"
-                                                            class="hidden">
-                                                            <rect x="6" y="4" width="4" height="16"></rect>
-                                                            <rect x="14" y="4" width="4" height="16"></rect>
+                                                        <svg id="vPauseIcon" viewBox="0 0 24 24" fill="currentColor" class="ctrl-icon-sm hidden">
+                                                            <rect x="6" y="4" width="4" height="16" rx="1"></rect>
+                                                            <rect x="14" y="4" width="4" height="16" rx="1"></rect>
                                                         </svg>
                                                     </button>
-
-                                                    <button id="btnVideoSkipBack" class="btn-ctrl" title="Skip -10s">
-                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                            stroke-width="2">
-                                                            <path d="M11 19l-9-7 9-7v14zM22 19l-9-7 9-7v14z"></path>
-                                                        </svg>
-                                                        <span>-10s</span>
-                                                    </button>
-
-                                                    <button id="btnVideoSkipFwd" class="btn-ctrl" title="Skip +10s">
-                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                            stroke-width="2">
-                                                            <path d="M13 5l9 7-9 7V5zM2 5l9 7-9 7V5z"></path>
-                                                        </svg>
-                                                        <span>+10s</span>
-                                                    </button>
-
                                                     <div class="video-time-wrap">
-                                                        <span id="vTimeCurrent">00:00</span> / <span
-                                                            id="vTimeDuration">00:00</span>
+                                                        <span id="vTimeCurrent">00:00</span> <span class="time-sep text-dark-muted">/</span> <span id="vTimeDuration">00:00</span>
                                                     </div>
                                                 </div>
 
-                                                <div class="video-ctrl-right">
-                                                    <button id="btnMuteToggle" class="btn-ctrl-icon"
-                                                        title="Mute/Unmute">
-                                                        <svg id="volHighIcon" viewBox="0 0 24 24" fill="none"
-                                                            stroke="currentColor" stroke-width="2">
-                                                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5">
-                                                            </polygon>
-                                                            <path
-                                                                d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07">
-                                                            </path>
-                                                        </svg>
-                                                        <svg id="volMuteIcon" viewBox="0 0 24 24" fill="none"
-                                                            stroke="currentColor" stroke-width="2" class="hidden">
-                                                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5">
-                                                            </polygon>
-                                                            <line x1="23" y1="9" x2="17" y2="15"></line>
-                                                            <line x1="17" y1="9" x2="23" y2="15"></line>
-                                                        </svg>
-                                                    </button>
-                                                    <input id="vVolumeSlider" type="range" min="0" max="1" step="0.05"
-                                                        value="1" class="volume-slider" title="Volume">
+                                                <!-- Right Floating Island: <Volume> <Settings (Captions & Hide Controls)> <Fullscreen> -->
+                                                <div class="video-ctrl-island video-ctrl-island-right" id="videoCtrlRightIsland">
+                                                    <div class="volume-ctrl-group">
+                                                        <button id="btnMuteToggle" class="btn-ctrl-floating" title="Mute/Unmute">
+                                                            <svg id="volHighIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ctrl-icon-sm">
+                                                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                                                            </svg>
+                                                            <svg id="volMuteIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ctrl-icon-sm hidden">
+                                                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                                                <line x1="23" y1="9" x2="17" y2="15"></line>
+                                                                <line x1="17" y1="9" x2="23" y2="15"></line>
+                                                            </svg>
+                                                        </button>
+                                                        <input id="vVolumeSlider" type="range" min="0" max="1" step="0.05" value="1" class="volume-slider" title="Volume">
+                                                    </div>
 
-                                                    <!-- Subtitle Mode Dropdown Wrapper -->
+                                                    <!-- Player Settings Dropdown (Captions & Hide Controls) -->
                                                     <div class="caption-ctrl-group relative" id="captionCtrlGroup">
-                                                        <button id="btnToggleCaptions" class="btn-ctrl-icon active"
-                                                            title="Toggle Subtitles / Choose Mode">
-                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                                stroke-width="2">
-                                                                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-                                                                <path d="M7 15h4M15 15h2M7 11h2M13 11h4"></path>
+                                                        <button id="btnToggleCaptions" class="btn-ctrl-floating" title="Player Settings & Subtitles">
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ctrl-icon-sm">
+                                                                <circle cx="12" cy="12" r="3"></circle>
+                                                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                                                             </svg>
                                                         </button>
                                                         <div id="captionModeDropdown" class="caption-mode-dropdown hidden">
@@ -870,28 +839,26 @@
                                                                 <div class="mode-item-title">Off</div>
                                                                 <div class="mode-item-desc">Disable on-screen captions</div>
                                                             </button>
+                                                            <div class="caption-mode-divider"></div>
+                                                            <button id="btnCollapseControls" class="caption-mode-item" title="Hide Player Controls">
+                                                                <div class="mode-item-title flex items-center gap-1.5 text-xs text-dark-muted hover:text-white">
+                                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+                                                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                                                    </svg>
+                                                                    <span>Hide Controls</span>
+                                                                </div>
+                                                            </button>
                                                         </div>
                                                     </div>
 
-                                                    <button id="btnFullscreen" class="btn-ctrl-icon"
-                                                        title="Toggle Fullscreen">
-                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                            stroke-width="2">
-                                                            <path
-                                                                d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3">
-                                                            </path>
-                                                        </svg>
-                                                    </button>
-
-                                                    <!-- Collapse Controls Button -->
-                                                    <button id="btnCollapseControls" class="btn-ctrl-icon"
-                                                        title="Collapse Player Controls">
-                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
-                                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                                    <button id="btnFullscreen" class="btn-ctrl-floating" title="Toggle Fullscreen">
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ctrl-icon-sm">
+                                                            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
                                                         </svg>
                                                     </button>
                                                 </div>
                                             </div>
+
 
                                             <!-- Discreet Expand Button (Small arrow on the right, less opacity) -->
                                             <button id="btnExpandControls" class="btn-expand-controls hidden" title="Show Player Controls">
@@ -916,11 +883,13 @@
                                         <!-- Dedicated Subtitle Banner: Directly relative and attached to player -->
                                         <div id="captionOverlay" class="subtitle-banner">
                                             <div id="captionDialogueRow" class="caption-dialogue-row">
-                                                <div id="captionAvatarWrap" class="caption-avatar-slot"></div>
-                                                <span id="captionSpeakerTag"
-                                                    class="caption-speaker-name">Speaker:</span>
-                                                <p id="captionText" class="caption-dialogue-text">Subtitles will appear
-                                                    here synchronized with playback...</p>
+                                                <div class="caption-col-speaker">
+                                                    <div id="captionAvatarWrap" class="caption-avatar-slot"></div>
+                                                    <span id="captionSpeakerTag" class="caption-speaker-name"></span>
+                                                </div>
+                                                <div class="caption-col-text">
+                                                    <p id="captionText" class="caption-dialogue-text"></p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1107,16 +1076,6 @@
                                         <span id="btnToggleSidebarText">Panel</span>
                                     </button>
 
-                                    <button id="btnBarMerge" class="btn btn-sm btn-action-pill"
-                                        title="Merge misclassified speakers">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                            class="icon-xs">
-                                            <circle cx="18" cy="18" r="3"></circle>
-                                            <circle cx="6" cy="6" r="3"></circle>
-                                            <path d="M6 9v12m12-9c0 3-2 6-6 6"></path>
-                                        </svg>
-                                        Merge
-                                    </button>
 
                                     <div class="export-dropdown-wrapper">
                                         <button id="btnBarExport" class="btn btn-sm btn-action-pill"
@@ -1230,7 +1189,7 @@
                         <!-- Top Header Strip -->
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
                             <div>
-                                <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 mb-2">
+                                <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-[4px] text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 mb-2">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                                     <span>Settings &amp; Database</span>
                                 </div>
@@ -1735,7 +1694,7 @@
                         <!-- Top Header Strip -->
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-surface-border">
                             <div>
-                                <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 mb-2">
+                                <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-[4px] text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 mb-2">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                                     <span>Speaker Diarization &amp; Voice Clustering</span>
                                 </div>
@@ -1745,6 +1704,13 @@
                                 </p>
                             </div>
                             <div class="flex items-center gap-2 flex-wrap">
+                                <div class="relative">
+                                    <input type="text" id="profileSearchInput" class="form-input form-input-sm text-xs" style="padding-left: 32px !important;" placeholder="Filter voices...">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-text-dim">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>
+                                </div>
                                 <button id="btnAddNewProfile" class="btn btn-primary btn-sm" title="Enroll a new voice profile">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
                                         <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -1790,87 +1756,51 @@
                             <h3 class="text-sm font-semibold uppercase tracking-wider text-text-muted">
                                 Saved Offline Voices (<span id="modalProfileCount">0</span>)
                             </h3>
+                            <span class="text-xs text-text-dim">Automatic Speaker Recognition Active</span>
                         </div>
 
-                        <!-- Enrolled Profiles Grid -->
-                        <div id="enrolledProfilesList" class="enrolled-profiles-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <!-- Dynamic profile cards -->
-                        </div>
-                    </section>
+                        <!-- Table View of Enrolled Voice Profiles -->
+                        <div class="enrolled-profiles-table-wrap bg-surface-card border border-surface-border rounded-xl shadow-sm overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table id="enrolledProfilesTable" class="w-full text-left border-collapse text-xs sm:text-sm">
+                                    <thead>
+                                        <tr class="border-b border-surface-border bg-surface-base/70 text-text-muted uppercase text-[11px] font-semibold tracking-wider">
+                                            <th class="py-3 px-4">Speaker Voice</th>
+                                            <th class="py-3 px-4">Profile ID</th>
+                                            <th class="py-3 px-4">Voice Samples</th>
+                                            <th class="py-3 px-4">Embedding Vector</th>
+                                            <th class="py-3 px-4">Enrolled / Updated</th>
+                                            <th class="py-3 px-4 text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="enrolledProfilesTableBody" class="divide-y divide-surface-border">
+                                        <!-- Populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
 
-                    <!-- Transcription History Tab View -->
-                    <section id="historyView" class="history-view hidden p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
-                        <!-- Top Header Strip -->
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-surface-border">
-                            <div>
-                                <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 mb-2">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-                                    <span>SQLite Database Storage</span>
+                            <!-- Hidden fallback for legacy selectors -->
+                            <div id="enrolledProfilesList" class="hidden"></div>
+
+                            <!-- Empty State for Voice Profiles -->
+                            <div id="enrolledProfilesEmpty" class="py-12 px-4 flex flex-col items-center justify-center text-center hidden">
+                                <div class="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 mb-3">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6">
+                                        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                        <line x1="12" y1="19" x2="12" y2="22"></line>
+                                    </svg>
                                 </div>
-                                <div class="flex items-center gap-3">
-                                    <h2 class="text-xl sm:text-2xl font-bold tracking-tight">Transcription History</h2>
-                                    <span id="modalHistoryCountBadge" class="badge">0 jobs</span>
-                                </div>
-                                <p class="text-xs sm:text-sm text-text-muted mt-1">
-                                    Previously transcribed media files. Load any past session directly into your workspace or export captions.
+                                <h4 class="text-sm font-semibold text-text-primary">No Enrolled Voice Profiles Yet</h4>
+                                <p class="text-xs text-text-muted max-w-sm mt-1">
+                                    When you rename a speaker in "Speaker Directory & Inspector" or click "+ Enroll New Voice", recurring speakers are remembered automatically across all video transcriptions.
                                 </p>
                             </div>
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <div class="relative">
-                                    <input type="text" id="historySearchInput" class="form-input form-input-sm text-xs" style="padding-left: 32px !important;" placeholder="Filter history...">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-text-dim">
-                                        <circle cx="11" cy="11" r="8"></circle>
-                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                                    </svg>
-                                </div>
-                                <button id="btnHistoryRefresh" class="btn btn-secondary btn-sm" title="Refresh transcription history">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
-                                        <polyline points="23 4 23 10 17 10"></polyline>
-                                        <polyline points="1 20 1 14 7 14"></polyline>
-                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-                                    </svg>
-                                    <span>Refresh</span>
-                                </button>
-                                <button id="btnHistoryGoWorkspace" class="btn btn-secondary btn-sm hidden" title="Return to Active Workspace">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
-                                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                                        <line x1="8" y1="21" x2="16" y2="21"></line>
-                                        <line x1="12" y1="17" x2="12" y2="21"></line>
-                                    </svg>
-                                    <span>Active Workspace</span>
-                                </button>
-                                <button id="btnClearAllHistory" class="btn btn-secondary btn-sm text-red-400 hover:text-red-300" title="Delete all history jobs">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
-                                        <polyline points="3 6 5 6 21 6"></polyline>
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                    </svg>
-                                    <span>Clear All</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Loading State -->
-                        <div id="historyLoading" class="history-loading hidden py-12 flex flex-col items-center justify-center gap-3 text-text-muted">
-                            <div class="spinner"></div>
-                            <span class="text-sm">Loading history...</span>
-                        </div>
-
-                        <!-- Empty State -->
-                        <div id="historyEmpty" class="history-empty hidden py-16 flex flex-col items-center justify-center gap-3 text-center">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-12 h-12 text-text-dim">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <polyline points="12 6 12 12 16 14"></polyline>
-                            </svg>
-                            <p class="text-sm font-medium text-text-muted">No transcription history found yet.</p>
-                            <p class="text-xs text-text-dim max-w-sm">Transcribe video or audio files from the Home view or file explorer to see them here.</p>
-                            <button id="btnHistoryUploadNow" class="btn btn-primary btn-sm mt-2">Transcribe First Media</button>
-                        </div>
-
-                        <!-- Dynamic History Items Grid -->
-                        <div id="historyListContainer" class="history-list-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <!-- Dynamic history items -->
                         </div>
                     </section>
+
+                    <!-- Combined with Recent Transcriptions on Home View (User Request) -->
+                    <div id="historyView" class="hidden"></div>
 
                 </main>
             </div><!-- /.workbench-main-viewport -->
@@ -2252,65 +2182,6 @@
             </div>
         </div>
 
-        <!-- Merge Misclassified Speakers Modal -->
-        <div id="mergeModal" class="modal-backdrop hidden">
-            <div class="modal-dialog">
-                <div class="modal-header">
-                    <div class="title-with-badge">
-                        <h3 class="modal-title">Merge Misclassified Speakers</h3>
-                        <span class="badge">Combine Turns</span>
-                    </div>
-                    <button id="btnCloseMergeModal" class="btn-close" aria-label="Close">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p class="modal-desc">
-                        If the same person was split into two speaker IDs, merge them below. All turns spoken by the
-                        source speaker will be reassigned to the target speaker.
-                    </p>
-
-                    <div class="form-group">
-                        <label for="mergeSourceSelect" class="form-label">Misclassified Speaker (To Remove)</label>
-                        <select id="mergeSourceSelect" class="form-input form-select">
-                            <!-- Populated dynamically -->
-                        </select>
-                        <span class="form-help-text">This speaker ID will be removed and merged.</span>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="mergeTargetSelect" class="form-label">Merge Into Speaker (To Keep)</label>
-                        <select id="mergeTargetSelect" class="form-input form-select">
-                            <!-- Populated dynamically -->
-                        </select>
-                        <span class="form-help-text">All dialogue turns will be assigned to this speaker name &
-                            color.</span>
-                    </div>
-
-                    <div id="mergePreviewCard" class="merge-preview-card">
-                        <div class="merge-flow-diagram">
-                            <div id="mergePreviewSource" class="merge-flow-speaker">
-                                <span class="speaker-dot"></span>
-                                <span class="spk-name">Source Speaker</span>
-                            </div>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                class="merge-flow-arrow">
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                                <polyline points="12 5 19 12 12 19"></polyline>
-                            </svg>
-                            <div id="mergePreviewTarget" class="merge-flow-speaker">
-                                <span class="speaker-dot"></span>
-                                <span class="spk-name">Target Speaker</span>
-                            </div>
-                        </div>
-                        <p id="mergeTurnsCountText" class="merge-preview-note">0 turn(s) will be transferred.</p>
-                    </div>
-
-                </div>
-                <div class="modal-footer">
-                    <button id="btnCancelMerge" class="btn btn-secondary">Cancel</button>
-                    <button id="btnConfirmMerge" class="btn btn-primary">Merge Speakers</button>
-                </div>
-            </div>
-        </div>
 
         <!-- Voice Profiles Tab View is mounted in main workspace -->
         <div id="profilesModal" class="hidden" style="display:none !important"></div>
@@ -2470,17 +2341,11 @@
 
     </div>
 
-        <!-- Offline Script Engine & Modular Components -->
+        <!-- Offline Script Engine -->
         <script src="/static/libs/gaze.js"></script>
         <script src="/static/js/utils.js"></script>
         <script src="/static/js/api.js"></script>
-        <script src="/static/components/Icons.js"></script>
-        <script src="/static/components/SpeakerCard.js"></script>
-        <script src="/static/components/Modal.js"></script>
-        <script src="/static/components/FileTreeNode.js"></script>
-        <script src="/static/components/HistoryCard.js"></script>
-        <script src="/static/components/WorkspaceTabs.js"></script>
-        <script src="/static/app.js?v=shadcn2"></script>
+        <script src="/static/app.js?v=v3"></script>
 </body>
 
 </html>

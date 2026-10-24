@@ -95,6 +95,12 @@ def init_db():
     except Exception:
         pass
 
+    # Add avatar_seed column to voice_profiles if missing
+    try:
+        cursor.execute("ALTER TABLE voice_profiles ADD COLUMN avatar_seed TEXT")
+    except Exception:
+        pass
+
     conn.commit()
     conn.close()
 
@@ -221,7 +227,7 @@ def update_transcript_content(transcript_id: str, speakers: List[Dict[str, Any]]
 def get_all_voice_profiles() -> List[Dict[str, Any]]:
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, name, color, sample_count, embedding_json, created_at, updated_at FROM voice_profiles ORDER BY name ASC")
+    cursor.execute("SELECT id, name, color, avatar_seed, sample_count, embedding_json, created_at, updated_at FROM voice_profiles ORDER BY name ASC")
     rows = cursor.fetchall()
     conn.close()
     profiles = []
@@ -244,7 +250,7 @@ def get_voice_profile_by_name(name: str) -> Optional[Dict[str, Any]]:
         return item
     return None
 
-def save_voice_profile(name: str, embedding: List[float], color: str = "#f6c48f") -> str:
+def save_voice_profile(name: str, embedding: List[float], color: str = "#f6c48f", avatar_seed: Optional[str] = None) -> str:
     name = name.strip()
     existing = get_voice_profile_by_name(name)
     now = datetime.now(timezone.utc).isoformat()
@@ -257,15 +263,15 @@ def save_voice_profile(name: str, embedding: List[float], color: str = "#f6c48f"
         count = existing["sample_count"] + 1
         new_emb = [(old_emb[i] * (count - 1) + embedding[i]) / count for i in range(len(embedding))]
         cursor.execute(
-            """UPDATE voice_profiles SET embedding_json = ?, sample_count = ?, color = ?, updated_at = ? WHERE id = ?""",
-            (json.dumps(new_emb), count, color, now, profile_id)
+            """UPDATE voice_profiles SET embedding_json = ?, sample_count = ?, color = ?, avatar_seed = COALESCE(?, avatar_seed), updated_at = ? WHERE id = ?""",
+            (json.dumps(new_emb), count, color, avatar_seed, now, profile_id)
         )
     else:
         profile_id = str(uuid.uuid4())
         cursor.execute(
-            """INSERT INTO voice_profiles (id, name, color, embedding_json, sample_count, created_at, updated_at)
-               VALUES (?, ?, ?, ?, 1, ?, ?)""",
-            (profile_id, name, color, json.dumps(embedding), now, now)
+            """INSERT INTO voice_profiles (id, name, color, avatar_seed, embedding_json, sample_count, created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, 1, ?, ?)""",
+            (profile_id, name, color, avatar_seed, json.dumps(embedding), now, now)
         )
     conn.commit()
     conn.close()

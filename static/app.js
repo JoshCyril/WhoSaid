@@ -195,6 +195,9 @@ class WhoSaidApp {
 
     this.profilesModal = document.getElementById("profilesModal");
     this.enrolledProfilesList = document.getElementById("enrolledProfilesList");
+    this.enrolledProfilesTableBody = document.getElementById("enrolledProfilesTableBody");
+    this.enrolledProfilesEmpty = document.getElementById("enrolledProfilesEmpty");
+    this.profileSearchInput = document.getElementById("profileSearchInput");
     this.profileCountBadge = document.getElementById("profileCountBadge");
     this.modalProfileCount = document.getElementById("modalProfileCount");
     this.enrollNewProfileCard = document.getElementById("enrollNewProfileCard");
@@ -220,11 +223,11 @@ class WhoSaidApp {
     this.vscodeExplorerSidebar = document.getElementById("vscodeExplorerSidebar");
     this.vscodeResizer = document.getElementById("vscodeResizer");
     this.actBarExplorer = document.getElementById("actBarExplorer");
-    this.actBarHome = document.getElementById("actBarHome");
-    this.actBarWorkspace = document.getElementById("actBarWorkspace");
-    this.actBarWorkspaceDot = document.getElementById("actBarWorkspaceDot");
-    this.actBarProfiles = document.getElementById("actBarProfiles");
-    this.actBarHistory = document.getElementById("actBarHistory");
+    this.actBarHome = document.getElementById("actBarHome") || this.navHome;
+    this.actBarWorkspace = document.getElementById("actBarWorkspace") || this.navWorkspace;
+    this.actBarWorkspaceDot = document.getElementById("actBarWorkspaceDot") || this.navWorkspaceDot;
+    this.actBarProfiles = document.getElementById("actBarProfiles") || this.navProfiles;
+    this.actBarHistory = document.getElementById("actBarHistory") || this.navHistory;
     this.actBarToggleSidebar = document.getElementById("actBarToggleSidebar");
     this.btnHeaderToggleSidebar = document.getElementById("btnHeaderToggleSidebar");
 
@@ -524,24 +527,11 @@ class WhoSaidApp {
   }
 
   showHistoryView() {
-    if (this.homeView) this.homeView.classList.add("hidden");
-    if (this.workspaceView) this.workspaceView.classList.add("hidden");
-    if (this.backendSettingsView) this.backendSettingsView.classList.add("hidden");
-    if (this.profilesView) this.profilesView.classList.add("hidden");
-    if (this.historyView) this.historyView.classList.remove("hidden");
-
-    if (this.navHome) this.navHome.classList.remove("active");
-    if (this.navWorkspace) this.navWorkspace.classList.remove("active");
-    if (this.navProfiles) this.navProfiles.classList.remove("active");
-    if (this.navHistory) this.navHistory.classList.add("active");
-    if (this.navBackendSettings) this.navBackendSettings.classList.remove("active");
-    this.updateActivityBar("history");
-
-    const btnGoWs = document.getElementById("btnHistoryGoWorkspace");
-    if (btnGoWs) {
-      btnGoWs.classList.toggle("hidden", !this.currentTranscript);
+    this.showHomeView();
+    const recentEl = document.getElementById("homeRecentSection");
+    if (recentEl) {
+      recentEl.scrollIntoView({ behavior: "smooth" });
     }
-    this.loadHistoryList();
   }
 
   showBackendSettingsView() {
@@ -579,9 +569,94 @@ class WhoSaidApp {
     }
   }
 
+  updateRecentViewToggle() {
+    const btnGallery = document.getElementById("btnToggleRecentGallery");
+    const btnTable = document.getElementById("btnToggleRecentTable");
+    const galleryGrid = document.getElementById("homeRecentGrid");
+    const tableWrap = document.getElementById("homeRecentTableWrap");
+    const isTable = this.recentViewMode === "table";
+
+    if (btnGallery) {
+      btnGallery.classList.toggle("active", !isTable);
+      btnGallery.style.background = !isTable ? "rgba(56,189,248,0.18)" : "transparent";
+      btnGallery.style.color = !isTable ? "#38bdf8" : "#94a3b8";
+    }
+    if (btnTable) {
+      btnTable.classList.toggle("active", isTable);
+      btnTable.style.background = isTable ? "rgba(56,189,248,0.18)" : "transparent";
+      btnTable.style.color = isTable ? "#38bdf8" : "#94a3b8";
+    }
+    if (galleryGrid) galleryGrid.classList.toggle("hidden", isTable);
+    if (tableWrap) tableWrap.classList.toggle("hidden", !isTable);
+  }
+
+  renderSpeakerAvatarsCluster(speakers, avatarSize = 32) {
+    if (!speakers || speakers.length === 0) {
+      return '<span style="font-size:11px;color:var(--text-dim,#94a3b8);font-style:italic;">No speakers identified</span>';
+    }
+
+    const maxVisible = 4;
+    const visibleSpeakers = speakers.slice(0, maxVisible);
+    const remainingCount = speakers.length - maxVisible;
+
+    let html = '<div class="recent-speakers-cluster" style="display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;">';
+    visibleSpeakers.forEach((s) => {
+      const name = s.label || s.id || "Speaker";
+      const color = s.color || "#38bdf8";
+      const svg = this.getDicebearAvatarHtml(name, s.id, color, avatarSize);
+      html += `
+        <div class="recent-speaker-avatar-item" title="${this.escapeHtml(name)}" style="width:${avatarSize}px;height:${avatarSize}px;min-width:${avatarSize}px;min-height:${avatarSize}px;border-radius:6px;border:1.5px solid ${color}44;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;background:rgba(255,255,255,0.05);cursor:pointer;">
+          ${svg}
+        </div>
+      `;
+    });
+
+    if (remainingCount > 0) {
+      const remainingNames = speakers.slice(maxVisible).map((s) => s.label || s.id || "Speaker").join(", ");
+      html += `
+        <div class="recent-speaker-more-bubble" title="${this.escapeHtml(remainingNames)}" style="width:${avatarSize}px;height:${avatarSize}px;min-width:${avatarSize}px;min-height:${avatarSize}px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer;background:rgba(56,189,248,0.14);color:#38bdf8;border:1.5px solid rgba(56,189,248,0.35);">
+          +${remainingCount}
+        </div>
+      `;
+    }
+    html += '</div>';
+    return html;
+  }
+
+  renderSessionTags(item) {
+    const tags = [];
+    // 1. Language tag
+    if (item.language) {
+      const langLabel = item.task === "translate" ? `${item.language.toUpperCase()} → EN` : item.language.toUpperCase();
+      tags.push(`<span class="tag-pill tag-pill-emerald" title="Language: ${this.escapeHtml(langLabel)}">${this.escapeHtml(langLabel)}</span>`);
+    } else {
+      tags.push(`<span class="tag-pill tag-pill-emerald" title="Language: Auto">AUTO</span>`);
+    }
+
+    // 2. Whisper Model
+    const model = item.model_size || "base";
+    tags.push(`<span class="tag-pill tag-pill-cyan" title="Whisper Model: ${this.escapeHtml(model)}">${this.escapeHtml(model)}</span>`);
+
+    // 3. File Format
+    let ext = "VIDEO";
+    if (item.filename) {
+      const parts = item.filename.split(".");
+      if (parts.length > 1) ext = parts.pop().toUpperCase();
+    }
+    tags.push(`<span class="tag-pill tag-pill-purple" title="Media Format: ${this.escapeHtml(ext)}">${this.escapeHtml(ext)}</span>`);
+
+    // 4. Diarization
+    tags.push(`<span class="tag-pill tag-pill-amber" title="Speaker Diarization Active">Diarized</span>`);
+
+    return `<div class="tags-cell-wrap" style="display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap;">${tags.join("")}</div>`;
+  }
+
   renderHomeRecentGrid(list) {
     if (!this.homeRecentGrid) return;
     this.homeRecentGrid.innerHTML = "";
+
+    const tableBody = document.getElementById("homeRecentTableBody");
+    if (tableBody) tableBody.innerHTML = "";
 
     const hasRecent = Array.isArray(list) && list.length > 0;
     // User request: in UI only display the hero content if there is no 'recent transcript'
@@ -596,6 +671,11 @@ class WhoSaidApp {
       this.btnHomeSectionUpload.classList.toggle("hidden", !hasRecent);
     }
 
+    const toggleWrap = document.getElementById("recentViewToggleWrap");
+    if (toggleWrap) {
+      toggleWrap.classList.toggle("hidden", !hasRecent);
+    }
+
     if (!hasRecent) {
       this.homeRecentGrid.innerHTML = `
         <div class="recent-empty-state">
@@ -606,34 +686,28 @@ class WhoSaidApp {
           <p>No recent transcriptions found. Click "Upload File" or open a folder to get started!</p>
         </div>
       `;
+      const tableWrap = document.getElementById("homeRecentTableWrap");
+      if (tableWrap) tableWrap.classList.add("hidden");
+      if (this.homeRecentGrid) this.homeRecentGrid.classList.remove("hidden");
       return;
     }
 
-    list.slice(0, 6).forEach((item) => {
-      const card = document.createElement("div");
-      card.className = "recent-session-card";
-      card.style.transition = "opacity 0.25s ease, transform 0.25s ease";
-
+    // Populate Both Gallery Cards Grid and Table Rows
+    list.forEach((item) => {
       const createdDate = item.created_at ? new Date(item.created_at).toLocaleDateString() : "Recently";
       const durText = item.duration ? this.formatTime(item.duration) : "--:--";
-
-      // Speaker badges with DiceBear avatars
-      let speakersPillsHtml = "";
-      if (item.speakers && item.speakers.length > 0) {
-        speakersPillsHtml = item.speakers.map((s) => `
-          <span class="recent-speaker-pill" style="background-color: ${s.color || '#f6c48f'}18; color: ${s.color || '#f6c48f'}">
-            ${this.getDicebearAvatarHtml(s.label || s.id, s.id, s.color || '#f6c48f', 18)}
-            ${this.escapeHtml(s.label || s.id)}
-          </span>
-        `).join("");
-      } else {
-        speakersPillsHtml = '<span class="recent-speaker-pill" style="color:var(--text-dim)">Speakers processed</span>';
-      }
+      const speakersHtml = this.renderSpeakerAvatarsCluster(item.speakers || [], 32);
+      const tagsHtml = this.renderSessionTags(item);
 
       // Media availability badge
       const mediaBadge = item.media_available
         ? '<span class="status-badge status-completed" title="Video file available for playback"><span class="status-dot"></span>Video ready</span>'
         : '<span class="status-badge" style="background:rgba(56,189,248,0.12);color:#38bdf8" title="Audio track ready"><span class="status-dot" style="background:#38bdf8"></span>Audio ready</span>';
+
+      // 1. Gallery Card
+      const card = document.createElement("div");
+      card.className = "recent-session-card";
+      card.style.transition = "opacity 0.25s ease, transform 0.25s ease";
 
       card.innerHTML = `
         <div class="recent-card-top">
@@ -657,8 +731,12 @@ class WhoSaidApp {
           ${mediaBadge}
         </div>
 
-        <div class="recent-speakers-row">
-          ${speakersPillsHtml}
+        <div class="recent-speakers-row" style="margin: 10px 0;">
+          ${speakersHtml}
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          ${tagsHtml}
         </div>
 
         <div class="recent-card-footer">
@@ -698,7 +776,74 @@ class WhoSaidApp {
       });
 
       this.homeRecentGrid.appendChild(card);
+
+      // 2. Table Row
+      if (tableBody) {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-surface-elevated/40 transition-colors";
+        tr.innerHTML = `
+          <td class="py-3.5 px-4 font-medium text-text-primary">
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 shrink-0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+              </div>
+              <div class="min-w-0 max-w-xs truncate" title="${this.escapeHtml(item.filename)}">
+                <span class="font-medium text-text-primary text-xs sm:text-sm block truncate">${this.escapeHtml(item.filename)}</span>
+                <span class="text-[11px] text-text-muted">${durText}</span>
+              </div>
+            </div>
+          </td>
+          <td class="py-3.5 px-4">
+            ${speakersHtml}
+          </td>
+          <td class="py-3.5 px-4">
+            ${tagsHtml}
+          </td>
+          <td class="py-3.5 px-4 text-xs text-text-muted whitespace-nowrap">
+            <div>${createdDate}</div>
+            <div class="text-[11px] text-text-dim">${durText}</div>
+          </td>
+          <td class="py-3.5 px-4 text-right whitespace-nowrap">
+            <div class="inline-flex items-center gap-1.5 justify-end">
+              <button class="btn-table-open btn btn-xs btn-primary inline-flex items-center gap-1" title="Open in Workspace">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                <span>Open</span>
+              </button>
+              <button class="btn-table-delete p-1 rounded hover:bg-red-500/10 text-red-400" title="Delete session">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              </button>
+            </div>
+          </td>
+        `;
+
+        tr.querySelector(".btn-table-open").addEventListener("click", () => {
+          if (item.transcript_id) {
+            this.loadTranscript(item.transcript_id);
+          }
+        });
+
+        tr.querySelector(".btn-table-delete").addEventListener("click", (e) => {
+          e.stopPropagation();
+          this.openDeleteConfirmModal(item.job_id, item.filename, () => {
+            tr.remove();
+            if (tableBody.children.length === 0) {
+              this.renderHomeRecentGrid([]);
+            }
+          });
+        });
+
+        tableBody.appendChild(tr);
+      }
     });
+
+    this.updateRecentViewToggle();
   }
 
   bindEvents() {
@@ -724,28 +869,7 @@ class WhoSaidApp {
       this.navBackendSettings.addEventListener("click", () => this.showBackendSettingsView());
     }
 
-    // Profiles View extra controls
-    const btnProfRefresh = document.getElementById("btnProfilesRefresh");
-    if (btnProfRefresh) btnProfRefresh.addEventListener("click", () => this.loadVoiceProfilesList());
 
-    // History View extra controls
-    const btnHistRefresh = document.getElementById("btnHistoryRefresh");
-    if (btnHistRefresh) btnHistRefresh.addEventListener("click", () => this.loadHistoryList());
-    const btnHistGoWs = document.getElementById("btnHistoryGoWorkspace");
-    if (btnHistGoWs) btnHistGoWs.addEventListener("click", () => this.showWorkspaceView());
-    const btnHistUploadNow = document.getElementById("btnHistoryUploadNow");
-    if (btnHistUploadNow) btnHistUploadNow.addEventListener("click", () => this.openUploadModal());
-    const histSearchInput = document.getElementById("historySearchInput");
-    if (histSearchInput) {
-      histSearchInput.addEventListener("input", (e) => {
-        const q = e.target.value.toLowerCase().trim();
-        const cards = document.querySelectorAll("#historyListContainer .history-card");
-        cards.forEach((c) => {
-          const text = c.textContent.toLowerCase();
-          c.style.display = (!q || text.includes(q)) ? "" : "none";
-        });
-      });
-    }
 
     // Homepage CTA buttons
     if (this.btnHomeUpload) this.btnHomeUpload.addEventListener("click", () => this.openUploadModal());
@@ -805,25 +929,25 @@ class WhoSaidApp {
       });
     }
 
-    // Minimal Header More Actions Dropdown
-    const btnNavMore = document.getElementById("btnNavMore");
-    const navMoreMenu = document.getElementById("navMoreMenu");
-    if (btnNavMore && navMoreMenu) {
-      btnNavMore.addEventListener("click", (e) => {
-        e.stopPropagation();
-        navMoreMenu.classList.toggle("hidden");
+    // Recent view toggle: Gallery vs Table
+    this.recentViewMode = localStorage.getItem("whosaid_recent_view_mode") || "gallery";
+    const btnToggleRecentGallery = document.getElementById("btnToggleRecentGallery");
+    const btnToggleRecentTable = document.getElementById("btnToggleRecentTable");
+    if (btnToggleRecentGallery && btnToggleRecentTable) {
+      btnToggleRecentGallery.addEventListener("click", () => {
+        this.recentViewMode = "gallery";
+        localStorage.setItem("whosaid_recent_view_mode", "gallery");
+        this.updateRecentViewToggle();
       });
-      document.addEventListener("click", (e) => {
-        if (!btnNavMore.contains(e.target) && !navMoreMenu.contains(e.target)) {
-          navMoreMenu.classList.add("hidden");
-        }
-      });
-      navMoreMenu.querySelectorAll(".dropdown-item").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          navMoreMenu.classList.add("hidden");
-        });
+      btnToggleRecentTable.addEventListener("click", () => {
+        this.recentViewMode = "table";
+        localStorage.setItem("whosaid_recent_view_mode", "table");
+        this.updateRecentViewToggle();
       });
     }
+
+    // Custom Electron Titlebar Window Controls
+    this.initWindowControls();
 
     // Sidebar Collapsible Toggles
     const btnToggleSidebar = document.getElementById("btnToggleSidebar");
@@ -991,6 +1115,15 @@ class WhoSaidApp {
     }
     const btnSubEnr = document.getElementById("btnSubmitEnroll");
     if (btnSubEnr) btnSubEnr.addEventListener("click", () => this.submitNewVoiceProfile());
+
+    const btnProfRefresh = document.getElementById("btnProfilesRefresh");
+    if (btnProfRefresh) btnProfRefresh.addEventListener("click", () => this.loadVoiceProfilesList());
+
+    if (this.profileSearchInput) {
+      this.profileSearchInput.addEventListener("input", (e) => {
+        this.filterAndRenderVoiceProfiles(e.target.value.trim().toLowerCase());
+      });
+    }
 
     // Merge Misclassified Speakers Modal events
     if (this.btnOpenMergeModal) {
@@ -1541,19 +1674,19 @@ class WhoSaidApp {
 
   toggleFullscreen() {
     const target = this.videoWrapper || this.mediaVideo;
-    const isFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+    const isFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement || this.videoWrapper?.classList.contains("is-fullscreen"));
     if (!isFs) {
+      if (this.videoWrapper) this.videoWrapper.classList.add("is-fullscreen");
       if (target.requestFullscreen) {
-        target.requestFullscreen().catch(() => {
-          if (this.mediaVideo?.requestFullscreen) this.mediaVideo.requestFullscreen();
-        });
+        target.requestFullscreen().catch(() => {});
       } else if (target.webkitRequestFullscreen) {
         target.webkitRequestFullscreen();
       }
     } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.webkitExitFullscreen) {
+      if (this.videoWrapper) this.videoWrapper.classList.remove("is-fullscreen");
+      if (document.exitFullscreen && (document.fullscreenElement || document.webkitFullscreenElement)) {
+        document.exitFullscreen().catch(() => {});
+      } else if (document.webkitExitFullscreen && (document.fullscreenElement || document.webkitFullscreenElement)) {
         document.webkitExitFullscreen();
       }
     }
@@ -1649,7 +1782,7 @@ class WhoSaidApp {
     if (dur > 0) {
       const pct = (curr / dur) * 100;
       if (this.waveformSeekerLine) {
-        this.waveformSeekerLine.style.left = `${pct}%`;
+        this.waveformSeekerLine.style.left = `calc(16px + (100% - 32px) * ${pct / 100})`;
       }
       if (this.waveformSegmentedTrack) {
         const bars = this.waveformSegmentedTrack.children;
@@ -1704,14 +1837,15 @@ class WhoSaidApp {
               const avatarHtml = this.getDicebearAvatarHtml(
                 activeSeg.speaker_label,
                 activeSeg.speaker_id,
-                activeSeg.speaker_color || '#f6c48f',
-                22,
+                activeSeg.speaker_color || '#38bdf8',
+                28,
                 activeSeg.speaker_avatar_seed
               );
               if (this.minimalCaptionAvatar) this.minimalCaptionAvatar.innerHTML = avatarHtml;
               if (this.minimalCaptionSpeaker) {
                 this.minimalCaptionSpeaker.textContent = activeSeg.speaker_label;
-                this.minimalCaptionSpeaker.style.color = activeSeg.speaker_color || '#f6c48f';
+                const isLight = document.documentElement.classList.contains("light") || document.documentElement.getAttribute("data-theme") === "light";
+                this.minimalCaptionSpeaker.style.color = isLight ? "#18181b" : "#ffffff";
               }
             }
           }
@@ -1727,8 +1861,8 @@ class WhoSaidApp {
             const avatarHtml = this.getDicebearAvatarHtml(
               activeSeg.speaker_label,
               activeSeg.speaker_id,
-              activeSeg.speaker_color,
-              24,
+              activeSeg.speaker_color || '#38bdf8',
+              38,
               activeSeg.speaker_avatar_seed
             );
 
@@ -1736,12 +1870,12 @@ class WhoSaidApp {
             if (this.playerCcAvatarWrap) this.playerCcAvatarWrap.innerHTML = avatarHtml;
 
             if (this.captionSpeakerTag) {
-              this.captionSpeakerTag.textContent = `${activeSeg.speaker_label}:`;
-              this.captionSpeakerTag.style.color = activeSeg.speaker_color;
+              this.captionSpeakerTag.textContent = activeSeg.speaker_label;
+              this.captionSpeakerTag.style.color = activeSeg.speaker_color || '#ffffff';
             }
             if (this.playerCcSpeakerTag) {
-              this.playerCcSpeakerTag.textContent = `${activeSeg.speaker_label}:`;
-              this.playerCcSpeakerTag.style.color = activeSeg.speaker_color;
+              this.playerCcSpeakerTag.textContent = activeSeg.speaker_label;
+              this.playerCcSpeakerTag.style.color = activeSeg.speaker_color || '#ffffff';
             }
 
             let baseTextHtml = "";
@@ -1814,13 +1948,17 @@ class WhoSaidApp {
       if (this.playerMinimalCaption) this.playerMinimalCaption.classList.add("hidden");
       if (this.playerCcOverlay) this.playerCcOverlay.classList.add("hidden");
 
-      // In default view: keep subtitle section under player VISIBLE even when there is no text/active speech!
+      // In default view: keep subtitle section under player VISIBLE even when there is no text/active speech, but blank!
       if (this.captionOverlay && this.captionsVisible && this.captionMode === "regular") {
         this.captionOverlay.classList.remove("hidden");
         if (this.captionText) {
-          this.captionText.querySelectorAll(".caption-word-span.word-highlight").forEach((el) => {
-            el.classList.remove("word-highlight");
-          });
+          this.captionText.innerHTML = "";
+        }
+        if (this.captionSpeakerTag) {
+          this.captionSpeakerTag.textContent = "";
+        }
+        if (this.captionAvatarWrap) {
+          this.captionAvatarWrap.innerHTML = "";
         }
       }
     }
@@ -1890,15 +2028,14 @@ class WhoSaidApp {
     }
     this.renderSegmentedWaveformTimeline(segments, totalDuration);
 
-    // Initialize subtitle banner under player: always visible in default view
+    // Initialize subtitle banner under player: always visible in default view (blank when empty)
     if (this.captionOverlay && this.captionsVisible) {
       this.captionOverlay.classList.remove("hidden");
       if (this.captionText && !this.activeTurnId) {
-        this.captionText.innerHTML = '<span style="opacity: 0.65;">Subtitles will appear here synchronized with playback...</span>';
+        this.captionText.innerHTML = "";
       }
       if (this.captionSpeakerTag && !this.activeTurnId) {
-        this.captionSpeakerTag.textContent = "Speaker:";
-        this.captionSpeakerTag.style.color = "var(--text-main)";
+        this.captionSpeakerTag.textContent = "";
       }
       if (this.captionAvatarWrap && !this.activeTurnId) {
         this.captionAvatarWrap.innerHTML = "";
@@ -1926,7 +2063,7 @@ class WhoSaidApp {
         wordsHtml = this.escapeHtml(seg.text);
       }
 
-      const avatarHtml = this.getDicebearAvatarHtml(seg.speaker_label, seg.speaker_id, seg.speaker_color || '#f6c48f', 26, seg.speaker_avatar_seed);
+      const avatarHtml = this.getDicebearAvatarHtml(seg.speaker_label, seg.speaker_id, seg.speaker_color || '#f6c48f', 34, seg.speaker_avatar_seed);
       card.innerHTML = `
         <div class="turn-avatar-slot">
           ${avatarHtml}
@@ -2053,8 +2190,22 @@ class WhoSaidApp {
       });
     }
 
-    anchorBtn.parentElement.style.position = "relative";
-    anchorBtn.parentElement.appendChild(menu);
+    const rect = anchorBtn.getBoundingClientRect();
+    menu.style.position = "fixed";
+    menu.style.top = `${Math.min(rect.bottom + 6, window.innerHeight - 260)}px`;
+    menu.style.left = `${Math.max(10, Math.min(rect.left, window.innerWidth - 265))}px`;
+    menu.style.zIndex = "9999999";
+    document.body.appendChild(menu);
+
+    const onOutsideClick = (e) => {
+      if (!menu.contains(e.target) && e.target !== anchorBtn) {
+        menu.remove();
+        document.removeEventListener("pointerdown", onOutsideClick);
+      }
+    };
+    setTimeout(() => {
+      document.addEventListener("pointerdown", onOutsideClick);
+    }, 10);
   }
 
   async reassignTurnSpeaker(seg, targetSpeaker, turnNumber) {
@@ -2091,7 +2242,7 @@ class WhoSaidApp {
       item.dataset.speakerId = spk.id;
       item.title = `Click to inspect & edit ${spk.label}`;
 
-      const avatarHtml = this.getDicebearAvatarHtml(spk.label, spk.id, spk.color || '#f6c48f', 36, spk.avatar_seed);
+      const avatarHtml = this.getDicebearAvatarHtml(spk.label, spk.id, spk.color || '#f6c48f', 40, spk.avatar_seed);
       item.innerHTML = `
         <div class="speaker-grid-avatar">
           ${avatarHtml}
@@ -2186,8 +2337,9 @@ class WhoSaidApp {
 
   // --- Waveform Hover & Click Seekers ---
   handleWaveformHover(e) {
-    if (!this.videoTimelineWaveformWrap || !this.mediaVideo) return;
-    const rect = this.videoTimelineWaveformWrap.getBoundingClientRect();
+    const track = this.waveformSegmentedTrack || this.videoTimelineWaveformWrap;
+    if (!track || !this.mediaVideo) return;
+    const rect = track.getBoundingClientRect();
     const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
     const totalDur = (this.mediaVideo.duration && !isNaN(this.mediaVideo.duration))
       ? this.mediaVideo.duration
@@ -2245,7 +2397,7 @@ class WhoSaidApp {
         ${speakerInfoHtml}
       `;
 
-      const clampX = Math.max(50, Math.min(x, rect.width - 50));
+      const clampX = Math.max(50, Math.min(x + 16, rect.width - 50 + 16));
       this.waveformTimelineTooltip.style.left = `${clampX}px`;
       this.waveformTimelineTooltip.classList.remove("hidden");
     }
@@ -2265,8 +2417,9 @@ class WhoSaidApp {
   }
 
   handleWaveformClick(e) {
-    if (!this.videoTimelineWaveformWrap || !this.mediaVideo) return;
-    const rect = this.videoTimelineWaveformWrap.getBoundingClientRect();
+    const track = this.waveformSegmentedTrack || this.videoTimelineWaveformWrap;
+    if (!track || !this.mediaVideo) return;
+    const rect = track.getBoundingClientRect();
     const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
     const totalDur = (this.mediaVideo.duration && !isNaN(this.mediaVideo.duration))
       ? this.mediaVideo.duration
@@ -2274,8 +2427,9 @@ class WhoSaidApp {
     const seekTime = (x / rect.width) * totalDur;
 
     this.mediaVideo.currentTime = seekTime;
+    const pct = (x / rect.width) * 100;
     if (this.waveformSeekerLine) {
-      this.waveformSeekerLine.style.left = `${(x / rect.width) * 100}%`;
+      this.waveformSeekerLine.style.left = `calc(16px + (100% - 32px) * ${pct / 100})`;
     }
     this.mediaVideo.play();
   }
@@ -2481,7 +2635,22 @@ class WhoSaidApp {
       (this.currentTranscript.segments || []).forEach((seg) => {
         if (seg.speaker_id === spk.id) seg.speaker_color = newColor;
       });
-      await this.saveTranscriptEdits();
+      try {
+        await fetch(`/api/transcripts/${this.currentTranscript.id}/rename-speaker`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            speaker_id: spk.id,
+            new_label: spk.label,
+            color: newColor,
+            avatar_seed: spk.avatar_seed || spk.label,
+            enroll_profile: true
+          })
+        });
+        this.fetchProfileCount();
+      } catch (e) {
+        await this.saveTranscriptEdits();
+      }
       this.renderTranscript(this.currentTranscript);
       this.selectFolderSpeaker(spk.id);
       this.showToast(`Updated color for ${spk.label}`, "success");
@@ -2494,7 +2663,22 @@ class WhoSaidApp {
       (this.currentTranscript.segments || []).forEach((seg) => {
         if (seg.speaker_id === spk.id) seg.speaker_avatar_seed = newSeed;
       });
-      await this.saveTranscriptEdits();
+      try {
+        await fetch(`/api/transcripts/${this.currentTranscript.id}/rename-speaker`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            speaker_id: spk.id,
+            new_label: spk.label,
+            color: spk.color,
+            avatar_seed: newSeed,
+            enroll_profile: true
+          })
+        });
+        this.fetchProfileCount();
+      } catch (e) {
+        await this.saveTranscriptEdits();
+      }
       this.renderTranscript(this.currentTranscript);
       this.selectFolderSpeaker(spk.id);
       this.showToast(`Updated Cameo avatar for ${spk.label}`, "success");
@@ -2514,10 +2698,36 @@ class WhoSaidApp {
       if (seg.speaker_id === spk.id) seg.speaker_label = newName;
     });
 
-    await this.saveTranscriptEdits();
+    try {
+      const resp = await fetch(`/api/transcripts/${this.currentTranscript.id}/rename-speaker`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          speaker_id: spk.id,
+          new_label: newName,
+          color: spk.color,
+          avatar_seed: spk.avatar_seed || newName,
+          enroll_profile: true
+        })
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.speakers) {
+          this.currentTranscript.speakers = data.speakers;
+        }
+        this.fetchProfileCount();
+        this.showToast(`Saved "${newName}" to Enrolled Voice Profiles!`, "success");
+      } else {
+        await this.saveTranscriptEdits();
+        this.showToast(`Renamed to "${newName}"`, "success");
+      }
+    } catch (e) {
+      await this.saveTranscriptEdits();
+      this.showToast(`Renamed to "${newName}"`, "success");
+    }
+
     this.renderTranscript(this.currentTranscript);
     this.renderFolderSpeakersTable(this.currentTranscript.speakers || [], spk.id);
-    this.showToast(`Renamed to "${newName}"`, "success");
   }
 
   async executeFolderMerge() {
@@ -2912,33 +3122,125 @@ class WhoSaidApp {
   }
 
   async loadVoiceProfilesList() {
-    this.enrolledProfilesList.innerHTML = '<p class="modal-desc">Loading profiles...</p>';
+    if (!this.enrolledProfilesTableBody) {
+      this.enrolledProfilesTableBody = document.getElementById("enrolledProfilesTableBody");
+    }
+    if (!this.enrolledProfilesEmpty) {
+      this.enrolledProfilesEmpty = document.getElementById("enrolledProfilesEmpty");
+    }
+    if (this.enrolledProfilesTableBody) {
+      this.enrolledProfilesTableBody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-text-muted">Loading enrolled voice profiles...</td></tr>';
+    }
     try {
       const resp = await fetch("/api/profiles");
       if (!resp.ok) return;
       const list = await resp.json();
-      this.enrolledProfilesList.innerHTML = "";
+      this.allVoiceProfiles = list || [];
 
-      if (list.length === 0) {
-        this.enrolledProfilesList.innerHTML =
-          '<p class="modal-desc">No voices enrolled yet. When you rename speakers in transcripts or upload voice clips, they appear here.</p>';
-        return;
+      if (this.profileCountBadge) this.profileCountBadge.textContent = this.allVoiceProfiles.length;
+      if (this.modalProfileCount) this.modalProfileCount.textContent = this.allVoiceProfiles.length;
+
+      const query = (this.profileSearchInput ? this.profileSearchInput.value : "").trim().toLowerCase();
+      this.filterAndRenderVoiceProfiles(query);
+    } catch (e) {
+      if (this.enrolledProfilesTableBody) {
+        this.enrolledProfilesTableBody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-red-400">Failed to load profiles.</td></tr>';
+      }
+    }
+  }
+
+  filterAndRenderVoiceProfiles(query = "") {
+    if (!this.enrolledProfilesTableBody) {
+      this.enrolledProfilesTableBody = document.getElementById("enrolledProfilesTableBody");
+    }
+    if (!this.enrolledProfilesEmpty) {
+      this.enrolledProfilesEmpty = document.getElementById("enrolledProfilesEmpty");
+    }
+    const countEl = document.getElementById("modalProfileCount");
+    if (countEl) {
+      countEl.textContent = this.allVoiceProfiles ? this.allVoiceProfiles.length : 0;
+    }
+    if (!this.enrolledProfilesTableBody) return;
+
+    let list = this.allVoiceProfiles || [];
+    if (query) {
+      list = list.filter((p) =>
+        (p.name && p.name.toLowerCase().includes(query)) ||
+        (p.id && p.id.toLowerCase().includes(query))
+      );
+    }
+
+    this.enrolledProfilesTableBody.innerHTML = "";
+
+    if (list.length === 0) {
+      if (this.enrolledProfilesEmpty) this.enrolledProfilesEmpty.classList.remove("hidden");
+      return;
+    }
+
+    if (this.enrolledProfilesEmpty) this.enrolledProfilesEmpty.classList.add("hidden");
+
+    list.forEach((p) => {
+      const tr = document.createElement("tr");
+      tr.className = "profile-table-row hover:bg-surface-elevated/40 transition-colors";
+      const avatarHtml = this.getDicebearAvatarHtml(p.name, p.id, p.color || "#f6c48f", 36, p.avatar_seed);
+
+      let dateDisplay = "Just now";
+      if (p.created_at || p.updated_at) {
+        try {
+          const d = new Date(p.created_at || p.updated_at);
+          dateDisplay = d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+        } catch (e) {}
       }
 
-      list.forEach((p) => {
-        const card = document.createElement("div");
-        card.className = "profile-card";
-        const avatarHtml = this.getDicebearAvatarHtml(p.name, p.id, p.color || "#f6c48f", 42);
-        card.innerHTML = `
-          <div class="profile-card-header">
-            ${avatarHtml}
-            <button class="btn-remove-profile" title="Delete voice profile">&times;</button>
+      tr.innerHTML = `
+        <td class="py-3 px-4">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-surface-base border border-surface-border" style="border-left: 3px solid ${p.color || '#f6c48f'}">
+              ${avatarHtml}
+            </div>
+            <div class="flex flex-col min-w-0">
+              <span class="font-semibold text-text-primary text-sm truncate">${this.escapeHtml(p.name)}</span>
+              <span class="text-[11px] text-text-muted flex items-center gap-1.5">
+                <span class="inline-block w-2 h-2 rounded-full" style="background-color: ${p.color || '#f6c48f'}"></span>
+                <span>Color: ${p.color || '#f6c48f'}</span>
+              </span>
+            </div>
           </div>
-          <div class="profile-card-name">${this.escapeHtml(p.name)}</div>
-          <div class="profile-card-samples">${p.sample_count} audio sample(s) registered</div>
-        `;
+        </td>
+        <td class="py-3 px-4 font-mono text-xs text-text-muted">
+          <span class="px-2 py-0.5 rounded bg-surface-base border border-surface-border text-brand-300">
+            ${(p.id || '').substring(0, 8)}...
+          </span>
+        </td>
+        <td class="py-3 px-4">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path></svg>
+            ${p.sample_count || 1} sample${(p.sample_count || 1) === 1 ? '' : 's'}
+          </span>
+        </td>
+        <td class="py-3 px-4">
+          <div class="flex flex-col">
+            <span class="text-xs font-medium text-text-primary">192-dim 3D-Speaker</span>
+            <span class="text-[11px] text-text-dim">CAMPPlus Hypersphere</span>
+          </div>
+        </td>
+        <td class="py-3 px-4 text-xs text-text-muted whitespace-nowrap">
+          ${dateDisplay}
+        </td>
+        <td class="py-3 px-4 text-right">
+          <button class="btn-delete-profile inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[6px] text-xs font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors border border-red-500/20" title="Delete voice profile">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            <span>Delete</span>
+          </button>
+        </td>
+      `;
 
-        card.querySelector(".btn-remove-profile").addEventListener("click", async () => {
+      const deleteBtn = tr.querySelector(".btn-delete-profile");
+      if (deleteBtn) {
+        deleteBtn.addEventListener("click", async () => {
           if (confirm(`Remove voice profile for "${p.name}"?`)) {
             await fetch(`/api/profiles/${p.id}`, { method: "DELETE" });
             this.showToast(`Removed profile "${p.name}"`, "success");
@@ -2946,14 +3248,10 @@ class WhoSaidApp {
             this.fetchProfileCount();
           }
         });
+      }
 
-        this.enrolledProfilesList.appendChild(card);
-      });
-      this.profileCountBadge.textContent = list.length;
-      this.modalProfileCount.textContent = list.length;
-    } catch (e) {
-      this.enrolledProfilesList.innerHTML = '<p class="modal-desc">Failed to load profiles</p>';
-    }
+      this.enrolledProfilesTableBody.appendChild(tr);
+    });
   }
 
   async submitNewVoiceProfile() {
@@ -3666,7 +3964,7 @@ class WhoSaidApp {
       this.captionSpeakerTag.style.color = "";
     }
     if (this.captionText) {
-      this.captionText.innerHTML = '<span style="color:var(--text-dim,#94a3b8);font-size:0.85rem;font-style:italic;">No subtitles available • Transcribe media to generate captions</span>';
+      this.captionText.innerHTML = "";
     }
     if (this.playerCcAvatarWrap) this.playerCcAvatarWrap.innerHTML = "";
     if (this.playerCcSpeakerTag) {
@@ -6161,6 +6459,71 @@ class WhoSaidApp {
       const t = indicator.getAttribute("data-check-theme");
       indicator.classList.toggle("hidden", t !== theme);
     });
+  }
+
+  initWindowControls() {
+    const btnWinMinimize = document.getElementById("btnWinMinimize");
+    const btnWinMaximize = document.getElementById("btnWinMaximize");
+    const btnWinClose = document.getElementById("btnWinClose");
+    const iconWinMax = document.getElementById("iconWinMax");
+    const iconWinRestore = document.getElementById("iconWinRestore");
+
+    if (btnWinMinimize) {
+      btnWinMinimize.addEventListener("click", () => {
+        if (window.electronAPI && typeof window.electronAPI.minimizeWindow === "function") {
+          window.electronAPI.minimizeWindow();
+        } else {
+          this.showToast("Minimize is active in Desktop Electron window", "info");
+        }
+      });
+    }
+
+    if (btnWinMaximize) {
+      btnWinMaximize.addEventListener("click", async () => {
+        if (window.electronAPI && typeof window.electronAPI.maximizeWindow === "function") {
+          const isMax = await window.electronAPI.maximizeWindow();
+          if (iconWinMax && iconWinRestore) {
+            iconWinMax.classList.toggle("hidden", isMax);
+            iconWinRestore.classList.toggle("hidden", !isMax);
+          }
+        } else {
+          // Standard web browser fallback: fullscreen toggle
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen?.().catch(() => {});
+            if (iconWinMax && iconWinRestore) {
+              iconWinMax.classList.add("hidden");
+              iconWinRestore.classList.remove("hidden");
+            }
+          } else {
+            document.exitFullscreen?.().catch(() => {});
+            if (iconWinMax && iconWinRestore) {
+              iconWinMax.classList.remove("hidden");
+              iconWinRestore.classList.add("hidden");
+            }
+          }
+        }
+      });
+    }
+
+    if (btnWinClose) {
+      btnWinClose.addEventListener("click", () => {
+        if (window.electronAPI && typeof window.electronAPI.closeWindow === "function") {
+          window.electronAPI.closeWindow();
+        } else {
+          this.showToast("Close is active in Desktop Electron window", "info");
+        }
+      });
+    }
+
+    // Listen for state change notification from Electron process
+    if (window.electronAPI && typeof window.electronAPI.onWindowStateChange === "function") {
+      window.electronAPI.onWindowStateChange((state) => {
+        if (iconWinMax && iconWinRestore) {
+          iconWinMax.classList.toggle("hidden", state.isMaximized);
+          iconWinRestore.classList.toggle("hidden", !state.isMaximized);
+        }
+      });
+    }
   }
 
   updateAvailableModelsInModals() {

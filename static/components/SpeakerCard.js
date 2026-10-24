@@ -50,7 +50,7 @@ export class SpeakerCard {
 
           <!-- Segment / Duration Pill -->
           <div class="text-right shrink-0">
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-white/5 text-dark-muted border border-white/5">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-[4px] text-[11px] font-medium bg-white/5 text-dark-muted border border-white/5">
               ${speaker.count || 0} segs
             </span>
             ${durationFormatted ? `<div class="text-[10px] text-dark-subtle mt-0.5">${durationFormatted}</div>` : ''}

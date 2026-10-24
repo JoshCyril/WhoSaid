@@ -102,10 +102,72 @@ svg.is-speaking .dbga-hop {
   animation-play-state: running !important;
 }
 
-/* Glow highlight for active speaker avatar in transcript and player */
-.speaker-avatar-wrap.is-speaking {
-  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.6), 0 0 12px rgba(56, 189, 248, 0.4) !important;
-  transition: box-shadow 0.2s ease-in-out;
+/* User requirement: when gaze active speaker is highlighted and animated, do NOT add border or ring */
+.speaker-avatar-wrap.is-speaking,
+svg.gaze-avatar.is-speaking,
+.is-speaking svg.gaze-avatar {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Subtitle and dialogue avatar: bigger avatar display */
+.caption-avatar-slot,
+#captionAvatarWrap,
+#playerCcAvatarWrap {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+}
+
+/* Minimal Caption: rectangular badge, theme-adaptive white in dark mode, black in light mode */
+.minimal-caption-pill {
+  border-radius: 4px !important;
+  padding: 3px 10px 3px 4px !important;
+}
+.minimal-avatar-slot {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  border-radius: 4px !important;
+}
+.minimal-speaker-name {
+  color: #ffffff !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+html.light .minimal-speaker-name,
+html[data-theme="light"] .minimal-speaker-name {
+  color: #18181b !important;
+}
+html.light .minimal-caption-pill,
+html[data-theme="light"] .minimal-caption-pill {
+  background: rgba(245, 245, 245, 0.94) !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
+  color: #18181b !important;
+}
+
+/* All rounded pills transformed to clean rectangular badges with subtle corner radius */
+.badge,
+.pill,
+[class*="-badge"],
+[class*="-pill"],
+.speaker-count-pill,
+.status-badge,
+.hero-badge,
+.brand-badge,
+.active-file-indicator,
+.mockup-pill-badge,
+.recent-speaker-pill,
+.minimal-caption-pill,
+.db-badge-pill,
+.db-status-pill,
+.sql-chip,
+.folder-merge-badge,
+.prop-status-tag {
+  border-radius: 4px !important;
 }
 
 /* ==========================================================================
@@ -157,9 +219,23 @@ html.light .hover\:bg-white\/5:hover,
 html.light .hover\:bg-white\/10:hover {
   background-color: #dfdfdf !important;
 }
-html.light .app-header {
+html.light .electron-titlebar {
   background-color: #f4f4f4 !important;
   border-bottom-color: #d4d4d8 !important;
+}
+html.light .titlebar-app-name {
+  color: #1e1e1e !important;
+}
+html.light .titlebar-btn {
+  color: #555555 !important;
+}
+html.light .titlebar-btn:hover {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+  color: #1e1e1e !important;
+}
+html.light .titlebar-btn-close:hover {
+  background-color: #e81123 !important;
+  color: #ffffff !important;
 }
 html.light .vscode-activity-bar {
   background-color: #e2e2e2 !important;
@@ -494,7 +570,7 @@ html.light select {
   /* Main Workbench Layout Stack */
   .app-workbench-layout {
     flex-direction: column !important;
-    height: calc(100vh - 52px) !important;
+    height: calc(100vh - 32px) !important;
     overflow-x: hidden !important;
   }
 
@@ -598,5 +674,253 @@ html.light select {
     min-height: 320px !important;
     max-height: 50vh !important;
   }
+}
+
+/* ==========================================================================
+   USER REQUIREMENT: Dark theme workspace background #2e2e2e for EVERYTHING
+   (workspace, subtitle, panel, video player bg, main bg, tabs, cards)
+   ========================================================================== */
+html:not(.light) .workspace-view,
+html[data-theme="dark"] .workspace-view,
+html:not(.light) .workspace-left,
+html:not(.light) .workspace-right,
+html:not(.light) .workspace-editor-group,
+html:not(.light) .player-container,
+html:not(.light) .video-wrapper,
+html:not(.light) .video-stage,
+html:not(.light) #mediaVideo,
+html:not(.light) .video-waveform-progress-wrap,
+html:not(.light) .subtitle-banner,
+html:not(.light) .workspace-tabs-bar,
+html:not(.light) .transcript-panel,
+html:not(.light) .transcript-view,
+html:not(.light) .speakers-panel,
+html:not(.light) .workspace-right-toolbar,
+html:not(.light) .transcript-header,
+html:not(.light) .transcript-container,
+html:not(.light) .untranscribed-panel,
+html:not(.light) .workspace-empty-tabs-view {
+  background-color: #2e2e2e !important;
+  background: #2e2e2e !important;
+}
+
+html:not(.light) .transcript-turn-card {
+  background: #2e2e2e !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html:not(.light) .transcript-turn-card:hover {
+  background: #333333 !important;
+}
+
+html:not(.light) .transcript-turn-card.active-turn {
+  background: #383838 !important;
+  border-color: rgba(56, 189, 248, 0.4) !important;
+}
+
+html:not(.light) .workspace-tab {
+  background: #262626 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #a1a1aa !important;
+}
+
+html:not(.light) .workspace-tab.active {
+  background: #2e2e2e !important;
+  border-top-color: #38bdf8 !important;
+  color: #ffffff !important;
+}
+
+html:not(.light) .video-waveform-progress-wrap:hover,
+html:not(.light) .video-wrapper:hover .video-waveform-progress-wrap {
+  background: #282828 !important;
+}
+
+/* User Requirement: progressbar and subtitle section padding matching player controls (16px left & right) */
+.video-ctrl-bottom-bar {
+  left: 16px !important;
+  right: 16px !important;
+}
+
+.video-waveform-progress-wrap {
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+  box-sizing: border-box !important;
+}
+
+.subtitle-banner {
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+  box-sizing: border-box !important;
+}
+
+/* ==========================================================================
+   Recent Transcriptions: Gallery / Table Toggle, Big Avatars, Bubble, Tags
+   ========================================================================== */
+.btn-view-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  color: #94a3b8;
+  border: none;
+  transition: all 0.15s ease;
+}
+
+.btn-view-toggle.active {
+  background: rgba(56, 189, 248, 0.18) !important;
+  color: #38bdf8 !important;
+}
+
+html.light .btn-view-toggle {
+  color: #64748b;
+}
+
+html.light .btn-view-toggle.active {
+  background: rgba(14, 165, 233, 0.14) !important;
+  color: #0284c7 !important;
+}
+
+/* Speaker cluster: 32px avatars, hover name tooltip */
+.recent-speakers-cluster {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.recent-speaker-avatar-item {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.recent-speaker-avatar-item:hover {
+  transform: translateY(-2px) scale(1.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 5;
+}
+
+html.light .recent-speaker-avatar-item {
+  border-color: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.recent-speaker-more-bubble {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  border: 1.5px solid rgba(56, 189, 248, 0.3);
+  transition: transform 0.15s ease;
+}
+
+.recent-speaker-more-bubble:hover {
+  transform: translateY(-2px) scale(1.08);
+}
+
+/* Tags Column & Pills */
+.tags-cell-wrap {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+}
+
+.tag-pill-cyan {
+  background: rgba(6, 182, 212, 0.12);
+  color: #22d3ee;
+  border-color: rgba(6, 182, 212, 0.25);
+}
+
+.tag-pill-emerald {
+  background: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+.tag-pill-amber {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+.tag-pill-purple {
+  background: rgba(168, 85, 247, 0.12);
+  color: #c084fc;
+  border-color: rgba(168, 85, 247, 0.25);
+}
+
+.tag-pill-slate {
+  background: rgba(148, 163, 184, 0.12);
+  color: #cbd5e1;
+  border-color: rgba(148, 163, 184, 0.25);
+}
+
+html.light .tag-pill-cyan {
+  background: rgba(6, 182, 212, 0.1);
+  color: #0891b2;
+  border-color: rgba(6, 182, 212, 0.25);
+}
+
+html.light .tag-pill-emerald {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+html.light .tag-pill-amber {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+html.light .tag-pill-purple {
+  background: rgba(168, 85, 247, 0.1);
+  color: #9333ea;
+  border-color: rgba(168, 85, 247, 0.25);
+}
+
+html.light .tag-pill-slate {
+  background: rgba(148, 163, 184, 0.15);
+  color: #475569;
+  border-color: rgba(148, 163, 184, 0.3);
 }
 

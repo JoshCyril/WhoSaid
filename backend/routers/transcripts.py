@@ -87,7 +87,8 @@ async def update_transcript(transcript_id: str, payload: Dict[str, Any]):
 async def rename_speaker(transcript_id: str, payload: Dict[str, Any]):
     """
     Renames a speaker across all segments in the transcript.
-    Optionally saves the speaker's voice embedding as an enrolled Voice Profile.
+    Automatically enrolls or updates the speaker's voice profile with embedding,
+    color, and Cameo avatar seed in SQLite for future recognition across videos.
     """
     transcript = get_transcript(transcript_id)
     if not transcript:
@@ -95,7 +96,7 @@ async def rename_speaker(transcript_id: str, payload: Dict[str, Any]):
 
     speaker_id = payload.get("speaker_id")
     new_label = payload.get("new_label", "").strip()
-    enroll_profile = payload.get("enroll_profile", False)
+    enroll_profile = payload.get("enroll_profile", True)
     color = payload.get("color")
     avatar_seed = payload.get("avatar_seed")
 
@@ -118,22 +119,61 @@ async def rename_speaker(transcript_id: str, payload: Dict[str, Any]):
 
     # Update across all segments
     for seg in segments:
-        if seg["speaker_id"] == speaker_id:
+        if seg.get("speaker_id") == speaker_id:
             seg["speaker_label"] = new_label
             if color:
                 seg["speaker_color"] = color
             if avatar_seed:
                 seg["speaker_avatar_seed"] = avatar_seed
 
-    # If requested, enroll voice profile
+    # Get or extract speaker voice embedding
+    emb = target_spk.get("embedding") if target_spk else None
+    if not emb and target_spk:
+        try:
+            job_id = transcript.get("job_id")
+            if job_id:
+                job = get_job(job_id)
+                audio_path = job.get("audio_path") if job else None
+                if audio_path and os.path.exists(audio_path):
+                    from backend.audio import load_audio_samples
+                    from backend.diarizer import DiarizerService
+                    import numpy as np
+
+                    samples, sr = load_audio_samples(audio_path)
+                    spk_segments = [
+                        s for s in segments
+                        if s.get("speaker_id") == speaker_id and (s.get("end", 0) - s.get("start", 0)) > 0.4
+                    ]
+                    if spk_segments:
+                        chunks = []
+                        total_samples = 0
+                        for s in spk_segments:
+                            s_idx = int(s["start"] * sr)
+                            e_idx = min(len(samples), int(s["end"] * sr))
+                            if e_idx > s_idx:
+                                chunks.append(samples[s_idx:e_idx])
+                                total_samples += (e_idx - s_idx)
+                                if total_samples >= 15 * sr:
+                                    break
+                        if chunks:
+                            combined = np.concatenate(chunks)
+                            emb = DiarizerService.get_instance().extract_embedding_from_samples(combined, sr)
+                            if emb:
+                                target_spk["embedding"] = emb
+        except Exception as e:
+            print(f"[RenameSpeaker] Notice: could not extract audio embedding fallback: {e}")
+
+    # Automatically enroll into Voice Profiles if requested and embedding is available
     profile_id = None
-    if enroll_profile and target_spk and target_spk.get("embedding"):
+    if enroll_profile and target_spk and emb:
         profile_id = save_voice_profile(
             name=new_label,
-            embedding=target_spk["embedding"],
-            color=target_spk.get("color", "#f6c48f")
+            embedding=emb,
+            color=target_spk.get("color", color or "#f6c48f"),
+            avatar_seed=target_spk.get("avatar_seed", avatar_seed)
         )
         target_spk["profile_id"] = profile_id
+        print(f"[RenameSpeaker] Enrolled voice profile '{new_label}' (ID: {profile_id})")
 
     update_transcript_content(transcript_id, speakers, segments)
 
@@ -141,7 +181,7 @@ async def rename_speaker(transcript_id: str, payload: Dict[str, Any]):
         "status": "success",
         "speakers": speakers,
         "profile_id": profile_id,
-        "message": f"Renamed to '{new_label}'" + (" and saved as Voice Profile!" if enroll_profile else "")
+        "message": f"Renamed to '{new_label}'" + (" and saved into Enrolled Voice Profiles!" if profile_id else "")
     })
 
 @router.post("/api/transcripts/{transcript_id}/merge-speakers")

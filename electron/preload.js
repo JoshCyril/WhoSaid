@@ -17,5 +17,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Models folder & external browser links
   openExternal: (url) => ipcRenderer.invoke('shell:openExternal', url),
   openModelsFolder: () => ipcRenderer.invoke('fs:openModelsFolder'),
-  getModelsDir: () => ipcRenderer.invoke('config:getModelsDir')
+  getModelsDir: () => ipcRenderer.invoke('config:getModelsDir'),
+  // Window controls for custom titlebar
+  minimizeWindow: () => ipcRenderer.invoke('window:minimize'),
+  maximizeWindow: () => ipcRenderer.invoke('window:maximize'),
+  closeWindow: () => ipcRenderer.invoke('window:close'),
+  isWindowMaximized: () => ipcRenderer.invoke('window:isMaximized'),
+  onWindowStateChange: (callback) => ipcRenderer.on('window:state-changed', (_event, state) => callback(state))
 });

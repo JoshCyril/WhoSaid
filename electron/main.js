@@ -307,9 +307,12 @@ function createMainWindow() {
     height: 900,
     minWidth: 1040,
     minHeight: 680,
-    backgroundColor: '#2e2e2e',
+    backgroundColor: '#181b20',
     title: 'Who Said — Local Video Transcriber & Speaker Captions',
     icon: appIcon,
+    frame: false,
+    titleBarStyle: 'hidden',
+    titleBarOverlay: false,
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -324,6 +327,14 @@ function createMainWindow() {
     mainWindow.removeMenu();
   }
 
+  mainWindow.on('maximize', () => {
+    mainWindow?.webContents.send('window:state-changed', { isMaximized: true });
+  });
+
+  mainWindow.on('unmaximize', () => {
+    mainWindow?.webContents.send('window:state-changed', { isMaximized: false });
+  });
+
   // Recovery hook: if loading localhost URL ever fails, fallback to local setup.html
   mainWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription, validatedURL) => {
     console.warn(`[Window] did-fail-load on ${validatedURL}: ${errorDescription} (${errorCode})`);
@@ -336,6 +347,31 @@ function createMainWindow() {
     mainWindow = null;
   });
 }
+
+// Window Titlebar Control IPCs
+ipcMain.handle('window:minimize', () => {
+  if (mainWindow) mainWindow.minimize();
+});
+
+ipcMain.handle('window:maximize', () => {
+  if (mainWindow) {
+    if (mainWindow.isMaximized()) {
+      mainWindow.unmaximize();
+    } else {
+      mainWindow.maximize();
+    }
+    return mainWindow.isMaximized();
+  }
+  return false;
+});
+
+ipcMain.handle('window:close', () => {
+  if (mainWindow) mainWindow.close();
+});
+
+ipcMain.handle('window:isMaximized', () => {
+  return mainWindow ? mainWindow.isMaximized() : false;
+});
 
 // IPC Handlers
 ipcMain.handle('dialog:openFolder', async () => {

@@ -103,7 +103,7 @@ class DiarizerService:
         self,
         samples: np.ndarray,
         sample_rate: int = 16000,
-        similarity_threshold: float = 0.58,
+        similarity_threshold: float = 0.50,
         progress_callback: Optional[Callable[[int, int], None]] = None
     ) -> Dict[str, Any]:
         """
@@ -228,10 +228,13 @@ class DiarizerService:
                 speaker_name = matched_profile["name"]
                 speaker_color = matched_profile.get("color", SPEAKER_COLORS[color_idx % len(SPEAKER_COLORS)])
                 profile_id = matched_profile["id"]
+                avatar_seed = matched_profile.get("avatar_seed")
+                print(f"[Diarizer] Cluster {cid} MATCHED enrolled profile '{speaker_name}' (confidence: {best_score:.3f} >= {similarity_threshold})")
             else:
                 speaker_name = f"Speaker {final_idx + 1}"
                 speaker_color = SPEAKER_COLORS[color_idx % len(SPEAKER_COLORS)]
                 profile_id = None
+                avatar_seed = None
             color_idx += 1
 
             speaker_map[cid] = {
@@ -239,6 +242,7 @@ class DiarizerService:
                 "cluster_id": cid,
                 "label": speaker_name,
                 "color": speaker_color,
+                "avatar_seed": avatar_seed,
                 "profile_id": profile_id,
                 "match_confidence": round(best_score, 3) if best_score > 0 else None,
                 "embedding": embedding
@@ -251,6 +255,7 @@ class DiarizerService:
                 "cluster_id": 0,
                 "label": "Speaker 1",
                 "color": SPEAKER_COLORS[0],
+                "avatar_seed": None,
                 "profile_id": None,
                 "match_confidence": None,
                 "embedding": None
@@ -267,7 +272,8 @@ class DiarizerService:
                 "end": interval["end"],
                 "speaker_id": spk_info["id"],
                 "speaker_label": spk_info["label"],
-                "speaker_color": spk_info["color"]
+                "speaker_color": spk_info["color"],
+                "speaker_avatar_seed": spk_info.get("avatar_seed")
             })
 
         return {

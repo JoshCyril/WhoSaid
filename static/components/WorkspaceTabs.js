@@ -29,7 +29,7 @@ export class WorkspaceTabs {
               ${iconSvg}
               <span>${tab.label}</span>
               ${tab.badge !== undefined && tab.badge !== null ? `
-                <span class="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-brand-500/20 text-brand-300 font-mono">${tab.badge}</span>
+                <span class="ml-1 px-1.5 py-0.2 rounded-[4px] text-[10px] bg-brand-500/20 text-brand-300 font-mono">${tab.badge}</span>
               ` : ''}
             </button>
           `;

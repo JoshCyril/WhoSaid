@@ -274,11 +274,13 @@ class TranscriberService:
 
         # Group words into cohesive transcript turns
         merged_turns = []
+        initial_spk = speaker_lookup.get(all_words[0]["speaker_id"], default_spk)
         curr_turn = {
             "id": f"turn_0",
             "speaker_id": all_words[0]["speaker_id"],
-            "speaker_label": speaker_lookup.get(all_words[0]["speaker_id"], default_spk)["label"],
-            "speaker_color": speaker_lookup.get(all_words[0]["speaker_id"], default_spk)["color"],
+            "speaker_label": initial_spk["label"],
+            "speaker_color": initial_spk["color"],
+            "speaker_avatar_seed": initial_spk.get("avatar_seed"),
             "start": all_words[0]["start"],
             "end": all_words[0]["end"],
             "words": [all_words[0]],
@@ -302,6 +304,7 @@ class TranscriberService:
                     "speaker_id": w["speaker_id"],
                     "speaker_label": spk_info["label"],
                     "speaker_color": spk_info["color"],
+                    "speaker_avatar_seed": spk_info.get("avatar_seed"),
                     "start": w["start"],
                     "end": w["end"],
                     "words": [w],
