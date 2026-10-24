@@ -111,3 +111,8 @@ export class Modal {
     });
   }
 }
+
+if (typeof window !== "undefined") {
+  window.WhoSaidComponents = window.WhoSaidComponents || {};
+  window.WhoSaidComponents.Modal = Modal;
+}

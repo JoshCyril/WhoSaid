@@ -54,3 +54,8 @@ export class FileTreeNode {
     `;
   }
 }
+
+if (typeof window !== "undefined") {
+  window.WhoSaidComponents = window.WhoSaidComponents || {};
+  window.WhoSaidComponents.FileTreeNode = FileTreeNode;
+}

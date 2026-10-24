@@ -1,13 +1,13 @@
 // --- Who Said: Client Application Engine ---
 
-const PALETTE = [
+const PALETTE = (window.WhoSaidUtils && window.WhoSaidUtils.PALETTE) || [
   "#fb7185", "#2dd4bf", "#fbbf24", "#c084fc", "#4ade80",
   "#f472b6", "#38bdf8", "#f97316", "#a3e635", "#818cf8"
 ];
 
-const CAMEO_PRESETS = ["Felix", "Daisy", "Jack", "Willow", "Leo", "Maya", "Milo", "Zoe"];
+const CAMEO_PRESETS = (window.WhoSaidUtils && window.WhoSaidUtils.CAMEO_PRESETS) || ["Felix", "Daisy", "Jack", "Willow", "Leo", "Maya", "Milo", "Zoe"];
 
-const DEFAULT_AI_PROMPT = `Please provide a comprehensive summary of the following meeting/video transcript.
+const DEFAULT_AI_PROMPT = (window.WhoSaidUtils && window.WhoSaidUtils.DEFAULT_AI_PROMPT) || `Please provide a comprehensive summary of the following meeting/video transcript.
 Highlight the main discussion points, key decisions made, and action items assigned to each speaker.`;
 
 class WhoSaidApp {
@@ -2486,7 +2486,7 @@ class WhoSaidApp {
     const targetSpk = (this.currentTranscript.speakers || []).find((s) => s.id === targetId);
 
     try {
-      const resp = await fetch(`/api/transcripts/${this.currentTranscript.id}/merge_speakers`, {
+      const resp = await fetch(`/api/transcripts/${this.currentTranscript.id}/merge-speakers`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -3907,10 +3907,14 @@ class WhoSaidApp {
 
   // --- UI Toast Notifications ---
   showToast(message, type = "info") {
+    if (window.WhoSaidUtils && typeof window.WhoSaidUtils.showToast === "function") {
+      return window.WhoSaidUtils.showToast(message, type);
+    }
     const toast = document.createElement("div");
     toast.className = `toast ${type}`;
     toast.textContent = message;
-    document.getElementById("toastContainer").appendChild(toast);
+    const c = document.getElementById("toastContainer");
+    if (c) c.appendChild(toast);
     setTimeout(() => {
       toast.style.opacity = "0";
       toast.style.transform = "translateX(20px)";
@@ -3920,6 +3924,9 @@ class WhoSaidApp {
   }
 
   escapeHtml(str) {
+    if (window.WhoSaidUtils && typeof window.WhoSaidUtils.escapeHtml === "function") {
+      return window.WhoSaidUtils.escapeHtml(str);
+    }
     if (!str) return "";
     return str
       .replace(/&/g, "&amp;")
@@ -3930,6 +3937,9 @@ class WhoSaidApp {
   }
 
   formatFileSize(bytes) {
+    if (window.WhoSaidUtils && typeof window.WhoSaidUtils.formatFileSize === "function") {
+      return window.WhoSaidUtils.formatFileSize(bytes);
+    }
     if (!bytes || bytes === 0) return "0 B";
     const k = 1024;
     const sizes = ["B", "KB", "MB", "GB", "TB"];

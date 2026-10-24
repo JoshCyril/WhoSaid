@@ -146,3 +146,7 @@ export const Icons = {
       <line x1="9" y1="3" x2="9" y2="21"></line>
     </svg>`
 };
+
+if (typeof window !== "undefined") {
+  window.WhoSaidIcons = Icons;
+}

@@ -65,11 +65,16 @@ export class SpeakerCard {
           </button>
           
           <button type="button" class="hover:text-amber-300 flex items-center gap-1 transition-colors" data-action="merge-speaker" data-id="${speaker.id}">
-            ${Icons.merge('w-3 h-3')}
+            ${(typeof Icons !== 'undefined' && Icons.merge ? Icons.merge('w-3 h-3') : '')}
             <span>Merge</span>
           </button>
         </div>
       </div>
     `;
   }
+}
+
+if (typeof window !== "undefined") {
+  window.WhoSaidComponents = window.WhoSaidComponents || {};
+  window.WhoSaidComponents.SpeakerCard = SpeakerCard;
 }

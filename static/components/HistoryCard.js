@@ -62,3 +62,8 @@ export class HistoryCard {
     `;
   }
 }
+
+if (typeof window !== "undefined") {
+  window.WhoSaidComponents = window.WhoSaidComponents || {};
+  window.WhoSaidComponents.HistoryCard = HistoryCard;
+}

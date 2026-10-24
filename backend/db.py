@@ -6,39 +6,15 @@ from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 import sys
 
-if getattr(sys, "frozen", False):
-    APP_DIR = getattr(sys, "_MEIPASS", os.path.dirname(sys.executable))
-    ROOT_DIR = os.path.dirname(sys.executable)
-else:
-    APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ROOT_DIR = APP_DIR
-
-DEFAULT_DB_DIR = os.environ.get("WHOSAID_STORAGE_DIR") or os.path.join(ROOT_DIR, "storage")
-DEFAULT_DB_PATH = os.path.join(DEFAULT_DB_DIR, "whosaid.db")
-
-_ACTIVE_DB_PATH: Optional[str] = os.environ.get("WHOSAID_DB_PATH")
-
-def get_default_db_path() -> str:
-    return os.path.abspath(DEFAULT_DB_PATH)
-
-def get_db_path() -> str:
-    global _ACTIVE_DB_PATH
-    if _ACTIVE_DB_PATH and _ACTIVE_DB_PATH.strip():
-        return os.path.abspath(_ACTIVE_DB_PATH.strip())
-    return os.path.abspath(DEFAULT_DB_PATH)
+from backend.config import (
+    APP_DIR, ROOT_DIR, BASE_DIR, DEFAULT_DB_DIR, DEFAULT_DB_PATH,
+    get_default_db_path, get_db_path, set_db_path as config_set_db_path
+)
 
 def set_db_path(new_path: Optional[str]) -> str:
-    global _ACTIVE_DB_PATH
-    if not new_path or not str(new_path).strip():
-        _ACTIVE_DB_PATH = None
-    else:
-        clean_path = os.path.abspath(str(new_path).strip())
-        parent_dir = os.path.dirname(clean_path)
-        if parent_dir:
-            os.makedirs(parent_dir, exist_ok=True)
-        _ACTIVE_DB_PATH = clean_path
+    path = config_set_db_path(new_path)
     init_db()
-    return get_db_path()
+    return path
 
 # For backwards compatibility
 DB_DIR = DEFAULT_DB_DIR

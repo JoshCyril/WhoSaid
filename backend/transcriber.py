@@ -6,75 +6,23 @@ import faster_whisper
 
 import json
 
-if getattr(sys, "frozen", False):
-    APP_DIR = getattr(sys, "_MEIPASS", os.path.dirname(sys.executable))
-    ROOT_DIR = os.path.dirname(sys.executable)
-else:
-    APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ROOT_DIR = APP_DIR
+from backend.config import (
+    APP_DIR, ROOT_DIR, BASE_DIR, MODELS_CONFIG_FILE,
+    get_default_models_dir, get_models_dir, set_models_dir as config_set_models_dir
+)
 
-MODELS_CONFIG_FILE = os.path.join(ROOT_DIR, "storage", "models_config.json")
-
-def get_default_models_dir() -> str:
-    candidates = [
-        os.path.join(ROOT_DIR, "models"),
-        os.path.join(APP_DIR, "models"),
-        os.path.join(ROOT_DIR, "..", "models"),
-        os.path.join(APP_DIR, "_internal", "models")
-    ]
-    return os.path.abspath(next((p for p in candidates if p and os.path.exists(p)), os.path.join(ROOT_DIR, "models")))
-
-_saved_models_dir = None
-if os.path.exists(MODELS_CONFIG_FILE):
-    try:
-        with open(MODELS_CONFIG_FILE, "r", encoding="utf-8") as f:
-            c = json.load(f)
-            _saved_models_dir = c.get("models_dir")
-    except Exception:
-        pass
-
-_model_candidates = [
-    _saved_models_dir,
-    os.environ.get("WHOSAID_MODELS_DIR"),
-    os.path.join(ROOT_DIR, "models"),
-    os.path.join(APP_DIR, "models"),
-    os.path.join(ROOT_DIR, "..", "models"),
-    os.path.join(APP_DIR, "_internal", "models")
-]
-MODELS_DIR = next((p for p in _model_candidates if p and os.path.exists(p)), os.path.join(ROOT_DIR, "models"))
-os.environ["WHOSAID_MODELS_DIR"] = os.path.abspath(MODELS_DIR)
-
-def get_models_dir() -> str:
-    global MODELS_DIR
-    return os.path.abspath(MODELS_DIR)
+MODELS_DIR = get_models_dir()
 
 def set_models_dir(new_path: Optional[str]) -> str:
     global MODELS_DIR
-    if not new_path or not str(new_path).strip():
-        MODELS_DIR = get_default_models_dir()
-        if os.path.exists(MODELS_CONFIG_FILE):
-            try:
-                os.remove(MODELS_CONFIG_FILE)
-            except Exception:
-                pass
-    else:
-        clean_path = os.path.abspath(str(new_path).strip())
-        MODELS_DIR = clean_path
-        os.environ["WHOSAID_MODELS_DIR"] = clean_path
-        try:
-            os.makedirs(os.path.dirname(MODELS_CONFIG_FILE), exist_ok=True)
-            with open(MODELS_CONFIG_FILE, "w", encoding="utf-8") as f:
-                json.dump({"models_dir": clean_path}, f, indent=2)
-        except Exception:
-            pass
-
+    res = config_set_models_dir(new_path)
+    MODELS_DIR = res
     try:
         from backend import diarizer
         diarizer.update_models_dir(MODELS_DIR)
     except Exception:
         pass
-
-    return get_models_dir()
+    return res
 
 
 def find_local_whisper_model(model_size: str, search_dir: str) -> Optional[str]:

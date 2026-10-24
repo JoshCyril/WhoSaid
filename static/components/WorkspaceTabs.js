@@ -67,3 +67,8 @@ export class WorkspaceTabs {
     });
   }
 }
+
+if (typeof window !== "undefined") {
+  window.WhoSaidComponents = window.WhoSaidComponents || {};
+  window.WhoSaidComponents.WorkspaceTabs = WorkspaceTabs;
+}

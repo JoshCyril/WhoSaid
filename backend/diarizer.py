@@ -6,29 +6,17 @@ from backend.db import get_all_voice_profiles
 
 import sys
 
-if getattr(sys, "frozen", False):
-    APP_DIR = getattr(sys, "_MEIPASS", os.path.dirname(sys.executable))
-    ROOT_DIR = os.path.dirname(sys.executable)
-else:
-    APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ROOT_DIR = APP_DIR
+from backend.config import APP_DIR, ROOT_DIR, BASE_DIR, get_models_dir, get_diarizer_model_paths
 
-_model_candidates = [
-    os.environ.get("WHOSAID_MODELS_DIR"),
-    os.path.join(ROOT_DIR, "models"),
-    os.path.join(APP_DIR, "models"),
-    os.path.join(ROOT_DIR, "..", "models"),
-    os.path.join(APP_DIR, "_internal", "models")
-]
-MODELS_DIR = next((p for p in _model_candidates if p and os.path.exists(p)), os.path.join(ROOT_DIR, "models"))
-SEG_MODEL_PATH = os.path.join(MODELS_DIR, "model.onnx")
-EMB_MODEL_PATH = os.path.join(MODELS_DIR, "3dspeaker_speech_campplus_sv_zh_en_16k-common_advanced.onnx")
+MODELS_DIR = get_models_dir()
+SEG_MODEL_PATH, EMB_MODEL_PATH = get_diarizer_model_paths()
 
 def update_models_dir(new_dir: str):
     global MODELS_DIR, SEG_MODEL_PATH, EMB_MODEL_PATH
     MODELS_DIR = os.path.abspath(new_dir)
-    SEG_MODEL_PATH = os.path.join(MODELS_DIR, "model.onnx")
-    EMB_MODEL_PATH = os.path.join(MODELS_DIR, "3dspeaker_speech_campplus_sv_zh_en_16k-common_advanced.onnx")
+    SEG_MODEL_PATH, EMB_MODEL_PATH = get_diarizer_model_paths()
+    # Reset singleton so next access reinitializes with updated model paths
+    DiarizerService._instance = None
 
 
 SPEAKER_COLORS = [
