@@ -17,7 +17,7 @@
     <!-- Local DiceBear Cameo Engine (100% Offline from cameo.min.json) -->
     <script src="/static/libs/cameo.js"></script>
     <!-- Unified Tailwind & Vega Design System (100% Offline Compiled) -->
-    <link rel="stylesheet" href="/static/tailwind.css?v=fullwidth1">
+    <link rel="stylesheet" href="/static/tailwind.css?v=fullwidth2">
 </head>
 
 <body class="style-vega">
@@ -589,8 +589,10 @@
                                     </div>
                                 </div>
 
-                            </div>
-                                        <!-- Recent Transcriptions Section (Combined Transcriptions & History) -->
+                            </div><!-- /.hero-layout-grid -->
+                        </div><!-- /#homeHeroSection -->
+
+                        <!-- Recent Transcriptions Section (Combined Transcriptions & History) -->
                         <div class="home-section" id="homeRecentSection">
                             <div class="section-header">
                                 <div class="section-title-wrap">
@@ -679,7 +681,7 @@
                                     </table>
                                 </div>
                             </div>
-                        </div>            </div>
+                        </div>
                     </section>
 
                     <!-- Active Workspace View -->
@@ -2198,9 +2200,20 @@
                 </div>
                 <div class="modal-body folder-modal-body">
 
-                    <!-- Left Pane: Table View of Speakers -->
-                    <div class="folder-left-pane">
+                    <!-- Left Pane: Speaker List (Separately Scrollable) -->
+                    <div class="folder-left-pane" id="folderLeftPane">
                         <div class="folder-pane-header">
+                            <div class="folder-section-title">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5 text-brand-400">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                                <span>Speaker List</span>
+                            </div>
+                        </div>
+                        <div class="folder-search-wrap">
                             <input type="text" id="folderSearchInput" class="form-input form-input-sm"
                                 placeholder="Filter speakers...">
                         </div>
@@ -2220,8 +2233,18 @@
                         </div>
                     </div>
 
-                    <!-- Right Pane: Folder Viewer & Editor -->
+                    <!-- Right Pane: Speaker Editor (Separately Scrollable) -->
                     <div class="folder-right-pane" id="folderRightPane">
+                        <div class="folder-pane-header">
+                            <div class="folder-section-title">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5 text-brand-400">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                                <span>Speaker Editor</span>
+                            </div>
+                        </div>
+
                         <div id="folderSpeakerEmptyState" class="folder-empty-state hidden">
                             <p>Select a speaker from the table on the left to inspect and edit.</p>
                         </div>
@@ -2234,10 +2257,18 @@
                                     <span id="folderSpeakerIdBadge" class="folder-id-badge">spk_0</span>
                                 </div>
                                 <div class="folder-meta-col">
-                                    <div class="folder-input-row">
-                                        <input type="text" id="folderSpeakerNameInput" class="form-input"
+                                    <div class="folder-input-row flex items-center gap-2">
+                                        <input type="text" id="folderSpeakerNameInput" class="form-input flex-1"
                                             placeholder="Speaker Name">
                                         <button id="btnFolderSaveName" class="btn btn-primary btn-sm">Save</button>
+                                        <button id="btnFolderOpenMergeModal" class="btn btn-secondary btn-sm flex items-center gap-1.5" title="Merge all dialogue turns of this speaker into another speaker">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5 text-brand-400">
+                                                <circle cx="18" cy="18" r="3"></circle>
+                                                <circle cx="6" cy="6" r="3"></circle>
+                                                <path d="M6 9v12m12-9c0 3-2 6-6 6"></path>
+                                            </svg>
+                                            <span>Merge All Turns</span>
+                                        </button>
                                     </div>
 
                                     <!-- Color Presets -->
@@ -2252,37 +2283,9 @@
                                 </div>
                             </div>
 
-                            <!-- Merge Section (Upgraded UI/UX) -->
-                            <div class="folder-merge-card">
-                                <div class="folder-merge-header">
-                                    <div class="folder-merge-title-group">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="folder-merge-icon">
-                                            <circle cx="18" cy="18" r="3"></circle>
-                                            <circle cx="6" cy="6" r="3"></circle>
-                                            <path d="M6 9v12m12-9c0 3-2 6-6 6"></path>
-                                        </svg>
-                                        <span class="folder-merge-heading">Merge Speaker</span>
-                                    </div>
-                                    <span class="folder-merge-badge">Reassign all turns</span>
-                                </div>
-                                <div class="folder-merge-controls">
-                                    <div class="folder-merge-select-wrap">
-                                        <select id="folderMergeTargetSelect" class="folder-merge-select" title="Select target speaker to merge into">
-                                            <!-- Populated dynamically with other speakers -->
-                                        </select>
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="folder-merge-chevron">
-                                            <polyline points="6 9 12 15 18 9"></polyline>
-                                        </svg>
-                                    </div>
-                                    <button id="btnFolderExecuteMerge" class="btn-merge-action" title="Execute speaker merge">
-                                        <span>Merge Into</span>
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-arrow-merge">
-                                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                                            <polyline points="12 5 19 12 12 19"></polyline>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
+                            <!-- Hidden fallback for legacy merge selectors -->
+                            <select id="folderMergeTargetSelect" class="hidden" style="display:none !important;"></select>
+                            <button id="btnFolderExecuteMerge" class="hidden" style="display:none !important;"></button>
 
                             <!-- Folder Viewer for Turns (Files in Folder) -->
                             <div class="folder-turns-section">
@@ -2310,6 +2313,63 @@
                 </div>
                 <div class="modal-footer">
                     <button id="btnCloseFolderBottom" class="btn btn-secondary">Done</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Merge Misclassified Speakers Modal (User Request: Similar to Merge Popup) -->
+        <div id="mergeModal" class="modal-backdrop hidden" style="z-index: 1050 !important;">
+            <div class="modal-dialog" style="max-width: 480px;">
+                <div class="modal-header">
+                    <div class="title-with-badge">
+                        <h3 class="modal-title">Merge Speaker</h3>
+                        <span class="badge">Combine Turns</span>
+                    </div>
+                    <button id="btnCloseMergeModal" class="btn-close" aria-label="Close">&times;</button>
+                </div>
+                <div class="modal-body space-y-4">
+                    <p class="modal-desc text-xs text-text-muted">
+                        All dialogue turns spoken by the source speaker will be reassigned and merged into the target speaker.
+                    </p>
+
+                    <div class="form-group">
+                        <label for="mergeSourceSelect" class="form-label text-xs font-semibold">Misclassified Speaker (To Remove)</label>
+                        <select id="mergeSourceSelect" class="form-input form-select text-xs">
+                            <!-- Populated dynamically -->
+                        </select>
+                        <span class="form-help-text text-[11px] text-text-dim">This speaker ID will be removed and their turns transferred.</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mergeTargetSelect" class="form-label text-xs font-semibold">Merge Into Speaker (To Keep)</label>
+                        <select id="mergeTargetSelect" class="form-input form-select text-xs">
+                            <!-- Populated dynamically -->
+                        </select>
+                        <span class="form-help-text text-[11px] text-text-dim">All dialogue turns will be assigned to this speaker name &amp; color.</span>
+                    </div>
+
+                    <!-- Visual Flow Diagram Preview Card -->
+                    <div id="mergePreviewCard" class="merge-preview-card">
+                        <div class="merge-flow-diagram">
+                            <div id="mergePreviewSource" class="merge-flow-speaker">
+                                <span class="speaker-dot"></span>
+                                <span class="spk-name">Source Speaker</span>
+                            </div>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="merge-flow-arrow">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                            <div id="mergePreviewTarget" class="merge-flow-speaker">
+                                <span class="speaker-dot"></span>
+                                <span class="spk-name">Target Speaker</span>
+                            </div>
+                        </div>
+                        <p id="mergeTurnsCountText" class="merge-preview-note">0 turn(s) will be transferred.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnCancelMerge" class="btn btn-secondary">Cancel</button>
+                    <button id="btnConfirmMerge" class="btn btn-primary">Merge Speakers</button>
                 </div>
             </div>
         </div>
@@ -2345,7 +2405,7 @@
         <script src="/static/libs/gaze.js"></script>
         <script src="/static/js/utils.js"></script>
         <script src="/static/js/api.js"></script>
-        <script src="/static/app.js?v=v3"></script>
+        <script src="/static/app.js?v=v6"></script>
 </body>
 
 </html>

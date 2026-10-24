@@ -2170,7 +2170,7 @@ body {
     width: 100%;
     position: relative;
     cursor: pointer !important;
-    padding: 0 !important;
+    padding: 0 16px !important;
     background: #181b20;
     border-top: 1px solid #3c3c3c;
     border-radius: 0;
@@ -2181,17 +2181,18 @@ body {
     transition: height 0.22s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease;
     z-index: 100 !important;
     overflow: visible !important;
-    box-sizing: border-box;
+    box-sizing: border-box !important;
 }
 
 .video-wrapper.is-playing:not(:hover) .video-waveform-progress-wrap {
     height: 8px;
+    padding: 0 16px !important;
 }
 
 .video-wrapper:hover .video-waveform-progress-wrap,
 .video-waveform-progress-wrap:hover {
     height: 44px;
-    padding: 0 !important;
+    padding: 0 16px !important;
     background: #1e2228;
 }
 
@@ -3575,16 +3576,36 @@ body.style-light .turn-content .word-span {
 /* ==========================================================================
    SPEAKER DIRECTORY & INSPECTOR TWO-COLUMN MODAL
    ========================================================================== */
-.modal-folder-viewer {
-    max-width: 920px;
+.modal-dialog.modal-folder-viewer {
+    max-width: 980px;
+    width: 94vw;
+    height: 82vh;
+    max-height: 820px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .folder-modal-body {
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    gap: 18px;
-    padding: 0;
-    max-height: 70vh;
+    flex: 1;
+    min-height: 0 !important;
+    height: 100% !important;
+    display: grid !important;
+    grid-template-columns: 310px 1fr !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+
+.folder-section-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: hsl(var(--muted-foreground));
 }
 
 .folder-left-pane {
@@ -3592,30 +3613,69 @@ body.style-light .turn-content .word-span {
     padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
+    min-height: 0;
+    height: 100%;
     overflow: hidden;
+    background: hsl(var(--card));
+}
+
+.folder-search-wrap {
+    flex-shrink: 0;
 }
 
 .folder-speakers-table-wrap {
     flex: 1;
+    min-height: 0;
+    height: 100%;
     overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
 }
 
-/* Shadcn Table */
+/* Custom Independent Scrollbars */
+.folder-speakers-table-wrap::-webkit-scrollbar,
+.folder-right-pane::-webkit-scrollbar {
+    width: 6px;
+}
+
+.folder-speakers-table-wrap::-webkit-scrollbar-track,
+.folder-right-pane::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.folder-speakers-table-wrap::-webkit-scrollbar-thumb,
+.folder-right-pane::-webkit-scrollbar-thumb {
+    background: hsl(var(--border) / 0.8);
+    border-radius: 9999px;
+}
+
+.folder-speakers-table-wrap::-webkit-scrollbar-thumb:hover,
+.folder-right-pane::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+}
+
+/* Shadcn Table with Sticky Headers */
 .folder-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.8125rem;
 }
 
-.folder-table th {
+.folder-table thead th {
+    position: sticky;
+    top: 0;
+    background: hsl(var(--card));
+    z-index: 2;
     text-align: left;
-    padding: 6px 8px;
+    padding: 8px 8px;
     font-size: 0.6875rem;
     font-weight: 600;
     color: hsl(var(--muted-foreground));
     text-transform: uppercase;
+    letter-spacing: 0.04em;
     border-bottom: 1px solid hsl(var(--border));
+    box-shadow: 0 1px 0 hsl(var(--border));
 }
 
 .folder-table td {
@@ -3632,16 +3692,28 @@ body.style-light .turn-content .word-span {
     background: hsl(var(--muted) / 0.4);
 }
 
-.folder-table tr.active-row {
+.folder-table tr.active-row,
+.folder-table tr.active-folder-row {
     background: hsl(var(--accent));
 }
 
 .folder-right-pane {
-    padding: 16px 20px;
+    padding: 18px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 0;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: hsl(var(--card));
+}
+
+.folder-detail-content {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    overflow-y: auto;
+    min-height: 0;
 }
 
 .folder-speaker-card {
@@ -3924,8 +3996,7 @@ body.style-light .turn-content .word-span {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    max-height: 240px;
-    overflow-y: auto;
+    overflow: visible;
 }
 
 .folder-turn-item {

@@ -741,7 +741,16 @@ html:not(.light) .video-wrapper:hover .video-waveform-progress-wrap {
   right: 16px !important;
 }
 
-.video-waveform-progress-wrap {
+.video-waveform-progress-wrap,
+.video-waveform-progress-wrap:hover,
+.video-wrapper:hover .video-waveform-progress-wrap,
+.video-wrapper.is-playing .video-waveform-progress-wrap,
+html:not(.light) .video-waveform-progress-wrap,
+html:not(.light) .video-waveform-progress-wrap:hover,
+html:not(.light) .video-wrapper:hover .video-waveform-progress-wrap,
+:fullscreen .video-waveform-progress-wrap,
+:-webkit-full-screen .video-waveform-progress-wrap,
+.video-wrapper.is-fullscreen .video-waveform-progress-wrap {
   padding-left: 16px !important;
   padding-right: 16px !important;
   box-sizing: border-box !important;
@@ -805,20 +814,32 @@ html.light .btn-view-toggle.active {
   overflow: hidden;
   position: relative;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1.5px solid rgba(255, 255, 255, 0.12);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  transition: transform 0.15s ease;
 }
 
 .recent-speaker-avatar-item:hover {
   transform: translateY(-2px) scale(1.08);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: none !important;
   z-index: 5;
 }
 
 html.light .recent-speaker-avatar-item {
-  border-color: rgba(0, 0, 0, 0.1);
-  background: rgba(0, 0, 0, 0.04);
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* User Requirement: Enrolled Voice Profiles avatar no border */
+.profile-table-row td .rounded-full,
+#enrolledProfilesTable td .rounded-full {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  background: transparent !important;
 }
 
 .recent-speaker-more-bubble {

@@ -127,6 +127,7 @@ class WhoSaidApp {
     this.folderSearchInput = document.getElementById("folderSearchInput");
     this.folderSpeakerNameInput = document.getElementById("folderSpeakerNameInput");
     this.btnFolderSaveName = document.getElementById("btnFolderSaveName");
+    this.btnFolderOpenMergeModal = document.getElementById("btnFolderOpenMergeModal");
     this.folderMergeTargetSelect = document.getElementById("folderMergeTargetSelect");
     this.btnFolderExecuteMerge = document.getElementById("btnFolderExecuteMerge");
     this.folderTurnsList = document.getElementById("folderTurnsList");
@@ -605,7 +606,7 @@ class WhoSaidApp {
       const color = s.color || "#38bdf8";
       const svg = this.getDicebearAvatarHtml(name, s.id, color, avatarSize);
       html += `
-        <div class="recent-speaker-avatar-item" title="${this.escapeHtml(name)}" style="width:${avatarSize}px;height:${avatarSize}px;min-width:${avatarSize}px;min-height:${avatarSize}px;border-radius:6px;border:1.5px solid ${color}44;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;background:rgba(255,255,255,0.05);cursor:pointer;">
+        <div class="recent-speaker-avatar-item" title="${this.escapeHtml(name)}" style="width:${avatarSize}px;height:${avatarSize}px;min-width:${avatarSize}px;min-height:${avatarSize}px;border-radius:6px;border:none !important;box-shadow:none !important;outline:none !important;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;background:transparent;cursor:pointer;">
           ${svg}
         </div>
       `;
@@ -1040,6 +1041,11 @@ class WhoSaidApp {
     if (this.btnFolderSaveName) {
       this.btnFolderSaveName.addEventListener("click", () => this.saveFolderSpeakerName());
     }
+    if (this.btnFolderOpenMergeModal) {
+      this.btnFolderOpenMergeModal.addEventListener("click", () => {
+        this.openMergeModal(this.activeFolderSpeakerId);
+      });
+    }
     if (this.btnFolderExecuteMerge) {
       this.btnFolderExecuteMerge.addEventListener("click", () => this.executeFolderMerge());
     }
@@ -1143,6 +1149,11 @@ class WhoSaidApp {
     }
     if (this.mergeTargetSelect) {
       this.mergeTargetSelect.addEventListener("change", () => this.updateMergePreview());
+    }
+    if (this.mergeModal) {
+      this.mergeModal.addEventListener("click", (e) => {
+        if (e.target === this.mergeModal) this.closeMergeModal();
+      });
     }
 
     // Legacy Export Dropdown (Guarded)
@@ -1716,12 +1727,14 @@ class WhoSaidApp {
       });
     }
 
+    // Reset cached active caption turn & mode so switching immediately renders the active speech
+    this.currentActiveCaptionTurnId = null;
+    this.currentActiveCaptionMode = null;
+    this._lastScrolledWordSpan = null;
+
     if (mode === "minimal") {
       if (this.captionOverlay) this.captionOverlay.classList.add("hidden");
       if (this.playerCcOverlay) this.playerCcOverlay.classList.add("hidden");
-      if (this.activeTurnId && this.playerMinimalCaption) {
-        this.playerMinimalCaption.classList.remove("hidden");
-      }
       this.showToast("Caption style: Minimal (<Avatar><Name>)", "info");
     } else if (mode === "regular") {
       if (this.playerMinimalCaption) this.playerMinimalCaption.classList.add("hidden");
@@ -1732,6 +1745,11 @@ class WhoSaidApp {
       if (this.captionOverlay) this.captionOverlay.classList.add("hidden");
       if (this.playerCcOverlay) this.playerCcOverlay.classList.add("hidden");
       this.showToast("Captions hidden", "info");
+    }
+
+    // Immediately trigger updateActiveSegment to re-render subtitle text & avatar right now
+    if (this.mediaVideo) {
+      this.updateActiveSegment(this.mediaVideo.currentTime || 0);
     }
   }
 
@@ -1832,8 +1850,9 @@ class WhoSaidApp {
           if (this.playerCcOverlay) this.playerCcOverlay.classList.add("hidden");
           if (this.playerMinimalCaption) {
             this.playerMinimalCaption.classList.remove("hidden");
-            if (this.currentActiveCaptionTurnId !== activeSeg.id) {
+            if (this.currentActiveCaptionTurnId !== activeSeg.id || this.currentActiveCaptionMode !== "minimal") {
               this.currentActiveCaptionTurnId = activeSeg.id;
+              this.currentActiveCaptionMode = "minimal";
               const avatarHtml = this.getDicebearAvatarHtml(
                 activeSeg.speaker_label,
                 activeSeg.speaker_id,
@@ -1855,9 +1874,14 @@ class WhoSaidApp {
           if (this.captionOverlay) this.captionOverlay.classList.remove("hidden");
           if (this.playerCcOverlay) this.playerCcOverlay.classList.remove("hidden");
 
-          // If active speaker segment changed, update avatar, speaker name, and base word spans
-          if (this.currentActiveCaptionTurnId !== activeSeg.id) {
+          // If active speaker segment changed, OR mode changed, OR text was wiped out: re-render
+          const needsReRender = this.currentActiveCaptionTurnId !== activeSeg.id ||
+            this.currentActiveCaptionMode !== "regular" ||
+            !this.captionText || !this.captionText.innerHTML.trim();
+
+          if (needsReRender) {
             this.currentActiveCaptionTurnId = activeSeg.id;
+            this.currentActiveCaptionMode = "regular";
             const avatarHtml = this.getDicebearAvatarHtml(
               activeSeg.speaker_label,
               activeSeg.speaker_id,
@@ -1906,7 +1930,8 @@ class WhoSaidApp {
                 span.classList.toggle("word-active", isWordActive);
                 if (isWordActive) activeSpanToScroll = span;
               });
-              if (activeSpanToScroll) {
+              if (activeSpanToScroll && this._lastScrolledWordSpan !== activeSpanToScroll) {
+                this._lastScrolledWordSpan = activeSpanToScroll;
                 activeSpanToScroll.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
               }
             };
@@ -1945,6 +1970,8 @@ class WhoSaidApp {
       document.querySelectorAll(".transcript-turn-card.active-turn").forEach((c) => c.classList.remove("active-turn"));
 
       this.currentActiveCaptionTurnId = null;
+      this.currentActiveCaptionMode = null;
+      this._lastScrolledWordSpan = null;
       if (this.playerMinimalCaption) this.playerMinimalCaption.classList.add("hidden");
       if (this.playerCcOverlay) this.playerCcOverlay.classList.add("hidden");
 
@@ -2548,10 +2575,22 @@ class WhoSaidApp {
       });
     }
 
-    // 4. Populate merge target select
+    // 4. Update Merge All Turns button & fallback select
+    const otherSpeakers = (this.currentTranscript.speakers || []).filter((s) => s.id !== speakerId);
+    if (this.btnFolderOpenMergeModal) {
+      const hasOthers = otherSpeakers.length > 0;
+      this.btnFolderOpenMergeModal.disabled = !hasOthers;
+      if (!hasOthers) {
+        this.btnFolderOpenMergeModal.title = "At least 2 speakers required to merge turns";
+        this.btnFolderOpenMergeModal.classList.add("opacity-50", "cursor-not-allowed");
+      } else {
+        this.btnFolderOpenMergeModal.title = "Merge all dialogue turns of this speaker into another speaker";
+        this.btnFolderOpenMergeModal.classList.remove("opacity-50", "cursor-not-allowed");
+      }
+    }
+
     if (this.folderMergeTargetSelect) {
       this.folderMergeTargetSelect.innerHTML = "";
-      const otherSpeakers = (this.currentTranscript.speakers || []).filter((s) => s.id !== speakerId);
       if (otherSpeakers.length === 0) {
         const opt = document.createElement("option");
         opt.value = "";
@@ -2977,10 +3016,11 @@ class WhoSaidApp {
     });
 
     // Determine default selections
-    if (preferredSourceId && speakers.some((s) => s.id === preferredSourceId)) {
-      this.mergeSourceSelect.value = preferredSourceId;
+    const sourceIdToUse = preferredSourceId || this.activeFolderSpeakerId;
+    if (sourceIdToUse && speakers.some((s) => s.id === sourceIdToUse)) {
+      this.mergeSourceSelect.value = sourceIdToUse;
       // Select the first different speaker as target
-      const other = speakers.find((s) => s.id !== preferredSourceId);
+      const other = speakers.find((s) => s.id !== sourceIdToUse);
       if (other) this.mergeTargetSelect.value = other.id;
     } else {
       // Pick first two distinct speakers
@@ -3010,7 +3050,7 @@ class WhoSaidApp {
 
     if (sourceSpk && this.mergePreviewSource) {
       this.mergePreviewSource.innerHTML = `
-        ${this.getDicebearAvatarHtml(sourceSpk.label, sourceSpk.id, sourceSpk.color, 36)}
+        ${this.getDicebearAvatarHtml(sourceSpk.label, sourceSpk.id, sourceSpk.color, 36, sourceSpk.avatar_seed)}
         <div class="spk-preview-meta">
           <span class="spk-name">${this.escapeHtml(sourceSpk.label)}</span>
           <span class="spk-popup-id-tag">ID: <code>${sourceSpk.id}</code></span>
@@ -3020,7 +3060,7 @@ class WhoSaidApp {
 
     if (targetSpk && this.mergePreviewTarget) {
       this.mergePreviewTarget.innerHTML = `
-        ${this.getDicebearAvatarHtml(targetSpk.label, targetSpk.id, targetSpk.color, 36)}
+        ${this.getDicebearAvatarHtml(targetSpk.label, targetSpk.id, targetSpk.color, 36, targetSpk.avatar_seed)}
         <div class="spk-preview-meta">
           <span class="spk-name">${this.escapeHtml(targetSpk.label)}</span>
           <span class="spk-popup-id-tag">ID: <code>${targetSpk.id}</code></span>
@@ -3195,7 +3235,7 @@ class WhoSaidApp {
       tr.innerHTML = `
         <td class="py-3 px-4">
           <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-surface-base border border-surface-border" style="border-left: 3px solid ${p.color || '#f6c48f'}">
+            <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-transparent" style="border:none !important;box-shadow:none !important;outline:none !important;">
               ${avatarHtml}
             </div>
             <div class="flex flex-col min-w-0">
