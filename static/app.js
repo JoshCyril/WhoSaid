@@ -430,26 +430,46 @@ class WhoSaidApp {
     }
   }
 
-  // --- Local DiceBear Cameo Avatar Generator System (Offline from cameo.min.json) ---
-  getDicebearAvatarUrl(seed, colorHex = "#f6c48f") {
+  // --- Local DiceBear Gaze Avatar Generator System (Offline from gaze.min.json) ---
+  getDicebearAvatarUrl(seed, colorHex = "#38bdf8") {
+    if (window.WhoSaidUtils && typeof window.WhoSaidUtils.getDicebearAvatarUrl === "function") {
+      return window.WhoSaidUtils.getDicebearAvatarUrl(seed, colorHex);
+    }
+    if (window.GazeAvatar && window.GazeAvatar.renderDataUri) {
+      return window.GazeAvatar.renderDataUri(seed, colorHex);
+    }
     if (window.CameoAvatar && window.CameoAvatar.renderDataUri) {
       return window.CameoAvatar.renderDataUri(seed, colorHex);
     }
     const s = encodeURIComponent((seed || "speaker").trim());
-    const c = (colorHex || "#f6c48f").replace("#", "").trim();
-    return `https://api.dicebear.com/10.x/cameo/svg?seed=${s}&color=${c}&backgroundColor=transparent`;
+    const c = (colorHex || "#38bdf8").replace("#", "").trim();
+    return `https://api.dicebear.com/10.x/gaze/svg?seed=${s}&color=${c}&backgroundColor=transparent`;
   }
 
-  getDicebearAvatarHtml(name, id, color = "#f6c48f", size = 26, avatarSeed = null) {
+  getDicebearAvatarHtml(name, id, color = "#38bdf8", size = 26, avatarSeed = null, isSpeaking = false) {
+    if (window.WhoSaidUtils && typeof window.WhoSaidUtils.getDicebearAvatarHtml === "function") {
+      return window.WhoSaidUtils.getDicebearAvatarHtml(name, id, color, size, avatarSeed, isSpeaking);
+    }
+    if (window.GazeAvatar && window.GazeAvatar.renderHtml) {
+      return window.GazeAvatar.renderHtml(name, id, color, size, avatarSeed, isSpeaking);
+    }
     const seed = (avatarSeed || name || id || "speaker").trim();
     const url = this.getDicebearAvatarUrl(seed, color);
     const initial = (name || id || "S").charAt(0).toUpperCase();
+    const spkClass = isSpeaking ? "is-speaking" : "";
     return `
-      <span class="speaker-avatar-wrap" style="width:${size}px;height:${size}px;min-width:${size}px;min-height:${size}px;max-width:${size}px;max-height:${size}px;background:transparent;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;" title="${this.escapeHtml(name || id)}">
+      <span class="speaker-avatar-wrap ${spkClass}" data-speaker-id="${this.escapeHtml(id || '')}" style="width:${size}px;height:${size}px;min-width:${size}px;min-height:${size}px;max-width:${size}px;max-height:${size}px;background:transparent;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;" title="${this.escapeHtml(name || id)}">
         <img class="speaker-avatar-img" width="${size}" height="${size}" src="${url}" alt="${this.escapeHtml(name || id)}" loading="lazy" style="width:${size}px;height:${size}px;min-width:${size}px;min-height:${size}px;max-width:${size}px;max-height:${size}px;object-fit:contain;display:block;" onerror="this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='flex';" />
         <span class="speaker-avatar-fallback" style="background:transparent; color:${color}; display:none;">${initial}</span>
       </span>
     `;
+  }
+
+  stopAllAvatarAnimations() {
+    this._lastAnimatedSpeakerId = null;
+    document.querySelectorAll(".speaker-avatar-wrap.is-speaking").forEach((el) => {
+      el.classList.remove("is-speaking");
+    });
   }
 
   // --- Views Navigation ---
@@ -1247,6 +1267,7 @@ class WhoSaidApp {
         try { this.wavesurfer.pause(); } catch(e) {}
       }
       this.stopPlaybackSyncLoop();
+      this.stopAllAvatarAnimations();
       this.onTimeUpdate();
     });
     this.mediaVideo.addEventListener("ended", () => {
@@ -1255,6 +1276,7 @@ class WhoSaidApp {
         try { this.wavesurfer.pause(); this.wavesurfer.setTime(0); } catch(e) {}
       }
       this.stopPlaybackSyncLoop();
+      this.stopAllAvatarAnimations();
       this.onTimeUpdate();
     });
     this.mediaVideo.addEventListener("seeked", () => {
@@ -1602,6 +1624,9 @@ class WhoSaidApp {
   }
 
   formatTime(seconds) {
+    if (window.WhoSaidUtils && typeof window.WhoSaidUtils.formatTime === "function") {
+      return window.WhoSaidUtils.formatTime(seconds);
+    }
     if (isNaN(seconds)) return "00:00";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
@@ -1809,6 +1834,24 @@ class WhoSaidApp {
         el.classList.remove("active-timeline-region");
       }
     });
+
+    // 5. Update DiceBear Gaze avatar animation: ONLY the active speaker animates when speaking
+    const isPlaying = this.mediaVideo && !this.mediaVideo.paused && !this.mediaVideo.ended;
+    const currentActiveSpeakerId = (activeSeg && isPlaying) ? (activeSeg.speaker_id || null) : null;
+
+    if (this._lastAnimatedSpeakerId !== currentActiveSpeakerId) {
+      this._lastAnimatedSpeakerId = currentActiveSpeakerId;
+      document.querySelectorAll(".speaker-avatar-wrap.is-speaking").forEach((el) => {
+        if (!currentActiveSpeakerId || el.dataset.speakerId !== currentActiveSpeakerId) {
+          el.classList.remove("is-speaking");
+        }
+      });
+      if (currentActiveSpeakerId) {
+        document.querySelectorAll(`.speaker-avatar-wrap[data-speaker-id="${currentActiveSpeakerId}"]`).forEach((el) => {
+          el.classList.add("is-speaking");
+        });
+      }
+    }
   }
 
   // --- Render Transcript & Speakers ---

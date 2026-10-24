@@ -79,19 +79,26 @@
    ========================================================================== */
 html.light,
 html[data-theme="light"] {
-    --background: 0 0% 91.76%; /* #eaeaea */
-    --foreground: 0 0% 18.04%; /* #2e2e2e */
+    --background: 0 0% 91.76%;
+    /* #eaeaea */
+    --foreground: 0 0% 18.04%;
+    /* #2e2e2e */
 
-    --card: 0 0% 95%; /* #f2f2f2 */
-    --card-foreground: 0 0% 18.04%; /* #2e2e2e */
+    --card: 0 0% 95%;
+    /* #f2f2f2 */
+    --card-foreground: 0 0% 18.04%;
+    /* #2e2e2e */
 
     --popover: 0 0% 95%;
     --popover-foreground: 0 0% 18.04%;
 
-    --primary: 0 0% 18.04%; /* #2e2e2e */
-    --primary-foreground: 0 0% 91.76%; /* #eaeaea */
+    --primary: 0 0% 18.04%;
+    /* #2e2e2e */
+    --primary-foreground: 0 0% 91.76%;
+    /* #eaeaea */
 
-    --secondary: 0 0% 86%; /* #dbdbdb */
+    --secondary: 0 0% 86%;
+    /* #dbdbdb */
     --secondary-foreground: 0 0% 18.04%;
 
     --muted: 0 0% 86%;
@@ -103,7 +110,8 @@ html[data-theme="light"] {
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 80%; /* #cccccc */
+    --border: 0 0% 80%;
+    /* #cccccc */
     --border-dashed: 0 0% 75%;
     --input: 0 0% 96%;
     --ring: 0 0% 25%;
@@ -2081,7 +2089,8 @@ body {
     margin: 0 !important;
     display: inline;
     border-radius: 2px;
-    color: rgba(255, 255, 255, 0.38); /* Unspoken: dimmer color */
+    color: rgba(255, 255, 255, 0.38);
+    /* Unspoken: dimmer color */
     background: transparent !important;
     transition: color 0.12s ease, opacity 0.12s ease;
     cursor: pointer;
@@ -2090,14 +2099,16 @@ body {
 /* Spoken word: bright color */
 .caption-word-span.word-spoken,
 .word-span.word-spoken {
-    color: #f1f5f9 !important; /* Bright crisp white */
+    color: #f1f5f9 !important;
+    /* Bright crisp white */
     opacity: 0.96;
 }
 
 /* Active word: bright color with subtle emphasis */
 .caption-word-span.word-active,
 .word-span.word-active {
-    color: #ffffff !important; /* Peak bright */
+    color: #ffffff !important;
+    /* Peak bright */
     font-weight: 600;
     opacity: 1;
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
@@ -2599,7 +2610,7 @@ body {
 
 .drop-subtitle {
     font-size: 0.8125rem;
-    color: hsl(var(--muted-foreground));
+    color: hsl(var(--foreground));
 }
 
 .drop-browse {
@@ -6041,5 +6052,3 @@ body {
     left: auto;
     z-index: 1000;
 }
-
-

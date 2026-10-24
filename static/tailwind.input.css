@@ -1,3 +1,9 @@
+/* ==========================================================================
+   WHO SAID — CONSOLIDATED TAILWIND & SHADCN DESIGN SYSTEM
+   Inlines and compiles Vega Theme, custom components, and Tailwind utilities
+   ========================================================================== */
+@import "./app.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -52,6 +58,54 @@
   .ws-card {
     @apply bg-dark-card border border-white/10 rounded-xl p-4 sm:p-5 transition-all duration-150;
   }
+}
+
+/* ==========================================================================
+   DICEBEAR GAZE AVATAR ENGINE & ACTIVE-SPEAKER ANIMATIONS
+   Animates avatar (eyes look, blink, hop) ONLY when the speaker is speaking.
+   ========================================================================== */
+.gaze-avatar,
+.speaker-avatar-wrap svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.dbga-eye,
+.dbga-look {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.dbga-hop {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+.dbga-eye,
+.dbga-look,
+.dbga-hop {
+  animation-play-state: paused !important;
+}
+
+/* Active Speaker Animation State: Triggers when container or svg has .is-speaking */
+.is-speaking .dbga-eye,
+.is-speaking .dbga-look,
+.is-speaking .dbga-hop,
+.speaker-avatar-wrap.is-speaking .dbga-eye,
+.speaker-avatar-wrap.is-speaking .dbga-look,
+.speaker-avatar-wrap.is-speaking .dbga-hop,
+svg.is-speaking .dbga-eye,
+svg.is-speaking .dbga-look,
+svg.is-speaking .dbga-hop {
+  --dbga-p: running !important;
+  animation-play-state: running !important;
+}
+
+/* Glow highlight for active speaker avatar in transcript and player */
+.speaker-avatar-wrap.is-speaking {
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.6), 0 0 12px rgba(56, 189, 248, 0.4) !important;
+  transition: box-shadow 0.2s ease-in-out;
 }
 
 /* ==========================================================================

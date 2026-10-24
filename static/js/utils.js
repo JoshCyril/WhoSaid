@@ -42,21 +42,28 @@ Highlight the main discussion points, key decisions made, and action items assig
       .replace(/'/g, "&#039;");
   }
 
-  function getDicebearAvatarUrl(seed, colorHex = "#f6c48f") {
+  function getDicebearAvatarUrl(seed, colorHex = "#38bdf8") {
+    if (window.GazeAvatar && typeof window.GazeAvatar.renderDataUri === "function") {
+      return window.GazeAvatar.renderDataUri(seed, colorHex);
+    }
     if (window.CameoAvatar && typeof window.CameoAvatar.renderDataUri === "function") {
       return window.CameoAvatar.renderDataUri(seed, colorHex);
     }
     const s = encodeURIComponent((seed || "speaker").trim());
-    const c = (colorHex || "#f6c48f").replace("#", "").trim();
-    return `https://api.dicebear.com/10.x/cameo/svg?seed=${s}&color=${c}&backgroundColor=transparent`;
+    const c = (colorHex || "#38bdf8").replace("#", "").trim();
+    return `https://api.dicebear.com/10.x/gaze/svg?seed=${s}&color=${c}&backgroundColor=transparent`;
   }
 
-  function getDicebearAvatarHtml(name, id, color = "#f6c48f", size = 26, avatarSeed = null) {
+  function getDicebearAvatarHtml(name, id, color = "#38bdf8", size = 26, avatarSeed = null, isSpeaking = false) {
+    if (window.GazeAvatar && typeof window.GazeAvatar.renderHtml === "function") {
+      return window.GazeAvatar.renderHtml(name, id, color, size, avatarSeed, isSpeaking);
+    }
     const seed = (avatarSeed || name || id || "speaker").trim();
     const url = getDicebearAvatarUrl(seed, color);
     const initial = (name || id || "S").charAt(0).toUpperCase();
+    const spkClass = isSpeaking ? "is-speaking" : "";
     return `
-      <span class="speaker-avatar-wrap" style="width:${size}px;height:${size}px;min-width:${size}px;min-height:${size}px;max-width:${size}px;max-height:${size}px;background:transparent;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;" title="${escapeHtml(name || id)}">
+      <span class="speaker-avatar-wrap ${spkClass}" data-speaker-id="${escapeHtml(id || '')}" style="width:${size}px;height:${size}px;min-width:${size}px;min-height:${size}px;max-width:${size}px;max-height:${size}px;background:transparent;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;" title="${escapeHtml(name || id)}">
         <img class="speaker-avatar-img" width="${size}" height="${size}" src="${url}" alt="${escapeHtml(name || id)}" loading="lazy" style="width:${size}px;height:${size}px;min-width:${size}px;min-height:${size}px;max-width:${size}px;max-height:${size}px;object-fit:contain;display:block;" onerror="this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='flex';" />
         <span class="speaker-avatar-fallback" style="background:transparent; color:${color}; display:none;">${initial}</span>
       </span>

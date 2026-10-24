@@ -27,13 +27,13 @@ export class SpeakerCard {
           
           <!-- Avatar + Name -->
           <div class="flex items-center gap-2.5 min-w-0">
-            ${speaker.avatarUrl ? `
+            ${(typeof window !== 'undefined' && window.WhoSaidUtils && window.WhoSaidUtils.getDicebearAvatarHtml) ? window.WhoSaidUtils.getDicebearAvatarHtml(speaker.name || speaker.id, speaker.id, speaker.color || '#38bdf8', 32, speaker.avatarSeed || speaker.avatar_seed || speaker.name) : (speaker.avatarUrl ? `
               <img src="${speaker.avatarUrl}" alt="${speaker.name}" class="w-8 h-8 rounded-full object-cover border border-white/20 shrink-0" />
             ` : `
               <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 text-slate-900 shadow-sm" style="background-color: ${speaker.color || '#38bdf8'}">
                 ${(speaker.name || speaker.id || 'S').substring(0, 2).toUpperCase()}
               </div>
-            `}
+            `)}
             
             <div class="min-w-0">
               <div class="flex items-center gap-1.5">
