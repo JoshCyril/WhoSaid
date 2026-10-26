@@ -837,6 +837,143 @@ html[data-theme="light"] .caption-word-span.word-active {
   font-weight: 400 !important;
 }
 
+/* Reopen Sidebar Button & Workspace Tab Action Buttons in Light Mode */
+html.light .workspace-tab-action-btn,
+html[data-theme="light"] .workspace-tab-action-btn,
+html.light #btnReopenSidebar,
+html[data-theme="light"] #btnReopenSidebar {
+  background-color: #e4e4e4 !important;
+  border-color: #d4d4d8 !important;
+  color: #2e2e2e !important;
+}
+html.light .workspace-tab-action-btn:hover,
+html[data-theme="light"] .workspace-tab-action-btn:hover,
+html.light #btnReopenSidebar:hover,
+html[data-theme="light"] #btnReopenSidebar:hover {
+  background-color: #dadada !important;
+  color: #111111 !important;
+}
+html.light .workspace-tab-action-btn svg,
+html.light .workspace-tab-action-btn span,
+html[data-theme="light"] .workspace-tab-action-btn svg,
+html[data-theme="light"] .workspace-tab-action-btn span,
+html.light #btnReopenSidebar svg,
+html.light #btnReopenSidebar span,
+html[data-theme="light"] #btnReopenSidebar svg,
+html[data-theme="light"] #btnReopenSidebar span {
+  color: #2e2e2e !important;
+}
+
+/* Video Controls & Speaker Name Light Mode */
+html.light .caption-speaker-name,
+html[data-theme="light"] .caption-speaker-name {
+  color: #2e2e2e !important;
+  font-weight: 600 !important;
+}
+html.light .video-time-wrap,
+html[data-theme="light"] .video-time-wrap,
+html.light .video-time-wrap #vTimeCurrent,
+html[data-theme="light"] .video-time-wrap #vTimeCurrent,
+html.light .video-time-wrap #vTimeDuration,
+html[data-theme="light"] .video-time-wrap #vTimeDuration,
+html.light #timeCurrent,
+html[data-theme="light"] #timeCurrent,
+html.light #timeDuration,
+html[data-theme="light"] #timeDuration {
+  color: #2e2e2e !important;
+}
+html.light .btn-ctrl-floating,
+html[data-theme="light"] .btn-ctrl-floating {
+  color: #2e2e2e !important;
+}
+html.light .btn-ctrl-floating:hover,
+html[data-theme="light"] .btn-ctrl-floating:hover {
+  background: rgba(0, 0, 0, 0.08) !important;
+  color: #111111 !important;
+}
+html.light .btn-ctrl-floating svg,
+html[data-theme="light"] .btn-ctrl-floating svg {
+  color: #2e2e2e !important;
+}
+
+/* Workspace View When Right Panel is Closed (.sidebar-collapsed) in Light Mode */
+html.light .workspace-view.sidebar-collapsed,
+html[data-theme="light"] .workspace-view.sidebar-collapsed {
+  background-color: #eaeaea !important;
+  background: #eaeaea !important;
+  color: #2e2e2e !important;
+}
+html.light .workspace-view.sidebar-collapsed .workspace-left,
+html[data-theme="light"] .workspace-view.sidebar-collapsed .workspace-left,
+html.light .workspace-view.sidebar-collapsed .workspace-editor-group,
+html[data-theme="light"] .workspace-view.sidebar-collapsed .workspace-editor-group,
+html.light .workspace-view.sidebar-collapsed .player-container,
+html[data-theme="light"] .workspace-view.sidebar-collapsed .player-container,
+html.light .workspace-view.sidebar-collapsed .video-wrapper,
+html[data-theme="light"] .workspace-view.sidebar-collapsed .video-wrapper,
+html.light .workspace-view.sidebar-collapsed .video-player-toolbar,
+html[data-theme="light"] .workspace-view.sidebar-collapsed .video-player-toolbar,
+html.light .workspace-view.sidebar-collapsed .subtitle-banner,
+html[data-theme="light"] .workspace-view.sidebar-collapsed .subtitle-banner,
+html.light .workspace-view.sidebar-collapsed .waveform-container,
+html[data-theme="light"] .workspace-view.sidebar-collapsed .waveform-container,
+html.light .workspace-view.sidebar-collapsed .video-waveform-progress-wrap,
+html[data-theme="light"] .workspace-view.sidebar-collapsed .video-waveform-progress-wrap {
+  background-color: #eaeaea !important;
+  background: #eaeaea !important;
+  color: #2e2e2e !important;
+  border-color: #d4d4d8 !important;
+}
+html.light .workspace-view.sidebar-collapsed .workspace-tabs-bar,
+html[data-theme="light"] .workspace-view.sidebar-collapsed .workspace-tabs-bar {
+  background-color: #dedede !important;
+  background: #dedede !important;
+  border-bottom-color: #d4d4d8 !important;
+  color: #2e2e2e !important;
+}
+html.light .workspace-view.sidebar-collapsed *,
+html[data-theme="light"] .workspace-view.sidebar-collapsed * {
+  color: #2e2e2e;
+}
+html.light .workspace-view.sidebar-collapsed .caption-word-span,
+html[data-theme="light"] .workspace-view.sidebar-collapsed .caption-word-span {
+  color: #919191 !important;
+}
+html.light .workspace-view.sidebar-collapsed .caption-word-span.word-spoken,
+html.light .workspace-view.sidebar-collapsed .caption-word-span.word-active,
+html[data-theme="light"] .workspace-view.sidebar-collapsed .caption-word-span.word-spoken,
+html[data-theme="light"] .workspace-view.sidebar-collapsed .caption-word-span.word-active {
+  color: #2e2e2e !important;
+  font-weight: 400 !important;
+}
+html.light .workspace-view.sidebar-collapsed .empty-tabs-title,
+html[data-theme="light"] .workspace-view.sidebar-collapsed .empty-tabs-title {
+  color: #2e2e2e !important;
+}
+html.light .workspace-view.sidebar-collapsed .empty-tabs-desc,
+html.light .workspace-view.sidebar-collapsed .empty-tabs-icon,
+html[data-theme="light"] .workspace-view.sidebar-collapsed .empty-tabs-desc,
+html[data-theme="light"] .workspace-view.sidebar-collapsed .empty-tabs-icon {
+  color: #555555 !important;
+}
+html.light .workspace-view.sidebar-collapsed #btnReopenSidebar,
+html[data-theme="light"] .workspace-view.sidebar-collapsed #btnReopenSidebar {
+  background-color: #e4e4e4 !important;
+  border-color: #d4d4d8 !important;
+  color: #2e2e2e !important;
+}
+html.light .workspace-view.sidebar-collapsed #btnReopenSidebar:hover,
+html[data-theme="light"] .workspace-view.sidebar-collapsed #btnReopenSidebar:hover {
+  background-color: #dadada !important;
+  color: #111111 !important;
+}
+html.light .workspace-view.sidebar-collapsed #btnReopenSidebar span,
+html.light .workspace-view.sidebar-collapsed #btnReopenSidebar svg,
+html[data-theme="light"] .workspace-view.sidebar-collapsed #btnReopenSidebar span,
+html[data-theme="light"] .workspace-view.sidebar-collapsed #btnReopenSidebar svg {
+  color: #2e2e2e !important;
+}
+
 html.light .transcript-toolbar,
 html[data-theme="light"] .transcript-toolbar,
 html.light .transcript-header,

@@ -494,6 +494,7 @@ class WhoSaidApp {
       this.btnHomeWorkspace.classList.remove("hidden");
     }
     this.loadHomeRecentSessions();
+    this.updateWorkspaceNavVisibility();
   }
 
   showWorkspaceView() {
@@ -509,6 +510,7 @@ class WhoSaidApp {
     if (this.navBackendSettings) this.navBackendSettings.classList.remove("active");
     this.updateActivityBar("workspace");
     this.renderWorkspaceTabs();
+    this.updateWorkspaceNavVisibility();
   }
 
   showProfilesView() {
@@ -1429,7 +1431,9 @@ class WhoSaidApp {
     });
 
     // Search input
-    this.transcriptSearchInput.addEventListener("input", (e) => this.filterTranscript(e.target.value));
+    if (this.transcriptSearchInput) {
+      this.transcriptSearchInput.addEventListener("input", (e) => this.filterTranscript(e.target.value));
+    }
 
     // Waveform timeline hover & click seeking events
     if (this.videoTimelineWaveformWrap) {
@@ -3770,11 +3774,13 @@ class WhoSaidApp {
     if (this.openTabs.length === 0) {
       if (this.workspaceEmptyTabsState) this.workspaceEmptyTabsState.classList.remove("hidden");
       if (this.workspacePlayerContainer) this.workspacePlayerContainer.classList.add("hidden");
+      this.updateWorkspaceNavVisibility();
       return;
     } else {
       if (this.workspaceEmptyTabsState) this.workspaceEmptyTabsState.classList.add("hidden");
       if (this.workspacePlayerContainer) this.workspacePlayerContainer.classList.remove("hidden");
     }
+    this.updateWorkspaceNavVisibility();
 
     this.openTabs.forEach((tab) => {
       const tabEl = document.createElement("div");
@@ -3872,6 +3878,7 @@ class WhoSaidApp {
         if (this.activeFileIndicator) this.activeFileIndicator.classList.add("hidden");
         this.renderWorkspaceTabs();
         this.updateOpenEditors();
+        this.updateWorkspaceNavVisibility();
       }
     } else {
       this.renderWorkspaceTabs();
@@ -4364,7 +4371,10 @@ class WhoSaidApp {
     if (isCollapsed && this.vscodeExplorerSidebar) {
       this.vscodeExplorerSidebar.classList.add("collapsed");
       if (this.actBarExplorer) this.actBarExplorer.classList.remove("active");
+    } else {
+      if (this.actBarExplorer) this.actBarExplorer.classList.add("active");
     }
+    this.updateWorkspaceNavVisibility();
 
     // Activity Bar interactions
     if (this.actBarExplorer) {
@@ -4660,6 +4670,19 @@ class WhoSaidApp {
     if (this.actBarWorkspace) this.actBarWorkspace.classList.toggle("active", activeTab === "workspace");
     if (this.actBarProfiles) this.actBarProfiles.classList.toggle("active", activeTab === "profiles");
     if (this.actBarHistory) this.actBarHistory.classList.toggle("active", activeTab === "history");
+  }
+
+  updateWorkspaceNavVisibility() {
+    const hasActive = (this.openTabs && this.openTabs.length > 0) || !!this.currentTranscript;
+    if (this.navWorkspace) {
+      this.navWorkspace.classList.toggle("hidden", !hasActive);
+    }
+    if (this.actBarWorkspace) {
+      this.actBarWorkspace.classList.toggle("hidden", !hasActive);
+    }
+    if (this.btnHomeWorkspace) {
+      this.btnHomeWorkspace.classList.toggle("hidden", !hasActive);
+    }
   }
 
   initSidebarResizer() {

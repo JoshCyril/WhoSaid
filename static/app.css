@@ -1434,7 +1434,7 @@ html[data-theme="light"] .titlebar-version-badge {
     max-width: 100% !important;
     align-items: stretch !important;
     justify-content: flex-start !important;
-    background: #121417 !important;
+    background: var(--bg-main) !important;
 }
 
 .workspace-view.sidebar-collapsed .video-wrapper {
