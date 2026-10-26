@@ -58,10 +58,30 @@ Everything runs locally on your CPU with **zero cloud calls**.
 
 > ⚠️ **Beta Testing Notice**: This release is currently in **Beta Testing** and is not the final release.
 
-You can download pre-compiled Windows executable binaries directly from [GitHub Releases](https://github.com/JoshCyril/WhoSaid/releases):
+You can download the pre-compiled Windows standalone executable directly from [GitHub Releases](https://github.com/JoshCyril/WhoSaid/releases/tag/v1.0.0-beta.3):
 
-- 📦 **[WhoSaid Setup 0.3.0-beta.exe (Installer)](https://github.com/JoshCyril/WhoSaid/releases/download/v0.3-beta/WhoSaid.Setup.0.3.0-beta.exe)** — Standard Windows installer.
-- 🚀 **[WhoSaid 0.3.0-beta.exe (Portable)](https://github.com/JoshCyril/WhoSaid/releases/download/v0.3-beta/WhoSaid.0.3.0-beta.exe)** — Zero-install standalone executable.
+- 🚀 **[WhoSaid.1.0.0-beta.3.exe (Portable Standalone)](https://github.com/JoshCyril/WhoSaid/releases/download/v1.0.0-beta.3/WhoSaid.1.0.0-beta.3.exe)** — Zero-install standalone executable. Download and double-click to run.
+
+---
+
+## 🎙️ Whisper Speech Models (Offline Download)
+
+WhoSaid runs 100% offline. The **tiny** model (~75MB) is bundled directly inside the application for immediate out-of-the-box use.
+
+For higher transcription accuracy (recommended for meetings, technical discussions, and multi-speaker audio), download any of the Faster-Whisper CTranslate2 models from Hugging Face:
+
+| Model Size | Accuracy / Speed | Download Link (Hugging Face) | Directory Name |
+| :--- | :--- | :--- | :--- |
+| **Tiny** *(Bundled)* | Fast / Good for clear audio | [Systran/faster-whisper-tiny](https://huggingface.co/Systran/faster-whisper-tiny) | `models/tiny/` |
+| **Base** | Balanced / Recommended for general speech | [Systran/faster-whisper-base](https://huggingface.co/Systran/faster-whisper-base) | `models/base/` |
+| **Small** | High accuracy / Great for meetings | [Systran/faster-whisper-small](https://huggingface.co/Systran/faster-whisper-small) | `models/small/` |
+| **Medium** | Very High accuracy / Rich vocabulary | [Systran/faster-whisper-medium](https://huggingface.co/Systran/faster-whisper-medium) | `models/medium/` |
+| **Large-v3** | State-of-the-art / Multi-lingual | [Systran/faster-whisper-large-v3](https://huggingface.co/Systran/faster-whisper-large-v3) | `models/large-v3/` |
+
+### How to Add a Model:
+1. Open the Hugging Face link above and download the model files: `model.bin` (or `model.safetensors`), `config.json`, `tokenizer.json`, and `vocabulary.json`.
+2. Create a folder matching the model name inside your `models/` directory (e.g., `models/base/` or `models/small/`), or set your custom models directory in WhoSaid under **Settings ➔ Models Directory**.
+3. Place the downloaded files inside that folder. WhoSaid will automatically detect the model on launch and make it selectable in the transcription dropdown!
 
 ---
 
