@@ -625,31 +625,22 @@ class WhoSaidApp {
   }
 
   renderSessionTags(item) {
-    const tags = [];
-    // 1. Language tag
-    if (item.language) {
-      const langLabel = item.task === "translate" ? `${item.language.toUpperCase()} → EN` : item.language.toUpperCase();
-      tags.push(`<span class="tag-pill tag-pill-emerald" title="Language: ${this.escapeHtml(langLabel)}">${this.escapeHtml(langLabel)}</span>`);
-    } else {
-      tags.push(`<span class="tag-pill tag-pill-emerald" title="Language: Auto">AUTO</span>`);
+    const customTags = item.custom_tags || item.tags || [];
+    if (!customTags || customTags.length === 0) {
+      return `<span class="text-xs text-text-dim italic">No custom tags</span>`;
     }
-
-    // 2. Whisper Model
-    const model = item.model_size || "base";
-    tags.push(`<span class="tag-pill tag-pill-cyan" title="Whisper Model: ${this.escapeHtml(model)}">${this.escapeHtml(model)}</span>`);
-
-    // 3. File Format
-    let ext = "VIDEO";
-    if (item.filename) {
-      const parts = item.filename.split(".");
-      if (parts.length > 1) ext = parts.pop().toUpperCase();
-    }
-    tags.push(`<span class="tag-pill tag-pill-purple" title="Media Format: ${this.escapeHtml(ext)}">${this.escapeHtml(ext)}</span>`);
-
-    // 4. Diarization
-    tags.push(`<span class="tag-pill tag-pill-amber" title="Speaker Diarization Active">Diarized</span>`);
-
-    return `<div class="tags-cell-wrap" style="display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap;">${tags.join("")}</div>`;
+    const colorClasses = [
+      "tag-pill-cyan",
+      "tag-pill-purple",
+      "tag-pill-emerald",
+      "tag-pill-amber",
+      "tag-pill-slate"
+    ];
+    const tagsHtml = customTags.map((tag, idx) => {
+      const colorCls = colorClasses[idx % colorClasses.length];
+      return `<span class="tag-pill ${colorCls}" title="Custom Tag: ${this.escapeHtml(tag)}">#${this.escapeHtml(tag)}</span>`;
+    }).join("");
+    return `<div class="tags-cell-wrap" style="display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap;">${tagsHtml}</div>`;
   }
 
   renderHomeRecentGrid(list) {
@@ -697,6 +688,7 @@ class WhoSaidApp {
     list.forEach((item) => {
       const createdDate = item.created_at ? new Date(item.created_at).toLocaleDateString() : "Recently";
       const durText = item.duration ? this.formatTime(item.duration) : "--:--";
+      const sizeText = this.formatFileSize(item.file_size || item.size || 0);
       const speakersHtml = this.renderSpeakerAvatarsCluster(item.speakers || [], 32);
       const tagsHtml = this.renderSessionTags(item);
 
@@ -725,9 +717,9 @@ class WhoSaidApp {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             ${durText}
           </span>
-          <span style="display:inline-flex;align-items:center;gap:4px">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-            ${createdDate}
+          <span style="display:inline-flex;align-items:center;gap:4px" title="Media Size: ${sizeText}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            ${sizeText}
           </span>
           ${mediaBadge}
         </div>
@@ -803,8 +795,8 @@ class WhoSaidApp {
             ${tagsHtml}
           </td>
           <td class="py-3.5 px-4 text-xs text-text-muted whitespace-nowrap">
-            <div>${createdDate}</div>
-            <div class="text-[11px] text-text-dim">${durText}</div>
+            <div class="font-medium text-text-primary">${durText}</div>
+            <div class="text-[11px] text-text-dim">${sizeText}</div>
           </td>
           <td class="py-3.5 px-4 text-right whitespace-nowrap">
             <div class="inline-flex items-center gap-1.5 justify-end">
@@ -1905,7 +1897,7 @@ class WhoSaidApp {
             let baseTextHtml = "";
             if (activeSeg.words && activeSeg.words.length > 0) {
               baseTextHtml = activeSeg.words
-                .map((w, idx) => `<span class="caption-word-span" data-idx="${idx}">${this.escapeHtml(w.word)}</span>`)
+                .map((w, idx) => `<span class="caption-word-span" data-idx="${idx}">${this.escapeHtml((w.word || "").trim())}</span>`)
                 .join(" ");
             } else {
               baseTextHtml = this.escapeHtml(activeSeg.text);
@@ -2082,7 +2074,7 @@ class WhoSaidApp {
           .map(
             (w) =>
               `<span class="word-span" data-start="${w.start}" data-end="${w.end}" title="${w.start}s - ${w.end}s">${this.escapeHtml(
-                w.word
+                (w.word || "").trim()
               )}</span>`
           )
           .join(" ");
@@ -2141,6 +2133,26 @@ class WhoSaidApp {
         }
       });
 
+      // Click avatar or speaker name to reassign turn
+      const avatarSlot = card.querySelector(".turn-avatar-slot");
+      const spkNameSpan = card.querySelector(".turn-speaker-name");
+      if (avatarSlot) {
+        avatarSlot.style.cursor = "pointer";
+        avatarSlot.title = `Click to reassign Turn #${index + 1}`;
+        avatarSlot.addEventListener("click", (e) => {
+          e.stopPropagation();
+          this.openTurnReassignMenu(avatarSlot, seg, index + 1);
+        });
+      }
+      if (spkNameSpan) {
+        spkNameSpan.style.cursor = "pointer";
+        spkNameSpan.title = `Click to reassign Turn #${index + 1}`;
+        spkNameSpan.addEventListener("click", (e) => {
+          e.stopPropagation();
+          this.openTurnReassignMenu(spkNameSpan, seg, index + 1);
+        });
+      }
+
       this.transcriptContainer.appendChild(card);
     });
   }
@@ -2172,7 +2184,7 @@ class WhoSaidApp {
       </div>
       <button type="button" class="reassign-new-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        <span>+ Move to New Speaker...</span>
+        <span>Move to New Speaker...</span>
       </button>
     `;
 
@@ -2241,15 +2253,32 @@ class WhoSaidApp {
     seg.speaker_color = targetSpeaker.color;
     seg.speaker_avatar_seed = targetSpeaker.avatar_seed;
 
+    // Keep active tabs in sync
+    const tab = (this.openTabs || []).find((t) => t.id === this.activeTabId);
+    if (tab && tab.transcript) {
+      tab.transcript.speakers = this.currentTranscript.speakers;
+      tab.transcript.segments = this.currentTranscript.segments;
+    }
+
     await this.saveTranscriptEdits();
     this.renderTranscript(this.currentTranscript);
     this.renderSpeakerAvatarGrid(this.currentTranscript.speakers);
     this.renderWaveformRegions();
-    if (this.activeFolderSpeakerId) {
-      this.loadFolderSpeakersTable();
-      this.selectFolderSpeaker(this.activeFolderSpeakerId);
+
+    // Realtime update in folder modal if open
+    if (this.speakerFolderModal && !this.speakerFolderModal.classList.contains("hidden")) {
+      const speakers = this.currentTranscript.speakers || [];
+      const currentActiveId = this.activeFolderSpeakerId || (speakers[0] ? speakers[0].id : null);
+      this.renderFolderSpeakersTable(speakers, currentActiveId);
     }
+
     this.showToast(`Moved Turn #${turnNumber} to ${targetSpeaker.label}`, "success");
+  }
+
+  loadFolderSpeakersTable(selectSpeakerId = null) {
+    if (!this.currentTranscript) return;
+    const speakers = this.currentTranscript.speakers || [];
+    this.renderFolderSpeakersTable(speakers, selectSpeakerId || this.activeFolderSpeakerId);
   }
 
   // --- Render Clean Single-Row Speaker Avatar Grid (Max 4-5 items) ---
@@ -3006,12 +3035,12 @@ class WhoSaidApp {
       const count = turnCounts[s.id] || 0;
       const opt1 = document.createElement("option");
       opt1.value = s.id;
-      opt1.textContent = `${s.id}: ${s.label} (${count} turn${count === 1 ? "" : "s"})`;
+      opt1.textContent = `${s.label} (${count} turn${count === 1 ? "" : "s"})`;
       this.mergeSourceSelect.appendChild(opt1);
 
       const opt2 = document.createElement("option");
       opt2.value = s.id;
-      opt2.textContent = `${s.id}: ${s.label} (${count} turn${count === 1 ? "" : "s"})`;
+      opt2.textContent = `${s.label} (${count} turn${count === 1 ? "" : "s"})`;
       this.mergeTargetSelect.appendChild(opt2);
     });
 
@@ -3050,20 +3079,20 @@ class WhoSaidApp {
 
     if (sourceSpk && this.mergePreviewSource) {
       this.mergePreviewSource.innerHTML = `
-        ${this.getDicebearAvatarHtml(sourceSpk.label, sourceSpk.id, sourceSpk.color, 36, sourceSpk.avatar_seed)}
+        ${this.getDicebearAvatarHtml(sourceSpk.label, sourceSpk.id, sourceSpk.color, 32, sourceSpk.avatar_seed)}
         <div class="spk-preview-meta">
-          <span class="spk-name">${this.escapeHtml(sourceSpk.label)}</span>
-          <span class="spk-popup-id-tag">ID: <code>${sourceSpk.id}</code></span>
+          <span class="spk-name" title="${this.escapeHtml(sourceSpk.label)}">${this.escapeHtml(sourceSpk.label)}</span>
+          <span class="spk-popup-id-tag">${sourceSpk.id}</span>
         </div>
       `;
     }
 
     if (targetSpk && this.mergePreviewTarget) {
       this.mergePreviewTarget.innerHTML = `
-        ${this.getDicebearAvatarHtml(targetSpk.label, targetSpk.id, targetSpk.color, 36, targetSpk.avatar_seed)}
+        ${this.getDicebearAvatarHtml(targetSpk.label, targetSpk.id, targetSpk.color, 32, targetSpk.avatar_seed)}
         <div class="spk-preview-meta">
-          <span class="spk-name">${this.escapeHtml(targetSpk.label)}</span>
-          <span class="spk-popup-id-tag">ID: <code>${targetSpk.id}</code></span>
+          <span class="spk-name" title="${this.escapeHtml(targetSpk.label)}">${this.escapeHtml(targetSpk.label)}</span>
+          <span class="spk-popup-id-tag">${targetSpk.id}</span>
         </div>
       `;
     }
@@ -3071,12 +3100,12 @@ class WhoSaidApp {
     const turnsCount = segments.filter((s) => s.speaker_id === sourceId).length;
 
     if (sourceId === targetId) {
-      this.mergeTurnsCountText.textContent = "Cannot merge a speaker into itself. Please select two different speakers.";
-      this.mergeTurnsCountText.style.color = "var(--danger)";
+      this.mergeTurnsCountText.textContent = "Select two different speakers to merge.";
+      this.mergeTurnsCountText.style.color = "hsl(var(--destructive, 0 72% 51%))";
       this.btnConfirmMerge.disabled = true;
     } else {
-      this.mergeTurnsCountText.textContent = `${turnsCount} dialogue turn${turnsCount === 1 ? "" : "s"} will be reassigned from ${sourceSpk ? sourceSpk.id : sourceId} to ${targetSpk ? targetSpk.id : targetId}.`;
-      this.mergeTurnsCountText.style.color = "var(--text-muted)";
+      this.mergeTurnsCountText.textContent = `${turnsCount} dialogue turn${turnsCount === 1 ? "" : "s"} will be merged into ${targetSpk ? targetSpk.label : targetId}.`;
+      this.mergeTurnsCountText.style.color = "hsl(var(--muted-foreground))";
       this.btnConfirmMerge.disabled = false;
     }
   }
@@ -3169,7 +3198,7 @@ class WhoSaidApp {
       this.enrolledProfilesEmpty = document.getElementById("enrolledProfilesEmpty");
     }
     if (this.enrolledProfilesTableBody) {
-      this.enrolledProfilesTableBody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-text-muted">Loading enrolled voice profiles...</td></tr>';
+      this.enrolledProfilesTableBody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-text-muted">Loading enrolled voice profiles...</td></tr>';
     }
     try {
       const resp = await fetch("/api/profiles");
@@ -3184,7 +3213,7 @@ class WhoSaidApp {
       this.filterAndRenderVoiceProfiles(query);
     } catch (e) {
       if (this.enrolledProfilesTableBody) {
-        this.enrolledProfilesTableBody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-red-400">Failed to load profiles.</td></tr>';
+        this.enrolledProfilesTableBody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-red-400">Failed to load profiles.</td></tr>';
       }
     }
   }
@@ -3219,7 +3248,7 @@ class WhoSaidApp {
 
     if (this.enrolledProfilesEmpty) this.enrolledProfilesEmpty.classList.add("hidden");
 
-    list.forEach((p) => {
+    list.forEach((p, idx) => {
       const tr = document.createElement("tr");
       tr.className = "profile-table-row hover:bg-surface-elevated/40 transition-colors";
       const avatarHtml = this.getDicebearAvatarHtml(p.name, p.id, p.color || "#f6c48f", 36, p.avatar_seed);
@@ -3247,9 +3276,10 @@ class WhoSaidApp {
             </div>
           </div>
         </td>
-        <td class="py-3 px-4 font-mono text-xs text-text-muted">
-          <span class="px-2 py-0.5 rounded bg-surface-base border border-surface-border text-brand-300">
-            ${(p.id || '').substring(0, 8)}...
+        <td class="py-3 px-4 text-xs">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[5px] font-medium bg-brand-500/10 text-brand-400 border border-brand-500/20" title="Full UUID: ${p.id}">
+            <span class="w-1.5 h-1.5 rounded-full bg-brand-400"></span>
+            <span>VP-${String(idx + 1).padStart(2, '0')}</span>
           </span>
         </td>
         <td class="py-3 px-4">
@@ -3257,12 +3287,6 @@ class WhoSaidApp {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path></svg>
             ${p.sample_count || 1} sample${(p.sample_count || 1) === 1 ? '' : 's'}
           </span>
-        </td>
-        <td class="py-3 px-4">
-          <div class="flex flex-col">
-            <span class="text-xs font-medium text-text-primary">192-dim 3D-Speaker</span>
-            <span class="text-[11px] text-text-dim">CAMPPlus Hypersphere</span>
-          </div>
         </td>
         <td class="py-3 px-4 text-xs text-text-muted whitespace-nowrap">
           ${dateDisplay}
@@ -6633,4 +6657,3 @@ class WhoSaidApp {
 document.addEventListener("DOMContentLoaded", () => {
   window.app = new WhoSaidApp();
 });
-

@@ -1,6 +1,6 @@
 {
   "name": "whosaid",
-  "version": "0.3.0-beta",
+  "version": "1.0.0-beta.3",
   "description": "Who Said - Local Video Transcriber & Speaker Captions",
   "author": "Josh Cyril <joshuacyril@users.noreply.github.com>",
   "main": "electron/main.js",

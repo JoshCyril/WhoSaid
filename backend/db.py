@@ -299,6 +299,12 @@ def get_transcription_history() -> List[Dict[str, Any]]:
     """)
     rows = cursor.fetchall()
     conn.close()
+    tags_map = get_all_file_tags_map()
+    norm_tags = {}
+    for p, tlist in tags_map.items():
+        if p:
+            norm_tags[os.path.normcase(os.path.abspath(p))] = tlist
+
     result = []
     for r in rows:
         item = dict(r)
@@ -308,6 +314,11 @@ def get_transcription_history() -> List[Dict[str, Any]]:
         item["speakers"] = [{"label": s.get("label", "Speaker"), "color": s.get("color", "#f6c48f")} for s in speakers[:5]]
         fp = item.pop("file_path", None)
         item["media_available"] = bool(fp and os.path.exists(fp))
+        item["file_size"] = os.path.getsize(fp) if (fp and os.path.exists(fp)) else 0
+        norm_fp = os.path.normcase(os.path.abspath(fp)) if fp else None
+        custom_tags = norm_tags.get(norm_fp, []) if norm_fp else []
+        item["custom_tags"] = custom_tags
+        item["tags"] = custom_tags
         result.append(item)
     return result
 

@@ -26,12 +26,16 @@
         <!-- Electron Desktop Titlebar (Frameless Header with Brand & Window Controls) -->
         <header class="electron-titlebar" id="electronTitlebar">
             <!-- Left: App Icon, Brand Name, Version & Status Badges -->
-            <div class="titlebar-brand app-no-drag" id="navLogo" role="button" title="Who Said — Local CPU Speech AI (Click to go Home)">
+            <div class="titlebar-brand app-no-drag" id="navLogo" role="button"
+                title="Who Said — Local CPU Speech AI (Click to go Home)">
                 <svg class="titlebar-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v20M17 5v14M7 5v14M22 10v4M2 10v4" />
                 </svg>
                 <span class="titlebar-app-name">Who Said</span>
-                <span class="titlebar-version-badge">v0.3.0 Beta</span>
+                <span class="titlebar-version-group">
+                    <span class="titlebar-version-badge">v1.0.0</span>
+                    <span class="titlebar-beta-pill">beta.3</span>
+                </span>
                 <span class="titlebar-status-badge">
                     <span class="status-pulse-dot"></span>
                     Local CPU
@@ -49,10 +53,12 @@
                     </svg>
                 </button>
                 <button id="btnWinMaximize" class="titlebar-btn" title="Maximize" aria-label="Maximize">
-                    <svg id="iconWinMax" viewBox="0 0 12 12" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="1.2">
+                    <svg id="iconWinMax" viewBox="0 0 12 12" class="w-3 h-3" fill="none" stroke="currentColor"
+                        stroke-width="1.2">
                         <rect x="1.5" y="1.5" width="9" height="9" rx="1"></rect>
                     </svg>
-                    <svg id="iconWinRestore" viewBox="0 0 12 12" class="w-3 h-3 hidden" fill="none" stroke="currentColor" stroke-width="1.2">
+                    <svg id="iconWinRestore" viewBox="0 0 12 12" class="w-3 h-3 hidden" fill="none"
+                        stroke="currentColor" stroke-width="1.2">
                         <rect x="3.5" y="1.5" width="7" height="7" rx="0.5"></rect>
                         <path d="M1.5 3.5v7h7"></path>
                     </svg>
@@ -74,7 +80,8 @@
                 <div class="activity-bar-top">
                     <!-- Home -->
                     <button class="activity-bar-item active" id="navHome" title="Home">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            class="activity-icon">
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                             <polyline points="9 22 9 12 15 12 15 22"></polyline>
                         </svg>
@@ -83,7 +90,8 @@
 
                     <!-- Workspace -->
                     <button class="activity-bar-item" id="navWorkspace" title="Workspace">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            class="activity-icon">
                             <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
                             <line x1="8" y1="21" x2="16" y2="21"></line>
                             <line x1="12" y1="17" x2="12" y2="21"></line>
@@ -94,15 +102,18 @@
 
                     <!-- Explorer Toggle -->
                     <button class="activity-bar-item" id="actBarExplorer" title="Explorer (Ctrl+Shift+E / Ctrl+B)">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon">
-                            <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z"></path>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            class="activity-icon">
+                            <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z">
+                            </path>
                         </svg>
                         <span class="activity-active-indicator"></span>
                     </button>
 
                     <!-- Voice Profiles -->
                     <button class="activity-bar-item" id="navProfiles" title="Voice Profiles">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            class="activity-icon">
                             <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
                             <circle cx="12" cy="7" r="4"></circle>
                         </svg>
@@ -113,7 +124,8 @@
 
                     <!-- Upload Button -->
                     <button class="activity-bar-item activity-upload-btn" id="btnNewUpload" title="Upload Media">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            class="activity-icon">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                             <polyline points="17 8 12 3 7 8"></polyline>
                             <line x1="12" y1="3" x2="12" y2="15"></line>
@@ -124,11 +136,14 @@
                 <div class="activity-bar-bottom">
                     <!-- Theme Switcher (Flyout) -->
                     <div class="activity-flyout-wrapper">
-                        <button id="btnThemeToggle" class="activity-bar-item" title="Theme (Light / Dark / System)" aria-label="Toggle Theme">
-                            <svg id="themeIconDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon">
+                        <button id="btnThemeToggle" class="activity-bar-item" title="Theme (Light / Dark / System)"
+                            aria-label="Toggle Theme">
+                            <svg id="themeIconDark" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" class="activity-icon">
                                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                             </svg>
-                            <svg id="themeIconLight" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon hidden">
+                            <svg id="themeIconLight" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" class="activity-icon hidden">
                                 <circle cx="12" cy="12" r="5"></circle>
                                 <line x1="12" y1="1" x2="12" y2="3"></line>
                                 <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -139,48 +154,56 @@
                                 <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
                                 <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                             </svg>
-                            <svg id="themeIconSystem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon hidden">
+                            <svg id="themeIconSystem" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" class="activity-icon hidden">
                                 <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
                                 <line x1="8" y1="21" x2="16" y2="21"></line>
                                 <line x1="12" y1="17" x2="12" y2="21"></line>
                             </svg>
                         </button>
-                        <div id="themeDropdownMenu" class="dropdown-menu activity-flyout-menu hidden" style="min-width: 140px;">
+                        <div id="themeDropdownMenu" class="dropdown-menu activity-flyout-menu hidden"
+                            style="min-width: 140px;">
                             <button class="dropdown-item theme-option-btn" data-theme="light">
                                 <div class="dropdown-item-row flex items-center justify-between w-full">
                                     <div class="flex items-center gap-2">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            class="icon-sm">
                                             <circle cx="12" cy="12" r="5"></circle>
                                             <line x1="12" y1="1" x2="12" y2="3"></line>
                                             <line x1="12" y1="21" x2="12" y2="23"></line>
                                         </svg>
                                         <span>Light</span>
                                     </div>
-                                    <span class="theme-check text-brand-400 font-bold hidden" data-check-theme="light">✓</span>
+                                    <span class="theme-check text-brand-400 font-bold hidden"
+                                        data-check-theme="light">✓</span>
                                 </div>
                             </button>
                             <button class="dropdown-item theme-option-btn" data-theme="dark">
                                 <div class="dropdown-item-row flex items-center justify-between w-full">
                                     <div class="flex items-center gap-2">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            class="icon-sm">
                                             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                                         </svg>
                                         <span>Dark</span>
                                     </div>
-                                    <span class="theme-check text-brand-400 font-bold hidden" data-check-theme="dark">✓</span>
+                                    <span class="theme-check text-brand-400 font-bold hidden"
+                                        data-check-theme="dark">✓</span>
                                 </div>
                             </button>
                             <button class="dropdown-item theme-option-btn" data-theme="system">
                                 <div class="dropdown-item-row flex items-center justify-between w-full">
                                     <div class="flex items-center gap-2">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            class="icon-sm">
                                             <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
                                             <line x1="8" y1="21" x2="16" y2="21"></line>
                                             <line x1="12" y1="17" x2="12" y2="21"></line>
                                         </svg>
                                         <span>System</span>
                                     </div>
-                                    <span class="theme-check text-brand-400 font-bold hidden" data-check-theme="system">✓</span>
+                                    <span class="theme-check text-brand-400 font-bold hidden"
+                                        data-check-theme="system">✓</span>
                                 </div>
                             </button>
                         </div>
@@ -188,9 +211,12 @@
 
                     <!-- Settings -->
                     <button class="activity-bar-item" id="navBackendSettings" title="Settings">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="activity-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            class="activity-icon">
                             <circle cx="12" cy="12" r="3"></circle>
-                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                            <path
+                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                            </path>
                         </svg>
                         <span class="activity-active-indicator"></span>
                     </button>
@@ -389,8 +415,10 @@
                                 </div>
                                 <div id="propTagsList" class="prop-tags-list"></div>
                                 <div class="prop-add-tag-row">
-                                    <input id="propNewTagInput" type="text" placeholder="Add custom tag (Enter)..." class="prop-tag-input" maxlength="25">
-                                    <button id="btnPropAddTag" class="btn btn-xs btn-secondary" title="Add custom tag">+</button>
+                                    <input id="propNewTagInput" type="text" placeholder="Add custom tag (Enter)..."
+                                        class="prop-tag-input" maxlength="25">
+                                    <button id="btnPropAddTag" class="btn btn-xs btn-secondary"
+                                        title="Add custom tag">+</button>
                                 </div>
                             </div>
                             <div class="prop-footer-actions">
@@ -597,13 +625,18 @@
                             <div class="section-header">
                                 <div class="section-title-wrap">
                                     <h3 class="section-title">Recent Transcriptions</h3>
-                                    <p class="section-subtitle">Browse your media transcriptions, view speaker rosters, and resume past workspace sessions</p>
+                                    <p class="section-subtitle">Browse your media transcriptions, view speaker rosters,
+                                        and resume past workspace sessions</p>
                                 </div>
                                 <div class="section-header-actions" style="display:flex; align-items:center; gap:8px;">
                                     <!-- View Mode Toggle: Gallery / Table (User Request) -->
-                                    <div class="recent-view-toggle-wrap" id="recentViewToggleWrap" style="display:inline-flex; align-items:center; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.12); border-radius:6px; padding:2px;">
-                                        <button id="btnToggleRecentGallery" class="btn-view-toggle active" title="Gallery View (Cards)" style="display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:4px; font-size:11.5px; font-weight:600; cursor:pointer; background:rgba(56,189,248,0.16); color:#38bdf8; border:none; transition:all 0.15s ease;">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;">
+                                    <div class="recent-view-toggle-wrap" id="recentViewToggleWrap"
+                                        style="display:inline-flex; align-items:center; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.12); border-radius:6px; padding:2px;">
+                                        <button id="btnToggleRecentGallery" class="btn-view-toggle active"
+                                            title="Gallery View (Cards)"
+                                            style="display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:4px; font-size:11.5px; font-weight:600; cursor:pointer; background:rgba(56,189,248,0.16); color:#38bdf8; border:none; transition:all 0.15s ease;">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                style="width:13px;height:13px;">
                                                 <rect x="3" y="3" width="7" height="7"></rect>
                                                 <rect x="14" y="3" width="7" height="7"></rect>
                                                 <rect x="14" y="14" width="7" height="7"></rect>
@@ -611,8 +644,10 @@
                                             </svg>
                                             <span>Gallery</span>
                                         </button>
-                                        <button id="btnToggleRecentTable" class="btn-view-toggle" title="Table View" style="display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:4px; font-size:11.5px; font-weight:600; cursor:pointer; background:transparent; color:#94a3b8; border:none; transition:all 0.15s ease;">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;">
+                                        <button id="btnToggleRecentTable" class="btn-view-toggle" title="Table View"
+                                            style="display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:4px; font-size:11.5px; font-weight:600; cursor:pointer; background:transparent; color:#94a3b8; border:none; transition:all 0.15s ease;">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                style="width:13px;height:13px;">
                                                 <line x1="8" y1="6" x2="21" y2="6"></line>
                                                 <line x1="8" y1="12" x2="21" y2="12"></line>
                                                 <line x1="8" y1="18" x2="21" y2="18"></line>
@@ -658,20 +693,24 @@
                                         <circle cx="12" cy="12" r="10"></circle>
                                         <polyline points="12 6 12 12 16 14"></polyline>
                                     </svg>
-                                    <p>No recent transcriptions found. Click "Upload Media" or "Try Demo" to get started!</p>
+                                    <p>No recent transcriptions found. Click "Upload Media" or "Try Demo" to get
+                                        started!</p>
                                 </div>
                             </div>
 
                             <!-- 2. Table Mode (Structured Data Table) -->
-                            <div id="homeRecentTableWrap" class="home-recent-table-wrap hidden bg-surface-card border border-surface-border rounded-xl shadow-sm overflow-hidden">
+                            <div id="homeRecentTableWrap"
+                                class="home-recent-table-wrap hidden bg-surface-card border border-surface-border rounded-xl shadow-sm overflow-hidden">
                                 <div class="overflow-x-auto">
-                                    <table id="homeRecentTable" class="w-full text-left border-collapse text-xs sm:text-sm">
+                                    <table id="homeRecentTable"
+                                        class="w-full text-left border-collapse text-xs sm:text-sm">
                                         <thead>
-                                            <tr class="border-b border-surface-border bg-surface-base/70 text-text-muted uppercase text-[11px] font-semibold tracking-wider">
+                                            <tr
+                                                class="border-b border-surface-border bg-surface-base/70 text-text-muted uppercase text-[11px] font-semibold tracking-wider">
                                                 <th class="py-3 px-4">Media File</th>
                                                 <th class="py-3 px-4">Speakers</th>
                                                 <th class="py-3 px-4">Tags</th>
-                                                <th class="py-3 px-4">Duration &amp; Date</th>
+                                                <th class="py-3 px-4">Duration &amp; Size</th>
                                                 <th class="py-3 px-4 text-right">Actions</th>
                                             </tr>
                                         </thead>
@@ -767,7 +806,8 @@
                                                 <div class="caption-dialogue-row" id="playerCcDialogueRow">
                                                     <div class="caption-col-speaker">
                                                         <div id="playerCcAvatarWrap" class="caption-avatar-slot"></div>
-                                                        <span id="playerCcSpeakerTag" class="caption-speaker-name"></span>
+                                                        <span id="playerCcSpeakerTag"
+                                                            class="caption-speaker-name"></span>
                                                     </div>
                                                     <div class="caption-col-text">
                                                         <p id="playerCcText" class="caption-dialogue-text"></p>
@@ -779,72 +819,103 @@
                                             <div class="player-minimal-caption hidden" id="playerMinimalCaption">
                                                 <div class="minimal-caption-pill">
                                                     <div id="minimalCaptionAvatar" class="minimal-avatar-slot"></div>
-                                                    <span id="minimalCaptionSpeaker" class="minimal-speaker-name">Speaker</span>
+                                                    <span id="minimalCaptionSpeaker"
+                                                        class="minimal-speaker-name">Speaker</span>
                                                 </div>
                                             </div>
 
                                             <!-- Two Floating Player Control Islands (Left & Right) -->
                                             <div class="video-ctrl-bottom-bar" id="videoCtrlBottomBar">
                                                 <!-- Left Floating Island: <Play/Pause> <Current Time / Duration> -->
-                                                <div class="video-ctrl-island video-ctrl-island-left" id="videoCtrlLeftIsland">
-                                                    <button id="btnVideoPlayPause" class="btn-ctrl-floating btn-ctrl-play"
+                                                <div class="video-ctrl-island video-ctrl-island-left"
+                                                    id="videoCtrlLeftIsland">
+                                                    <button id="btnVideoPlayPause"
+                                                        class="btn-ctrl-floating btn-ctrl-play"
                                                         title="Play/Pause (Space)">
-                                                        <svg id="vPlayIcon" viewBox="0 0 24 24" fill="currentColor" class="ctrl-icon-sm">
+                                                        <svg id="vPlayIcon" viewBox="0 0 24 24" fill="currentColor"
+                                                            class="ctrl-icon-sm">
                                                             <polygon points="6 4 20 12 6 20 6 4"></polygon>
                                                         </svg>
-                                                        <svg id="vPauseIcon" viewBox="0 0 24 24" fill="currentColor" class="ctrl-icon-sm hidden">
+                                                        <svg id="vPauseIcon" viewBox="0 0 24 24" fill="currentColor"
+                                                            class="ctrl-icon-sm hidden">
                                                             <rect x="6" y="4" width="4" height="16" rx="1"></rect>
                                                             <rect x="14" y="4" width="4" height="16" rx="1"></rect>
                                                         </svg>
                                                     </button>
                                                     <div class="video-time-wrap">
-                                                        <span id="vTimeCurrent">00:00</span> <span class="time-sep text-dark-muted">/</span> <span id="vTimeDuration">00:00</span>
+                                                        <span id="vTimeCurrent">00:00</span> <span
+                                                            class="time-sep text-dark-muted">/</span> <span
+                                                            id="vTimeDuration">00:00</span>
                                                     </div>
                                                 </div>
 
                                                 <!-- Right Floating Island: <Volume> <Settings (Captions & Hide Controls)> <Fullscreen> -->
-                                                <div class="video-ctrl-island video-ctrl-island-right" id="videoCtrlRightIsland">
+                                                <div class="video-ctrl-island video-ctrl-island-right"
+                                                    id="videoCtrlRightIsland">
                                                     <div class="volume-ctrl-group">
-                                                        <button id="btnMuteToggle" class="btn-ctrl-floating" title="Mute/Unmute">
-                                                            <svg id="volHighIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ctrl-icon-sm">
-                                                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                                                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                                                        <button id="btnMuteToggle" class="btn-ctrl-floating"
+                                                            title="Mute/Unmute">
+                                                            <svg id="volHighIcon" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
+                                                                class="ctrl-icon-sm">
+                                                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5">
+                                                                </polygon>
+                                                                <path
+                                                                    d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07">
+                                                                </path>
                                                             </svg>
-                                                            <svg id="volMuteIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ctrl-icon-sm hidden">
-                                                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                                            <svg id="volMuteIcon" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
+                                                                class="ctrl-icon-sm hidden">
+                                                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5">
+                                                                </polygon>
                                                                 <line x1="23" y1="9" x2="17" y2="15"></line>
                                                                 <line x1="17" y1="9" x2="23" y2="15"></line>
                                                             </svg>
                                                         </button>
-                                                        <input id="vVolumeSlider" type="range" min="0" max="1" step="0.05" value="1" class="volume-slider" title="Volume">
+                                                        <input id="vVolumeSlider" type="range" min="0" max="1"
+                                                            step="0.05" value="1" class="volume-slider" title="Volume">
                                                     </div>
 
                                                     <!-- Player Settings Dropdown (Captions & Hide Controls) -->
                                                     <div class="caption-ctrl-group relative" id="captionCtrlGroup">
-                                                        <button id="btnToggleCaptions" class="btn-ctrl-floating" title="Player Settings & Subtitles">
-                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ctrl-icon-sm">
+                                                        <button id="btnToggleCaptions" class="btn-ctrl-floating"
+                                                            title="Player Settings & Subtitles">
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                                stroke-width="2" class="ctrl-icon-sm">
                                                                 <circle cx="12" cy="12" r="3"></circle>
-                                                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                                                                <path
+                                                                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                                                                </path>
                                                             </svg>
                                                         </button>
-                                                        <div id="captionModeDropdown" class="caption-mode-dropdown hidden">
+                                                        <div id="captionModeDropdown"
+                                                            class="caption-mode-dropdown hidden">
                                                             <div class="caption-mode-header">Caption Style</div>
-                                                            <button class="caption-mode-item active" data-mode="regular">
+                                                            <button class="caption-mode-item active"
+                                                                data-mode="regular">
                                                                 <div class="mode-item-title">Regular (Default)</div>
-                                                                <div class="mode-item-desc">Synced dialogue row below player &amp; fullscreen CC</div>
+                                                                <div class="mode-item-desc">Synced dialogue row below
+                                                                    player &amp; fullscreen CC</div>
                                                             </button>
                                                             <button class="caption-mode-item" data-mode="minimal">
                                                                 <div class="mode-item-title">Minimal</div>
-                                                                <div class="mode-item-desc">Discreet top-left speaker badge &lt;Avatar&gt;&lt;Name&gt;</div>
+                                                                <div class="mode-item-desc">Discreet top-left speaker
+                                                                    badge &lt;Avatar&gt;&lt;Name&gt;</div>
                                                             </button>
                                                             <button class="caption-mode-item" data-mode="off">
                                                                 <div class="mode-item-title">Off</div>
-                                                                <div class="mode-item-desc">Disable on-screen captions</div>
+                                                                <div class="mode-item-desc">Disable on-screen captions
+                                                                </div>
                                                             </button>
                                                             <div class="caption-mode-divider"></div>
-                                                            <button id="btnCollapseControls" class="caption-mode-item" title="Hide Player Controls">
-                                                                <div class="mode-item-title flex items-center gap-1.5 text-xs text-dark-muted hover:text-white">
-                                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+                                                            <button id="btnCollapseControls" class="caption-mode-item"
+                                                                title="Hide Player Controls">
+                                                                <div
+                                                                    class="mode-item-title flex items-center gap-1.5 text-xs text-dark-muted hover:text-white">
+                                                                    <svg viewBox="0 0 24 24" fill="none"
+                                                                        stroke="currentColor" stroke-width="2"
+                                                                        class="w-3.5 h-3.5">
                                                                         <polyline points="6 9 12 15 18 9"></polyline>
                                                                     </svg>
                                                                     <span>Hide Controls</span>
@@ -853,9 +924,13 @@
                                                         </div>
                                                     </div>
 
-                                                    <button id="btnFullscreen" class="btn-ctrl-floating" title="Toggle Fullscreen">
-                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ctrl-icon-sm">
-                                                            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                                                    <button id="btnFullscreen" class="btn-ctrl-floating"
+                                                        title="Toggle Fullscreen">
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                            stroke-width="2" class="ctrl-icon-sm">
+                                                            <path
+                                                                d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3">
+                                                            </path>
                                                         </svg>
                                                     </button>
                                                 </div>
@@ -863,8 +938,10 @@
 
 
                                             <!-- Discreet Expand Button (Small arrow on the right, less opacity) -->
-                                            <button id="btnExpandControls" class="btn-expand-controls hidden" title="Show Player Controls">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-3.5 h-3.5">
+                                            <button id="btnExpandControls" class="btn-expand-controls hidden"
+                                                title="Show Player Controls">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2.5" class="w-3.5 h-3.5">
                                                     <polyline points="18 15 12 9 6 15"></polyline>
                                                 </svg>
                                             </button>
@@ -979,7 +1056,8 @@
                                         <span>Preview Mode</span>
                                     </div>
                                     <h3 id="untranscribedMediaTitle" class="untranscribed-title">Media File</h3>
-                                    <p class="untranscribed-desc">You are previewing raw media. Configure offline speech parameters below to transcribe with speaker identification.</p>
+                                    <p class="untranscribed-desc">You are previewing raw media. Configure offline speech
+                                        parameters below to transcribe with speaker identification.</p>
                                 </div>
 
                                 <div class="untranscribed-specs-grid">
@@ -1047,7 +1125,8 @@
                                     </div>
 
                                     <button id="btnStartWsTranscribe" class="btn btn-primary btn-block btn-lg mt-5">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            class="icon-sm">
                                             <polygon points="5 3 19 12 5 21 5 3"></polygon>
                                         </svg>
                                         <span>Start Transcription &amp; Diarization</span>
@@ -1055,11 +1134,14 @@
 
                                     <div id="wsTranscribeProgressBox" class="ws-transcribe-progress-box hidden mt-4">
                                         <div class="ws-progress-bar-track">
-                                            <div id="wsTranscribeProgressBar" class="ws-progress-bar-indicator" style="width: 0%;"></div>
+                                            <div id="wsTranscribeProgressBar" class="ws-progress-bar-indicator"
+                                                style="width: 0%;"></div>
                                         </div>
                                         <div class="flex items-center justify-between text-xs mt-2">
-                                            <span id="wsTranscribeProgressStatus" class="text-brand-300 font-medium">Processing audio...</span>
-                                            <span id="wsTranscribeProgressPct" class="text-text-muted font-mono">0%</span>
+                                            <span id="wsTranscribeProgressStatus"
+                                                class="text-brand-300 font-medium">Processing audio...</span>
+                                            <span id="wsTranscribeProgressPct"
+                                                class="text-text-muted font-mono">0%</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1186,36 +1268,49 @@
                     </section>
 
                     <!-- Settings & Database View -->
-                    <section id="backendSettingsView" class="backend-settings-view hidden p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
-                        
+                    <section id="backendSettingsView"
+                        class="backend-settings-view hidden p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
+
                         <!-- Top Header Strip -->
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+                        <div
+                            class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
                             <div>
-                                <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-[4px] text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 mb-2">
+                                <div
+                                    class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-[4px] text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 mb-2">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                                     <span>Settings &amp; Database</span>
                                 </div>
                                 <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">Settings</h2>
-                                <p class="text-xs sm:text-sm text-dark-muted mt-1">Configure export preferences, AI summary prompts, storage directories, and database tables.</p>
+                                <p class="text-xs sm:text-sm text-dark-muted mt-1">Configure export preferences, AI
+                                    summary prompts, storage directories, and database tables.</p>
                             </div>
                             <div class="flex items-center gap-2 flex-wrap">
-                                <button id="btnDbRefresh" class="btn btn-secondary btn-sm" title="Refresh stats & active table">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+                                <button id="btnDbRefresh" class="btn btn-secondary btn-sm"
+                                    title="Refresh stats & active table">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        class="w-3.5 h-3.5">
                                         <polyline points="23 4 23 10 17 10"></polyline>
                                         <polyline points="1 20 1 14 7 14"></polyline>
-                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15">
+                                        </path>
                                     </svg>
                                     <span>Refresh</span>
                                 </button>
-                                <button id="btnDbCleanCache" class="btn btn-secondary btn-sm" title="Clean temp audio & uploads cache">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+                                <button id="btnDbCleanCache" class="btn btn-secondary btn-sm"
+                                    title="Clean temp audio & uploads cache">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        class="w-3.5 h-3.5">
                                         <polyline points="3 6 5 6 21 6"></polyline>
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                        <path
+                                            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                        </path>
                                     </svg>
                                     <span>Purge Cache</span>
                                 </button>
-                                <a id="btnDbDownload" href="/api/db/download" download="whosaid.db" class="btn btn-primary btn-sm" title="Download SQLite database file">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+                                <a id="btnDbDownload" href="/api/db/download" download="whosaid.db"
+                                    class="btn btn-primary btn-sm" title="Download SQLite database file">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        class="w-3.5 h-3.5">
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                         <polyline points="7 10 12 15 17 10"></polyline>
                                         <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -1226,92 +1321,126 @@
                         </div>
 
                         <!-- AI Summary Prompt Configuration Card -->
-                        <div class="ws-card bg-dark-card border border-white/10 rounded-xl p-4 sm:p-5 flex flex-col gap-3.5 shadow-sm">
+                        <div
+                            class="ws-card bg-dark-card border border-white/10 rounded-xl p-4 sm:p-5 flex flex-col gap-3.5 shadow-sm">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                 <div class="flex items-center gap-2.5">
-                                    <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+                                    <div
+                                        class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            class="w-4 h-4">
                                             <path d="M12 2a10 10 0 1 0 10 10H12V2z"></path>
                                             <path d="M12 2a10 10 0 0 1 10 10h-10V2z" opacity="0.3"></path>
                                             <path d="m9 12 2 2 4-4"></path>
                                         </svg>
                                     </div>
                                     <div>
-                                        <h3 class="text-sm sm:text-base font-semibold text-white">AI Summary Prompt Template</h3>
-                                        <p class="text-xs text-dark-muted">Custom prompt prepended to exported AI Summary files to guide LLM summarization (ChatGPT, Claude, Gemini).</p>
+                                        <h3 class="text-sm sm:text-base font-semibold text-white">AI Summary Prompt
+                                            Template</h3>
+                                        <p class="text-xs text-dark-muted">Custom prompt prepended to exported AI
+                                            Summary files to guide LLM summarization (ChatGPT, Claude, Gemini).</p>
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-2 self-end sm:self-auto">
-                                    <button id="btnResetAiPrompt" class="btn btn-secondary btn-sm text-xs" title="Reset prompt to default">Reset</button>
-                                    <button id="btnSaveAiPrompt" class="btn btn-primary btn-sm text-xs" title="Save custom prompt">Save Prompt</button>
+                                    <button id="btnResetAiPrompt" class="btn btn-secondary btn-sm text-xs"
+                                        title="Reset prompt to default">Reset</button>
+                                    <button id="btnSaveAiPrompt" class="btn btn-primary btn-sm text-xs"
+                                        title="Save custom prompt">Save Prompt</button>
                                 </div>
                             </div>
-                            <textarea id="settingAiPromptInput" rows="3" class="w-full bg-dark-base border border-white/10 rounded-lg p-3 text-xs text-dark-text focus:outline-none focus:border-brand-400/50 resize-y font-mono leading-relaxed" placeholder="Enter your custom prompt for AI summary export..."></textarea>
+                            <textarea id="settingAiPromptInput" rows="3"
+                                class="w-full bg-dark-base border border-white/10 rounded-lg p-3 text-xs text-dark-text focus:outline-none focus:border-brand-400/50 resize-y font-mono leading-relaxed"
+                                placeholder="Enter your custom prompt for AI summary export..."></textarea>
                             <div class="flex items-center justify-between text-[11px] text-dark-muted flex-wrap gap-1">
-                                <span>Export format: <code>&lt;ai_prompt&gt;</code> &bull; <code>&lt;video_summary&gt;</code> &bull; <code>&lt;transcript&gt;</code></span>
-                                <span id="aiPromptSavedNotice" class="text-emerald-400 font-medium hidden">✓ Prompt Saved</span>
+                                <span>Export format: <code>&lt;ai_prompt&gt;</code> &bull;
+                                    <code>&lt;video_summary&gt;</code> &bull; <code>&lt;transcript&gt;</code></span>
+                                <span id="aiPromptSavedNotice" class="text-emerald-400 font-medium hidden">✓ Prompt
+                                    Saved</span>
                             </div>
                         </div>
 
                         <!-- Storage & Engine Directories (Side-by-Side Grid) -->
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            
+
                             <!-- 1. SQLite Database Location Card -->
-                            <div class="ws-card bg-dark-card border border-white/10 rounded-xl p-4 sm:p-5 flex flex-col justify-between gap-3.5 shadow-sm" id="dbConfigBanner">
+                            <div class="ws-card bg-dark-card border border-white/10 rounded-xl p-4 sm:p-5 flex flex-col justify-between gap-3.5 shadow-sm"
+                                id="dbConfigBanner">
                                 <div>
                                     <div class="flex items-center justify-between gap-2 mb-2">
                                         <div class="flex items-center gap-2.5">
-                                            <div class="w-8 h-8 rounded-lg bg-brand-500/10 text-brand-400 flex items-center justify-center shrink-0">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+                                            <div
+                                                class="w-8 h-8 rounded-lg bg-brand-500/10 text-brand-400 flex items-center justify-center shrink-0">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" class="w-4 h-4">
                                                     <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
                                                     <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
                                                     <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
                                                 </svg>
                                             </div>
-                                            <h3 class="text-sm sm:text-base font-semibold text-white">SQLite Database File</h3>
+                                            <h3 class="text-sm sm:text-base font-semibold text-white">SQLite Database
+                                                File</h3>
                                         </div>
                                         <div class="flex items-center gap-1.5 shrink-0">
-                                            <span id="dbStorageTypeBadge" class="px-2 py-0.5 rounded text-[11px] font-mono bg-white/5 border border-white/10 text-dark-muted">Default</span>
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/15 text-emerald-400">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                            <span id="dbStorageTypeBadge"
+                                                class="px-2 py-0.5 rounded text-[11px] font-mono bg-white/5 border border-white/10 text-dark-muted">Default</span>
+                                            <span
+                                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/15 text-emerald-400">
+                                                <span
+                                                    class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                                                 <span>Live</span>
                                             </span>
                                         </div>
                                     </div>
                                     <p class="text-xs text-dark-muted leading-relaxed">
-                                        Store your database anywhere (external drive, Documents, etc.). Retains settings across restarts.
+                                        Store your database anywhere (external drive, Documents, etc.). Retains settings
+                                        across restarts.
                                     </p>
                                 </div>
 
                                 <div class="space-y-2.5">
                                     <div class="relative flex items-center">
-                                        <input type="text" id="inputActiveDbPath" class="w-full bg-dark-base border border-white/10 rounded-lg pl-3 pr-10 py-1.5 text-xs font-mono text-dark-text focus:outline-none focus:border-brand-400/50" spellcheck="false" placeholder="Enter or select SQLite database file (*.db)..." />
-                                        <button id="btnCopyActiveDbPath" class="absolute right-1 ws-btn-icon text-dark-muted hover:text-white" title="Copy path">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+                                        <input type="text" id="inputActiveDbPath"
+                                            class="w-full bg-dark-base border border-white/10 rounded-lg pl-3 pr-10 py-1.5 text-xs font-mono text-dark-text focus:outline-none focus:border-brand-400/50"
+                                            spellcheck="false"
+                                            placeholder="Enter or select SQLite database file (*.db)..." />
+                                        <button id="btnCopyActiveDbPath"
+                                            class="absolute right-1 ws-btn-icon text-dark-muted hover:text-white"
+                                            title="Copy path">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                class="w-3.5 h-3.5">
                                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1">
+                                                </path>
                                             </svg>
                                         </button>
                                     </div>
 
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <button id="btnBrowseDbFile" class="btn btn-secondary btn-sm text-xs" title="Select an existing SQLite database file (.db, .sqlite)">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3">
-                                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                                        <button id="btnBrowseDbFile" class="btn btn-secondary btn-sm text-xs"
+                                            title="Select an existing SQLite database file (.db, .sqlite)">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                class="w-3 h-3">
+                                                <path
+                                                    d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
+                                                </path>
                                             </svg>
                                             <span>Select DB File</span>
                                         </button>
-                                        <button id="btnCreateNewDbFile" class="btn btn-secondary btn-sm text-xs" title="Create or specify a new database file">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3">
+                                        <button id="btnCreateNewDbFile" class="btn btn-secondary btn-sm text-xs"
+                                            title="Create or specify a new database file">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                class="w-3 h-3">
                                                 <line x1="12" y1="5" x2="12" y2="19"></line>
                                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                                             </svg>
                                             <span>New DB...</span>
                                         </button>
-                                        <button id="btnApplyDbPath" class="btn btn-primary btn-sm text-xs" title="Connect and switch active database">
+                                        <button id="btnApplyDbPath" class="btn btn-primary btn-sm text-xs"
+                                            title="Connect and switch active database">
                                             <span>Connect</span>
                                         </button>
-                                        <button id="btnResetDefaultDb" class="btn btn-outline btn-sm text-xs ml-auto" title="Reset to standard app data storage">
+                                        <button id="btnResetDefaultDb" class="btn btn-outline btn-sm text-xs ml-auto"
+                                            title="Reset to standard app data storage">
                                             <span>Reset Default</span>
                                         </button>
                                     </div>
@@ -1319,12 +1448,15 @@
                             </div>
 
                             <!-- 2. AI Models & Offline Speech Engine Folder Card -->
-                            <div class="ws-card bg-dark-card border border-white/10 rounded-xl p-4 sm:p-5 flex flex-col justify-between gap-3.5 shadow-sm" id="modelsConfigBanner">
+                            <div class="ws-card bg-dark-card border border-white/10 rounded-xl p-4 sm:p-5 flex flex-col justify-between gap-3.5 shadow-sm"
+                                id="modelsConfigBanner">
                                 <div>
                                     <div class="flex items-center justify-between gap-2 mb-2">
                                         <div class="flex items-center gap-2.5">
-                                            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+                                            <div
+                                                class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" class="w-4 h-4">
                                                     <rect x="4" y="4" width="16" height="16" rx="2"></rect>
                                                     <rect x="9" y="9" width="6" height="6"></rect>
                                                     <line x1="9" y1="1" x2="9" y2="4"></line>
@@ -1337,50 +1469,70 @@
                                                     <line x1="1" y1="14" x2="4" y2="14"></line>
                                                 </svg>
                                             </div>
-                                            <h3 class="text-sm sm:text-base font-semibold text-white">AI Models Folder</h3>
+                                            <h3 class="text-sm sm:text-base font-semibold text-white">AI Models Folder
+                                            </h3>
                                         </div>
                                         <div class="flex items-center gap-1.5 shrink-0">
-                                            <span id="modelsStorageTypeBadge" class="px-2 py-0.5 rounded text-[11px] font-mono bg-white/5 border border-white/10 text-dark-muted">Bundled</span>
-                                            <span id="modelsOfflineStatusBadge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                                            <span id="modelsStorageTypeBadge"
+                                                class="px-2 py-0.5 rounded text-[11px] font-mono bg-white/5 border border-white/10 text-dark-muted">Bundled</span>
+                                            <span id="modelsOfflineStatusBadge"
+                                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                                                 100% Offline Ready
                                             </span>
                                         </div>
                                     </div>
                                     <p class="text-xs text-dark-muted leading-relaxed">
-                                        Directory for Faster-Whisper, Pyannote diarization &amp; CAM++ voice embedding models.
+                                        Directory for Faster-Whisper, Pyannote diarization &amp; CAM++ voice embedding
+                                        models.
                                     </p>
                                 </div>
 
                                 <div class="space-y-2.5">
                                     <div class="relative flex items-center">
-                                        <input type="text" id="inputActiveModelsPath" class="w-full bg-dark-base border border-white/10 rounded-lg pl-3 pr-10 py-1.5 text-xs font-mono text-dark-text focus:outline-none focus:border-brand-400/50" spellcheck="false" placeholder="Path to AI models folder..." />
-                                        <button id="btnCopyActiveModelsPath" class="absolute right-1 ws-btn-icon text-dark-muted hover:text-white" title="Copy path">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+                                        <input type="text" id="inputActiveModelsPath"
+                                            class="w-full bg-dark-base border border-white/10 rounded-lg pl-3 pr-10 py-1.5 text-xs font-mono text-dark-text focus:outline-none focus:border-brand-400/50"
+                                            spellcheck="false" placeholder="Path to AI models folder..." />
+                                        <button id="btnCopyActiveModelsPath"
+                                            class="absolute right-1 ws-btn-icon text-dark-muted hover:text-white"
+                                            title="Copy path">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                class="w-3.5 h-3.5">
                                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1">
+                                                </path>
                                             </svg>
                                         </button>
                                     </div>
 
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <button id="btnBrowseModelsFolder" class="btn btn-secondary btn-sm text-xs" title="Select a custom folder containing AI models">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3">
-                                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                                        <button id="btnBrowseModelsFolder" class="btn btn-secondary btn-sm text-xs"
+                                            title="Select a custom folder containing AI models">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                class="w-3 h-3">
+                                                <path
+                                                    d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
+                                                </path>
                                             </svg>
                                             <span>Select Models Folder</span>
                                         </button>
-                                        <button id="btnOpenModelsFolder" class="btn btn-secondary btn-sm text-xs" title="Open folder in Windows Explorer">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3">
-                                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                        <button id="btnOpenModelsFolder" class="btn btn-secondary btn-sm text-xs"
+                                            title="Open folder in Windows Explorer">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                class="w-3 h-3">
+                                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6">
+                                                </path>
                                                 <polyline points="15 3 21 3 21 9"></polyline>
                                                 <line x1="10" y1="14" x2="21" y2="3"></line>
                                             </svg>
                                             <span>Open in Explorer</span>
                                         </button>
-                                        <button id="btnApplyModelsPath" class="btn btn-primary btn-sm text-xs" title="Set and load models from this directory">
+                                        <button id="btnApplyModelsPath" class="btn btn-primary btn-sm text-xs"
+                                            title="Set and load models from this directory">
                                             <span>Apply</span>
                                         </button>
-                                        <button id="btnResetDefaultModels" class="btn btn-outline btn-sm text-xs ml-auto" title="Reset to standard models folder">
+                                        <button id="btnResetDefaultModels"
+                                            class="btn btn-outline btn-sm text-xs ml-auto"
+                                            title="Reset to standard models folder">
                                             <span>Reset Default</span>
                                         </button>
                                     </div>
@@ -1390,34 +1542,45 @@
 
                         <!-- Compact Models Status Strip -->
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            <div class="bg-dark-surface/60 border border-white/5 rounded-xl p-3 flex flex-col justify-between gap-1.5">
+                            <div
+                                class="bg-dark-surface/60 border border-white/5 rounded-xl p-3 flex flex-col justify-between gap-1.5">
                                 <div class="flex items-center justify-between">
                                     <span class="text-xs font-semibold text-white">Whisper Tiny</span>
-                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-400" id="badgeModelTiny">Installed</span>
+                                    <span
+                                        class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-400"
+                                        id="badgeModelTiny">Installed</span>
                                 </div>
                                 <span class="text-[11px] text-dark-muted">Bundled &bull; ~75 MB &bull; Fast CPU</span>
                             </div>
 
-                            <div class="bg-dark-surface/60 border border-white/5 rounded-xl p-3 flex flex-col justify-between gap-1.5">
+                            <div
+                                class="bg-dark-surface/60 border border-white/5 rounded-xl p-3 flex flex-col justify-between gap-1.5">
                                 <div class="flex items-center justify-between">
                                     <span class="text-xs font-semibold text-white">Whisper Base</span>
-                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/10 text-dark-text" id="badgeModelBase">Available</span>
+                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/10 text-dark-text"
+                                        id="badgeModelBase">Available</span>
                                 </div>
                                 <span class="text-[11px] text-dark-muted">Optional &bull; ~145 MB &bull; Balanced</span>
                             </div>
 
-                            <div class="bg-dark-surface/60 border border-white/5 rounded-xl p-3 flex flex-col justify-between gap-1.5">
+                            <div
+                                class="bg-dark-surface/60 border border-white/5 rounded-xl p-3 flex flex-col justify-between gap-1.5">
                                 <div class="flex items-center justify-between">
                                     <span class="text-xs font-semibold text-white">Whisper Small</span>
-                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/5 text-dark-subtle" id="badgeModelSmall">Optional</span>
+                                    <span
+                                        class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/5 text-dark-subtle"
+                                        id="badgeModelSmall">Optional</span>
                                 </div>
-                                <a href="https://huggingface.co/Systran/faster-whisper-small" target="_blank" class="text-[11px] text-brand-400 hover:text-brand-300 truncate">Hugging Face ↗</a>
+                                <a href="https://huggingface.co/Systran/faster-whisper-small" target="_blank"
+                                    class="text-[11px] text-brand-400 hover:text-brand-300 truncate">Hugging Face ↗</a>
                             </div>
 
-                            <div class="bg-dark-surface/60 border border-white/5 rounded-xl p-3 flex flex-col justify-between gap-1.5">
+                            <div
+                                class="bg-dark-surface/60 border border-white/5 rounded-xl p-3 flex flex-col justify-between gap-1.5">
                                 <div class="flex items-center justify-between">
                                     <span class="text-xs font-semibold text-white">Diarization Engine</span>
-                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-400">Ready</span>
+                                    <span
+                                        class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-400">Ready</span>
                                 </div>
                                 <span class="text-[11px] text-dark-muted">Pyannote + CAM++ ONNX</span>
                             </div>
@@ -1491,240 +1654,265 @@
                         </div>
 
                         <!-- Advanced Database & System Tools (Collapsed by Default) -->
-                        <div class="border border-white/10 rounded-xl overflow-hidden mt-6 bg-dark-card/40" id="advancedDbSectionWrap">
-                            <button id="btnToggleAdvancedDb" class="w-full flex items-center justify-between p-4 bg-dark-card/70 hover:bg-dark-card transition-colors text-left" type="button">
+                        <div class="border border-white/10 rounded-xl overflow-hidden mt-6 bg-dark-card/40"
+                            id="advancedDbSectionWrap">
+                            <button id="btnToggleAdvancedDb"
+                                class="w-full flex items-center justify-between p-4 bg-dark-card/70 hover:bg-dark-card transition-colors text-left"
+                                type="button">
                                 <div class="flex items-center gap-2.5">
-                                    <svg id="advancedDbChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 transition-transform duration-200 text-dark-muted">
+                                    <svg id="advancedDbChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2"
+                                        class="w-4 h-4 transition-transform duration-200 text-dark-muted">
                                         <polyline points="9 18 15 12 9 6"></polyline>
                                     </svg>
-                                    <span class="text-sm font-semibold text-white">Advanced Database &amp; System Tools</span>
-                                    <span class="text-[10px] px-2 py-0.5 rounded font-mono bg-white/10 text-dark-muted" id="advancedDbStatusBadge">Collapsed</span>
+                                    <span class="text-sm font-semibold text-white">Advanced Database &amp; System
+                                        Tools</span>
+                                    <span class="text-[10px] px-2 py-0.5 rounded font-mono bg-white/10 text-dark-muted"
+                                        id="advancedDbStatusBadge">Collapsed</span>
                                 </div>
-                                <span class="text-xs text-dark-muted hidden sm:inline">Jobs, Transcripts, Profiles, SQL Console, Diagnostics</span>
+                                <span class="text-xs text-dark-muted hidden sm:inline">Jobs, Transcripts, Profiles, SQL
+                                    Console, Diagnostics</span>
                             </button>
 
                             <div id="advancedDbContent" class="hidden p-4 border-t border-white/10 space-y-4">
-<!-- Database Subtabs Navigation -->
-                        <div class="db-subnav-strip">
-                            <div class="db-tabs-left">
-                                <button class="db-subtab active" data-tab="jobs">
-                                    <span class="subtab-dot"></span>
-                                    Jobs Table (<span id="tabCountJobs">0</span>)
-                                </button>
-                                <button class="db-subtab" data-tab="transcripts">
-                                    <span class="subtab-dot"></span>
-                                    Transcripts Table (<span id="tabCountTranscripts">0</span>)
-                                </button>
-                                <button class="db-subtab" data-tab="voice_profiles">
-                                    <span class="subtab-dot"></span>
-                                    Voice Profiles (<span id="tabCountProfiles">0</span>)
-                                </button>
-                                <button class="db-subtab" data-tab="sql">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        class="icon-xs">
-                                        <polyline points="4 17 10 11 4 5"></polyline>
-                                        <line x1="12" y1="19" x2="20" y2="19"></line>
-                                    </svg>
-                                    SQL Console
-                                </button>
-                                <button class="db-subtab" data-tab="system">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        class="icon-xs">
-                                        <circle cx="12" cy="12" r="3"></circle>
-                                        <path
-                                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
-                                        </path>
-                                    </svg>
-                                    Storage &amp; Host
-                                </button>
-                            </div>
-                            <div class="db-filter-wrap" id="dbFilterWrap">
-                                <input type="text" id="dbTableSearchInput"
-                                    class="form-input form-input-sm db-search-field" placeholder="Search table rows..."
-                                    spellcheck="false" />
-                            </div>
-                        </div>
-
-                        <!-- Tab 1-3 Container: Table Viewer -->
-                        <div id="dbTableContainer" class="db-tab-content active-content">
-                            <div class="db-table-meta-bar">
-                                <span id="dbTableStatusText" class="db-status-text">Showing rows for table: jobs</span>
-                                <div class="db-pagination-controls">
-                                    <button id="btnDbPrevPage" class="btn btn-secondary btn-xs" disabled>&larr;
-                                        Prev</button>
-                                    <span id="dbPageIndicator" class="db-page-num">Page 1</span>
-                                    <button id="btnDbNextPage" class="btn btn-secondary btn-xs">Next &rarr;</button>
-                                </div>
-                            </div>
-                            <div class="db-table-scroll-wrapper">
-                                <table class="db-table-grid" id="dbMainTable">
-                                    <thead id="dbTableThead">
-                                        <!-- Dynamically populated th -->
-                                    </thead>
-                                    <tbody id="dbTableTbody">
-                                        <!-- Dynamically populated tr -->
-                                    </tbody>
-                                </table>
-                                <div id="dbTableEmptyNotice" class="db-empty-notice hidden">No records found.</div>
-                            </div>
-                        </div>
-
-                        <!-- Tab 4: SQL Console -->
-                        <div id="dbSqlContainer" class="db-tab-content hidden">
-                            <div class="sql-console-panel">
-                                <div class="sql-console-header">
-                                    <div class="sql-help-text">
-                                        <strong>Read-only SQLite Console:</strong> Run <code>SELECT</code> or
-                                        <code>PRAGMA</code> queries safely.
-                                    </div>
-                                    <div class="sql-quick-chips">
-                                        <button class="sql-chip"
-                                            data-query="SELECT id, filename, status, created_at FROM jobs ORDER BY created_at DESC LIMIT 10;">Recent
-                                            Jobs</button>
-                                        <button class="sql-chip"
-                                            data-query="SELECT id, job_id, created_at FROM transcripts ORDER BY created_at DESC LIMIT 10;">Recent
-                                            Transcripts</button>
-                                        <button class="sql-chip"
-                                            data-query="SELECT id, speaker_id, name, created_at FROM voice_profiles;">All
-                                            Voice Profiles</button>
-                                        <button class="sql-chip" data-query="PRAGMA table_info(jobs);">Jobs
-                                            Schema</button>
-                                    </div>
-                                </div>
-                                <div class="sql-input-area">
-                                    <textarea id="sqlQueryInput" class="sql-textarea" rows="4"
-                                        placeholder="Enter SQL SELECT statement... e.g. SELECT * FROM jobs ORDER BY created_at DESC LIMIT 20;"></textarea>
-                                    <div class="sql-actions-bar">
-                                        <span id="sqlExecutionStatus" class="sql-status-indicator">Ready</span>
-                                        <button id="btnRunSqlQuery" class="btn btn-primary btn-sm">
+                                <!-- Database Subtabs Navigation -->
+                                <div class="db-subnav-strip">
+                                    <div class="db-tabs-left">
+                                        <button class="db-subtab active" data-tab="jobs">
+                                            <span class="subtab-dot"></span>
+                                            Jobs Table (<span id="tabCountJobs">0</span>)
+                                        </button>
+                                        <button class="db-subtab" data-tab="transcripts">
+                                            <span class="subtab-dot"></span>
+                                            Transcripts Table (<span id="tabCountTranscripts">0</span>)
+                                        </button>
+                                        <button class="db-subtab" data-tab="voice_profiles">
+                                            <span class="subtab-dot"></span>
+                                            Voice Profiles (<span id="tabCountProfiles">0</span>)
+                                        </button>
+                                        <button class="db-subtab" data-tab="sql">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                                 class="icon-xs">
-                                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                                <polyline points="4 17 10 11 4 5"></polyline>
+                                                <line x1="12" y1="19" x2="20" y2="19"></line>
                                             </svg>
-                                            Execute Query
+                                            SQL Console
+                                        </button>
+                                        <button class="db-subtab" data-tab="system">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                class="icon-xs">
+                                                <circle cx="12" cy="12" r="3"></circle>
+                                                <path
+                                                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                                                </path>
+                                            </svg>
+                                            Storage &amp; Host
                                         </button>
                                     </div>
+                                    <div class="db-filter-wrap" id="dbFilterWrap">
+                                        <input type="text" id="dbTableSearchInput"
+                                            class="form-input form-input-sm db-search-field"
+                                            placeholder="Search table rows..." spellcheck="false" />
+                                    </div>
                                 </div>
-                                <div class="sql-results-panel">
+
+                                <!-- Tab 1-3 Container: Table Viewer -->
+                                <div id="dbTableContainer" class="db-tab-content active-content">
+                                    <div class="db-table-meta-bar">
+                                        <span id="dbTableStatusText" class="db-status-text">Showing rows for table:
+                                            jobs</span>
+                                        <div class="db-pagination-controls">
+                                            <button id="btnDbPrevPage" class="btn btn-secondary btn-xs" disabled>&larr;
+                                                Prev</button>
+                                            <span id="dbPageIndicator" class="db-page-num">Page 1</span>
+                                            <button id="btnDbNextPage" class="btn btn-secondary btn-xs">Next
+                                                &rarr;</button>
+                                        </div>
+                                    </div>
                                     <div class="db-table-scroll-wrapper">
-                                        <table class="db-table-grid" id="sqlResultsTable">
-                                            <thead id="sqlResultsThead"></thead>
-                                            <tbody id="sqlResultsTbody"></tbody>
+                                        <table class="db-table-grid" id="dbMainTable">
+                                            <thead id="dbTableThead">
+                                                <!-- Dynamically populated th -->
+                                            </thead>
+                                            <tbody id="dbTableTbody">
+                                                <!-- Dynamically populated tr -->
+                                            </tbody>
                                         </table>
-                                        <div id="sqlResultsEmpty" class="db-empty-notice">Execute a query above to see
-                                            live rows.</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tab 5: Storage & System View -->
-                        <div id="dbSystemContainer" class="db-tab-content hidden">
-                            <div class="db-system-grid">
-                                <div class="system-card">
-                                    <div class="system-card-header-flex">
-                                        <h3 class="system-card-title">Database File Location</h3>
-                                        <span id="sysDbBadge" class="db-type-badge default">Default</span>
-                                    </div>
-                                    <div class="system-path-box" id="sysDbPath">...</div>
-                                    <div class="system-stat-row">
-                                        <span>File Size:</span>
-                                        <strong id="sysDbSize">0 KB</strong>
-                                    </div>
-                                    <div class="system-stat-row">
-                                        <span>Engine / Mode:</span>
-                                        <strong style="color:#38bdf8;">SQLite 3 (WAL mode)</strong>
-                                    </div>
-                                    <div class="system-actions mt-3">
-                                        <button id="btnSysBrowseDb" class="btn btn-secondary btn-sm"
-                                            title="Select or change database file">
-                                            Change DB File...
-                                        </button>
-                                        <button id="btnSysShowInFolder" class="btn btn-secondary btn-sm"
-                                            title="Reveal database in File Explorer">
-                                            Reveal in Explorer
-                                        </button>
+                                        <div id="dbTableEmptyNotice" class="db-empty-notice hidden">No records found.
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="system-card">
-                                    <h3 class="system-card-title">Media Storage Utilization</h3>
-                                    <div class="system-stat-row">
-                                        <span>Uploads Cache Folder:</span>
-                                        <strong id="sysUploadsSize">0 MB</strong>
-                                    </div>
-                                    <div class="system-stat-row">
-                                        <span>Extracted 16kHz Audio Folder:</span>
-                                        <strong id="sysAudioSize">0 MB</strong>
-                                    </div>
-                                    <div class="system-actions mt-3">
-                                        <button id="btnSystemCleanMedia" class="btn btn-secondary btn-sm">
-                                            Purge Unused Temp Files
-                                        </button>
+                                <!-- Tab 4: SQL Console -->
+                                <div id="dbSqlContainer" class="db-tab-content hidden">
+                                    <div class="sql-console-panel">
+                                        <div class="sql-console-header">
+                                            <div class="sql-help-text">
+                                                <strong>Read-only SQLite Console:</strong> Run <code>SELECT</code> or
+                                                <code>PRAGMA</code> queries safely.
+                                            </div>
+                                            <div class="sql-quick-chips">
+                                                <button class="sql-chip"
+                                                    data-query="SELECT id, filename, status, created_at FROM jobs ORDER BY created_at DESC LIMIT 10;">Recent
+                                                    Jobs</button>
+                                                <button class="sql-chip"
+                                                    data-query="SELECT id, job_id, created_at FROM transcripts ORDER BY created_at DESC LIMIT 10;">Recent
+                                                    Transcripts</button>
+                                                <button class="sql-chip"
+                                                    data-query="SELECT id, speaker_id, name, created_at FROM voice_profiles;">All
+                                                    Voice Profiles</button>
+                                                <button class="sql-chip" data-query="PRAGMA table_info(jobs);">Jobs
+                                                    Schema</button>
+                                            </div>
+                                        </div>
+                                        <div class="sql-input-area">
+                                            <textarea id="sqlQueryInput" class="sql-textarea" rows="4"
+                                                placeholder="Enter SQL SELECT statement... e.g. SELECT * FROM jobs ORDER BY created_at DESC LIMIT 20;"></textarea>
+                                            <div class="sql-actions-bar">
+                                                <span id="sqlExecutionStatus" class="sql-status-indicator">Ready</span>
+                                                <button id="btnRunSqlQuery" class="btn btn-primary btn-sm">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="2" class="icon-xs">
+                                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                                    </svg>
+                                                    Execute Query
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="sql-results-panel">
+                                            <div class="db-table-scroll-wrapper">
+                                                <table class="db-table-grid" id="sqlResultsTable">
+                                                    <thead id="sqlResultsThead"></thead>
+                                                    <tbody id="sqlResultsTbody"></tbody>
+                                                </table>
+                                                <div id="sqlResultsEmpty" class="db-empty-notice">Execute a query above
+                                                    to see
+                                                    live rows.</div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="system-card">
-                                    <h3 class="system-card-title">Runtime &amp; Server Environment</h3>
-                                    <div class="system-stat-row">
-                                        <span>FastAPI Port:</span>
-                                        <strong id="sysServerPort">8000 (localhost)</strong>
-                                    </div>
-                                    <div class="system-stat-row">
-                                        <span>Platform:</span>
-                                        <strong id="sysPlatform">windows</strong>
-                                    </div>
-                                    <div class="system-stat-row">
-                                        <span>Execution Mode:</span>
-                                        <strong id="sysFrozenMode">Development / Standalone</strong>
-                                    </div>
-                                    <div class="system-stat-row">
-                                        <span>App Version:</span>
-                                        <strong>v0.3-beta</strong>
+                                <!-- Tab 5: Storage & System View -->
+                                <div id="dbSystemContainer" class="db-tab-content hidden">
+                                    <div class="db-system-grid">
+                                        <div class="system-card">
+                                            <div class="system-card-header-flex">
+                                                <h3 class="system-card-title">Database File Location</h3>
+                                                <span id="sysDbBadge" class="db-type-badge default">Default</span>
+                                            </div>
+                                            <div class="system-path-box" id="sysDbPath">...</div>
+                                            <div class="system-stat-row">
+                                                <span>File Size:</span>
+                                                <strong id="sysDbSize">0 KB</strong>
+                                            </div>
+                                            <div class="system-stat-row">
+                                                <span>Engine / Mode:</span>
+                                                <strong style="color:#38bdf8;">SQLite 3 (WAL mode)</strong>
+                                            </div>
+                                            <div class="system-actions mt-3">
+                                                <button id="btnSysBrowseDb" class="btn btn-secondary btn-sm"
+                                                    title="Select or change database file">
+                                                    Change DB File...
+                                                </button>
+                                                <button id="btnSysShowInFolder" class="btn btn-secondary btn-sm"
+                                                    title="Reveal database in File Explorer">
+                                                    Reveal in Explorer
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div class="system-card">
+                                            <h3 class="system-card-title">Media Storage Utilization</h3>
+                                            <div class="system-stat-row">
+                                                <span>Uploads Cache Folder:</span>
+                                                <strong id="sysUploadsSize">0 MB</strong>
+                                            </div>
+                                            <div class="system-stat-row">
+                                                <span>Extracted 16kHz Audio Folder:</span>
+                                                <strong id="sysAudioSize">0 MB</strong>
+                                            </div>
+                                            <div class="system-actions mt-3">
+                                                <button id="btnSystemCleanMedia" class="btn btn-secondary btn-sm">
+                                                    Purge Unused Temp Files
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div class="system-card">
+                                            <h3 class="system-card-title">Runtime &amp; Server Environment</h3>
+                                            <div class="system-stat-row">
+                                                <span>FastAPI Port:</span>
+                                                <strong id="sysServerPort">8000 (localhost)</strong>
+                                            </div>
+                                            <div class="system-stat-row">
+                                                <span>Platform:</span>
+                                                <strong id="sysPlatform">windows</strong>
+                                            </div>
+                                            <div class="system-stat-row">
+                                                <span>Execution Mode:</span>
+                                                <strong id="sysFrozenMode">Development / Standalone</strong>
+                                            </div>
+                                            <div class="system-stat-row">
+                                                <span>App Version:</span>
+                                                <span class="inline-flex items-center gap-1.5">
+                                                    <strong class="font-mono text-xs">v1.0.0</strong>
+                                                    <span class="titlebar-beta-pill">beta.3</span>
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
                             </div>
                         </div>
 
                     </section>
 
-                
+
                     <!-- Voice Profiles Tab View -->
                     <section id="profilesView" class="profiles-view hidden p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
                         <!-- Top Header Strip -->
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-surface-border">
+                        <div
+                            class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-surface-border">
                             <div>
-                                <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-[4px] text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 mb-2">
+                                <div
+                                    class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-[4px] text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 mb-2">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                                     <span>Speaker Diarization &amp; Voice Clustering</span>
                                 </div>
                                 <h2 class="text-xl sm:text-2xl font-bold tracking-tight">Enrolled Voice Profiles</h2>
                                 <p class="text-xs sm:text-sm text-text-muted mt-1">
-                                    Who Said extracts a unique 192-dim vocal embedding vector for each speaker to automatically recognize and name recurring voices across new files.
+                                    Who Said extracts a unique 192-dim vocal embedding vector for each speaker to
+                                    automatically recognize and name recurring voices across new files.
                                 </p>
                             </div>
                             <div class="flex items-center gap-2 flex-wrap">
                                 <div class="relative">
-                                    <input type="text" id="profileSearchInput" class="form-input form-input-sm text-xs" style="padding-left: 32px !important;" placeholder="Filter voices...">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-text-dim">
+                                    <input type="text" id="profileSearchInput" class="form-input form-input-sm text-xs"
+                                        style="padding-left: 32px !important;" placeholder="Filter voices...">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        class="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-text-dim">
                                         <circle cx="11" cy="11" r="8"></circle>
                                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                                     </svg>
                                 </div>
-                                <button id="btnAddNewProfile" class="btn btn-primary btn-sm" title="Enroll a new voice profile">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+                                <button id="btnAddNewProfile" class="btn btn-primary btn-sm"
+                                    title="Enroll a new voice profile">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        class="w-3.5 h-3.5">
                                         <line x1="12" y1="5" x2="12" y2="19"></line>
                                         <line x1="5" y1="12" x2="19" y2="12"></line>
                                     </svg>
-                                    <span>+ Enroll New Voice</span>
+                                    <span>Enroll New Voice</span>
                                 </button>
-                                <button id="btnProfilesRefresh" class="btn btn-secondary btn-sm" title="Refresh profiles list">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+                                <button id="btnProfilesRefresh" class="btn btn-secondary btn-sm"
+                                    title="Refresh profiles list">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        class="w-3.5 h-3.5">
                                         <polyline points="23 4 23 10 17 10"></polyline>
                                         <polyline points="1 20 1 14 7 14"></polyline>
-                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15">
+                                        </path>
                                     </svg>
                                     <span>Refresh</span>
                                 </button>
@@ -1732,24 +1920,30 @@
                         </div>
 
                         <!-- Enroll Form Card (Toggleable) -->
-                        <div id="enrollNewProfileCard" class="enroll-form-card hidden bg-surface-card border border-surface-border rounded-xl p-5 shadow-sm space-y-4">
+                        <div id="enrollNewProfileCard"
+                            class="enroll-form-card hidden bg-surface-card border border-surface-border rounded-xl p-5 shadow-sm space-y-4">
                             <div class="flex items-center justify-between pb-3 border-b border-surface-border">
                                 <h4 class="font-semibold text-base">Enroll Voice from Audio Sample</h4>
                                 <span class="text-xs text-text-dim">Minimum 1-2 sec of clear speech</span>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="space-y-1.5">
-                                    <label for="newProfileName" class="form-label text-xs font-semibold">Person Name</label>
-                                    <input type="text" id="newProfileName" class="form-input w-full" placeholder="e.g. Alice, Host, Interviewer">
+                                    <label for="newProfileName" class="form-label text-xs font-semibold">Person
+                                        Name</label>
+                                    <input type="text" id="newProfileName" class="form-input w-full"
+                                        placeholder="e.g. Alice, Host, Interviewer">
                                 </div>
                                 <div class="space-y-1.5">
-                                    <label for="newProfileAudio" class="form-label text-xs font-semibold">Voice Sample (WAV / MP3 / M4A / MP4)</label>
-                                    <input type="file" id="newProfileAudio" accept="audio/*,video/*" class="form-file-input w-full">
+                                    <label for="newProfileAudio" class="form-label text-xs font-semibold">Voice Sample
+                                        (WAV / MP3 / M4A / MP4)</label>
+                                    <input type="file" id="newProfileAudio" accept="audio/*,video/*"
+                                        class="form-file-input w-full">
                                 </div>
                             </div>
                             <div class="flex items-center justify-end gap-2 pt-2">
                                 <button id="btnCancelEnroll" class="btn btn-secondary btn-sm">Cancel</button>
-                                <button id="btnSubmitEnroll" class="btn btn-primary btn-sm">Extract &amp; Save Voice Profile</button>
+                                <button id="btnSubmitEnroll" class="btn btn-primary btn-sm">Extract &amp; Save Voice
+                                    Profile</button>
                             </div>
                         </div>
 
@@ -1762,15 +1956,17 @@
                         </div>
 
                         <!-- Table View of Enrolled Voice Profiles -->
-                        <div class="enrolled-profiles-table-wrap bg-surface-card border border-surface-border rounded-xl shadow-sm overflow-hidden">
+                        <div
+                            class="enrolled-profiles-table-wrap bg-surface-card border border-surface-border rounded-xl shadow-sm overflow-hidden">
                             <div class="overflow-x-auto">
-                                <table id="enrolledProfilesTable" class="w-full text-left border-collapse text-xs sm:text-sm">
+                                <table id="enrolledProfilesTable"
+                                    class="w-full text-left border-collapse text-xs sm:text-sm">
                                     <thead>
-                                        <tr class="border-b border-surface-border bg-surface-base/70 text-text-muted uppercase text-[11px] font-semibold tracking-wider">
+                                        <tr
+                                            class="border-b border-surface-border bg-surface-base/70 text-text-muted uppercase text-[11px] font-semibold tracking-wider">
                                             <th class="py-3 px-4">Speaker Voice</th>
                                             <th class="py-3 px-4">Profile ID</th>
                                             <th class="py-3 px-4">Voice Samples</th>
-                                            <th class="py-3 px-4">Embedding Vector</th>
                                             <th class="py-3 px-4">Enrolled / Updated</th>
                                             <th class="py-3 px-4 text-right">Actions</th>
                                         </tr>
@@ -1785,9 +1981,12 @@
                             <div id="enrolledProfilesList" class="hidden"></div>
 
                             <!-- Empty State for Voice Profiles -->
-                            <div id="enrolledProfilesEmpty" class="py-12 px-4 flex flex-col items-center justify-center text-center hidden">
-                                <div class="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 mb-3">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6">
+                            <div id="enrolledProfilesEmpty"
+                                class="py-12 px-4 flex flex-col items-center justify-center text-center hidden">
+                                <div
+                                    class="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 mb-3">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        class="w-6 h-6">
                                         <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
                                         <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
                                         <line x1="12" y1="19" x2="12" y2="22"></line>
@@ -1795,7 +1994,9 @@
                                 </div>
                                 <h4 class="text-sm font-semibold text-text-primary">No Enrolled Voice Profiles Yet</h4>
                                 <p class="text-xs text-text-muted max-w-sm mt-1">
-                                    When you rename a speaker in "Speaker Directory & Inspector" or click "+ Enroll New Voice", recurring speakers are remembered automatically across all video transcriptions.
+                                    When you rename a speaker in "Speaker Directory & Inspector" or click "Enroll New
+                                    Voice", recurring speakers are remembered automatically across all video
+                                    transcriptions.
                                 </p>
                             </div>
                         </div>
@@ -1813,8 +2014,10 @@
             <div class="modal-dialog modal-md" style="max-width: 540px;">
                 <div class="modal-header">
                     <div class="title-with-badge">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 text-brand-400">
-                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            class="w-5 h-5 text-brand-400">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
+                            </path>
                         </svg>
                         <h3 class="modal-title">Open Media Folder</h3>
                     </div>
@@ -1822,12 +2025,15 @@
                 </div>
                 <div class="modal-body space-y-4">
                     <p class="modal-desc text-xs text-text-muted">
-                        Select a folder on your computer containing video or audio files to browse and transcribe in Who Said.
+                        Select a folder on your computer containing video or audio files to browse and transcribe in Who
+                        Said.
                     </p>
 
                     <!-- Quick Location Shortcuts -->
                     <div>
-                        <label class="form-label text-xs font-semibold uppercase tracking-wider text-text-muted mb-2 block">Quick Locations</label>
+                        <label
+                            class="form-label text-xs font-semibold uppercase tracking-wider text-text-muted mb-2 block">Quick
+                            Locations</label>
                         <div id="quickDirsContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             <!-- Populated dynamically via /api/fs/quick-directories -->
                         </div>
@@ -1837,10 +2043,15 @@
                     <div class="space-y-1.5 pt-1">
                         <label for="openFolderManualInput" class="form-label text-xs font-semibold">Folder Path</label>
                         <div class="flex items-center gap-2">
-                            <input type="text" id="openFolderManualInput" class="form-input flex-1 text-xs font-mono" placeholder="C:\Users\...\Videos">
-                            <button id="btnBrowseNativeSystemFolder" class="btn btn-secondary btn-sm shrink-0" title="Open native Windows folder picker">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
-                                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                            <input type="text" id="openFolderManualInput" class="form-input flex-1 text-xs font-mono"
+                                placeholder="C:\Users\...\Videos">
+                            <button id="btnBrowseNativeSystemFolder" class="btn btn-secondary btn-sm shrink-0"
+                                title="Open native Windows folder picker">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    class="w-3.5 h-3.5">
+                                    <path
+                                        d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
+                                    </path>
                                 </svg>
                                 <span>Browse...</span>
                             </button>
@@ -1849,7 +2060,9 @@
 
                     <!-- Recent Folders (if any) -->
                     <div id="modalRecentFoldersSection" class="hidden pt-1">
-                        <label class="form-label text-xs font-semibold uppercase tracking-wider text-text-muted mb-1.5 block">Recent Folders</label>
+                        <label
+                            class="form-label text-xs font-semibold uppercase tracking-wider text-text-muted mb-1.5 block">Recent
+                            Folders</label>
                         <div id="modalRecentFoldersList" class="space-y-1 max-h-32 overflow-y-auto pr-1">
                             <!-- Populated from localStorage -->
                         </div>
@@ -1913,7 +2126,8 @@
                         <label class="section-label">Whisper Model Size</label>
                         <div class="model-pills" id="uploadModalModelPills">
                             <label class="model-pill">
-                                <input type="radio" name="pathModelSize" value="tiny" checked data-path-model-size="tiny">
+                                <input type="radio" name="pathModelSize" value="tiny" checked
+                                    data-path-model-size="tiny">
                                 <div class="pill-content">
                                     <span class="pill-name">Tiny</span>
                                     <span class="pill-desc">Ultra Fast (Offline Bundled)</span>
@@ -2204,7 +2418,8 @@
                     <div class="folder-left-pane" id="folderLeftPane">
                         <div class="folder-pane-header">
                             <div class="folder-section-title">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5 text-brand-400">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    class="w-3.5 h-3.5 text-brand-400">
                                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                                     <circle cx="9" cy="7" r="4"></circle>
                                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -2237,7 +2452,8 @@
                     <div class="folder-right-pane" id="folderRightPane">
                         <div class="folder-pane-header">
                             <div class="folder-section-title">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5 text-brand-400">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    class="w-3.5 h-3.5 text-brand-400">
                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                 </svg>
@@ -2261,8 +2477,11 @@
                                         <input type="text" id="folderSpeakerNameInput" class="form-input flex-1"
                                             placeholder="Speaker Name">
                                         <button id="btnFolderSaveName" class="btn btn-primary btn-sm">Save</button>
-                                        <button id="btnFolderOpenMergeModal" class="btn btn-secondary btn-sm flex items-center gap-1.5" title="Merge all dialogue turns of this speaker into another speaker">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5 text-brand-400">
+                                        <button id="btnFolderOpenMergeModal"
+                                            class="btn btn-secondary btn-sm flex items-center gap-1.5"
+                                            title="Merge all dialogue turns of this speaker into another speaker">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                class="w-3.5 h-3.5 text-brand-400">
                                                 <circle cx="18" cy="18" r="3"></circle>
                                                 <circle cx="6" cy="6" r="3"></circle>
                                                 <path d="M6 9v12m12-9c0 3-2 6-6 6"></path>
@@ -2284,7 +2503,8 @@
                             </div>
 
                             <!-- Hidden fallback for legacy merge selectors -->
-                            <select id="folderMergeTargetSelect" class="hidden" style="display:none !important;"></select>
+                            <select id="folderMergeTargetSelect" class="hidden"
+                                style="display:none !important;"></select>
                             <button id="btnFolderExecuteMerge" class="hidden" style="display:none !important;"></button>
 
                             <!-- Folder Viewer for Turns (Files in Folder) -->
@@ -2317,59 +2537,62 @@
             </div>
         </div>
 
-        <!-- Merge Misclassified Speakers Modal (User Request: Similar to Merge Popup) -->
+        <!-- Merge Misclassified Speakers Modal (Compact Popup: From -> To Dropdowns & Avatars) -->
         <div id="mergeModal" class="modal-backdrop hidden" style="z-index: 1050 !important;">
-            <div class="modal-dialog" style="max-width: 480px;">
-                <div class="modal-header">
+            <div class="modal-dialog merge-modal-compact" style="max-width: 440px;">
+                <div class="modal-header py-3 px-4">
                     <div class="title-with-badge">
-                        <h3 class="modal-title">Merge Speaker</h3>
-                        <span class="badge">Combine Turns</span>
+                        <h3 class="modal-title text-base font-semibold">Merge Speakers</h3>
+                        <span class="badge text-[10px]">Reassign Turns</span>
                     </div>
                     <button id="btnCloseMergeModal" class="btn-close" aria-label="Close">&times;</button>
                 </div>
-                <div class="modal-body space-y-4">
-                    <p class="modal-desc text-xs text-text-muted">
-                        All dialogue turns spoken by the source speaker will be reassigned and merged into the target speaker.
-                    </p>
-
-                    <div class="form-group">
-                        <label for="mergeSourceSelect" class="form-label text-xs font-semibold">Misclassified Speaker (To Remove)</label>
-                        <select id="mergeSourceSelect" class="form-input form-select text-xs">
-                            <!-- Populated dynamically -->
-                        </select>
-                        <span class="form-help-text text-[11px] text-text-dim">This speaker ID will be removed and their turns transferred.</span>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="mergeTargetSelect" class="form-label text-xs font-semibold">Merge Into Speaker (To Keep)</label>
-                        <select id="mergeTargetSelect" class="form-input form-select text-xs">
-                            <!-- Populated dynamically -->
-                        </select>
-                        <span class="form-help-text text-[11px] text-text-dim">All dialogue turns will be assigned to this speaker name &amp; color.</span>
-                    </div>
-
-                    <!-- Visual Flow Diagram Preview Card -->
-                    <div id="mergePreviewCard" class="merge-preview-card">
-                        <div class="merge-flow-diagram">
-                            <div id="mergePreviewSource" class="merge-flow-speaker">
-                                <span class="speaker-dot"></span>
-                                <span class="spk-name">Source Speaker</span>
-                            </div>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="merge-flow-arrow">
+                <div class="modal-body py-3.5 px-4 space-y-3">
+                    <!-- Dropdowns Row: From -> To -->
+                    <div class="merge-flow-grid">
+                        <div class="merge-flow-col">
+                            <label for="mergeSourceSelect" class="merge-col-label">From</label>
+                            <select id="mergeSourceSelect" class="form-input form-select text-xs py-1.5 pl-2 pr-7">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                        <div class="merge-flow-arrow-col">
+                            <svg class="merge-arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                                 <polyline points="12 5 19 12 12 19"></polyline>
                             </svg>
-                            <div id="mergePreviewTarget" class="merge-flow-speaker">
-                                <span class="speaker-dot"></span>
-                                <span class="spk-name">Target Speaker</span>
-                            </div>
                         </div>
-                        <p id="mergeTurnsCountText" class="merge-preview-note">0 turn(s) will be transferred.</p>
+                        <div class="merge-flow-col">
+                            <label for="mergeTargetSelect" class="merge-col-label">To</label>
+                            <select id="mergeTargetSelect" class="form-input form-select text-xs py-1.5 pl-2 pr-7">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
                     </div>
+
+                    <!-- Flow Diagram Card: <Avatar1><Name1> -> <Avatar2><Name2> -->
+                    <div id="mergePreviewCard" class="merge-avatars-card">
+                        <div id="mergePreviewSource" class="merge-avatar-speaker">
+                            <!-- Populated with <Avatar1><Name1> -->
+                        </div>
+                        <div class="merge-avatars-arrow">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </div>
+                        <div id="mergePreviewTarget" class="merge-avatar-speaker">
+                            <!-- Populated with <Avatar2><Name2> -->
+                        </div>
+                    </div>
+
+                    <p id="mergeTurnsCountText" class="merge-note-text">0 turn(s) will be transferred.</p>
                 </div>
-                <div class="modal-footer">
-                    <button id="btnCancelMerge" class="btn btn-secondary">Cancel</button>
-                    <button id="btnConfirmMerge" class="btn btn-primary">Merge Speakers</button>
+                <div class="modal-footer py-2.5 px-4">
+                    <button id="btnCancelMerge" class="btn btn-secondary btn-sm">Cancel</button>
+                    <button id="btnConfirmMerge" class="btn btn-primary btn-sm">Merge Speakers</button>
                 </div>
             </div>
         </div>
@@ -2401,11 +2624,11 @@
 
     </div>
 
-        <!-- Offline Script Engine -->
-        <script src="/static/libs/gaze.js"></script>
-        <script src="/static/js/utils.js"></script>
-        <script src="/static/js/api.js"></script>
-        <script src="/static/app.js?v=v6"></script>
+    <!-- Offline Script Engine -->
+    <script src="/static/libs/gaze.js"></script>
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/app.js?v=v6"></script>
 </body>
 
 </html>

@@ -25,8 +25,8 @@ export class FileTreeNode {
     }
 
     const activeCls = item.isActive 
-      ? 'bg-brand-500/15 text-white border-l-2 border-brand-400' 
-      : 'text-dark-muted hover:text-white hover:bg-white/5 border-l-2 border-transparent';
+      ? 'bg-brand-500/15 active-file text-brand-600 dark:text-white border-l-2 border-brand-400' 
+      : 'text-zinc-800 dark:text-dark-muted hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 border-l-2 border-transparent';
 
     return `
       <div 

@@ -404,7 +404,7 @@ ipcMain.handle('fs:saveRecentFolder', async (_event, folderPath) => {
   return saveRecentFolder(folderPath);
 });
 
-ipcMain.handle('app:getVersion', () => 'v0.3-beta');
+ipcMain.handle('app:getVersion', () => 'v1.0.0-beta.3');
 
 // Open links safely in default OS browser
 ipcMain.handle('shell:openExternal', async (_event, url) => {
