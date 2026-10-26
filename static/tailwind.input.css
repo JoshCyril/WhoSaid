@@ -870,12 +870,34 @@ html[data-theme="light"] .caption-speaker-name {
   color: #2e2e2e !important;
   font-weight: 600 !important;
 }
+
+/* Floating Player Controls Island in Light Mode */
+html.light .video-ctrl-island,
+html[data-theme="light"] .video-ctrl-island {
+  background: rgba(234, 234, 234, 0.94) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid #d4d4d8 !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12) !important;
+  color: #2e2e2e !important;
+}
 html.light .video-time-wrap,
-html[data-theme="light"] .video-time-wrap,
+html[data-theme="light"] .video-time-wrap {
+  color: #2e2e2e !important;
+}
 html.light .video-time-wrap #vTimeCurrent,
-html[data-theme="light"] .video-time-wrap #vTimeCurrent,
+html[data-theme="light"] .video-time-wrap #vTimeCurrent {
+  color: #2e2e2e !important;
+  font-weight: 600 !important;
+}
 html.light .video-time-wrap #vTimeDuration,
-html[data-theme="light"] .video-time-wrap #vTimeDuration,
+html[data-theme="light"] .video-time-wrap #vTimeDuration {
+  color: #555555 !important;
+}
+html.light .video-time-wrap .time-sep,
+html[data-theme="light"] .video-time-wrap .time-sep {
+  color: #777777 !important;
+}
 html.light #timeCurrent,
 html[data-theme="light"] #timeCurrent,
 html.light #timeDuration,
@@ -893,6 +915,72 @@ html[data-theme="light"] .btn-ctrl-floating:hover {
 }
 html.light .btn-ctrl-floating svg,
 html[data-theme="light"] .btn-ctrl-floating svg {
+  color: #2e2e2e !important;
+}
+html.light .btn-ctrl-floating.btn-ctrl-play,
+html[data-theme="light"] .btn-ctrl-floating.btn-ctrl-play {
+  color: #0284c7 !important;
+}
+html.light .volume-slider,
+html[data-theme="light"] .volume-slider {
+  accent-color: #0284c7 !important;
+  background: rgba(0, 0, 0, 0.15) !important;
+}
+html.light .btn-expand-controls,
+html[data-theme="light"] .btn-expand-controls {
+  background: rgba(234, 234, 234, 0.94) !important;
+  border-color: #d4d4d8 !important;
+  color: #2e2e2e !important;
+}
+html.light .caption-mode-dropdown,
+html[data-theme="light"] .caption-mode-dropdown {
+  background: #ffffff !important;
+  border-color: #d4d4d8 !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15) !important;
+  color: #2e2e2e !important;
+}
+html.light .caption-mode-header,
+html[data-theme="light"] .caption-mode-header {
+  color: #777777 !important;
+}
+html.light .caption-mode-item,
+html[data-theme="light"] .caption-mode-item {
+  color: #2e2e2e !important;
+}
+html.light .caption-mode-item:hover,
+html[data-theme="light"] .caption-mode-item:hover {
+  background: #eaeaea !important;
+}
+html.light .caption-mode-item.active,
+html[data-theme="light"] .caption-mode-item.active {
+  background: #dbeafe !important;
+}
+html.light .mode-item-title,
+html[data-theme="light"] .mode-item-title {
+  color: #2e2e2e !important;
+}
+html.light .caption-mode-item.active .mode-item-title,
+html[data-theme="light"] .caption-mode-item.active .mode-item-title {
+  color: #0284c7 !important;
+}
+html.light .mode-item-desc,
+html[data-theme="light"] .mode-item-desc {
+  color: #666666 !important;
+}
+html.light .caption-mode-divider,
+html[data-theme="light"] .caption-mode-divider {
+  border-top-color: #e4e4e4 !important;
+}
+html.light #btnCollapseControls,
+html[data-theme="light"] #btnCollapseControls {
+  color: #2e2e2e !important;
+}
+html.light #btnCollapseControls:hover,
+html[data-theme="light"] #btnCollapseControls:hover {
+  background: #eaeaea !important;
+}
+html.light #btnCollapseControls .mode-item-title,
+html[data-theme="light"] #btnCollapseControls .mode-item-title {
   color: #2e2e2e !important;
 }
 

@@ -11,8 +11,50 @@ window.WhoSaidUtils = (function () {
 
   const CAMEO_PRESETS = ["Felix", "Daisy", "Jack", "Willow", "Leo", "Maya", "Milo", "Zoe"];
 
-  const DEFAULT_AI_PROMPT = `Please provide a comprehensive summary of the following meeting/video transcript.
-Highlight the main discussion points, key decisions made, and action items assigned to each speaker.`;
+  const DEFAULT_AI_PROMPT = `You are summarizing an engineering meeting for a team building automation and
+back/middle-office systems for banks and fintech clients (reconciliation,
+settlements, payments ops, reporting, onboarding/KYC, integrations).
+The meeting mixes standup updates, dev demos, and bug-fix discussions.
+Summarize the transcript in footnote [^1].
+
+## Rules
+- Be specific. Every bullet must carry a name, ticket ID, system, environment,
+  number, or decision. Drop anything like "team discussed progress".
+- Never invent names, IDs, dates, owners, or decisions. Write "not stated" if missing.
+- Attribute updates, blockers, and actions to whoever said them.
+- Keep ticket IDs, client names, versions, dates, and numbers exactly as spoken.
+- Fix obvious speech-to-text errors (names, jargon, acronyms) from context;
+  mark low-confidence guesses with (?).
+- Skip small talk and repeats. Omit any section that has no content.
+- Mark as **HIGH**: money movement, reconciliation breaks, client-facing reports,
+  data accuracy, prod incidents, compliance/audit trail, SLA impact.
+
+## Sections
+1. **TL;DR** (max 3 lines): overall progress, biggest risk, what needs attention today.
+2. **Updates**: per person. Done / Next / Blocker (write "None" if no blocker).
+3. **Demos**: what was shown, by whom, feedback or concerns, outcome
+   (approved / needs changes / follow-up).
+4. **Bugs & fixes**: ID | issue | root cause | fix/status | owner | env | impact
+5. **Decisions**: decision, who made it, reason if stated.
+6. **Action items**: owner | task | due date | priority
+7. **Risks & dependencies**: client/SLA exposure, release or deployment
+   dependencies, bank/third-party API issues, security or data privacy concerns,
+   unresolved blockers.
+8. **Open questions**: what is unanswered and who should answer it.
+
+## Output format
+- Default: plain Markdown (headings, bullets, tables).
+- If I mention "obsidian md": output Obsidian Markdown instead:
+  - YAML frontmatter: date, type: meeting, attendees, project, tags
+  - [[wikilinks]] for people, tickets, and clients
+  - #tags for topics (e.g. #bugfix, #demo, #recon)
+  - "- [ ]" checkboxes for action items, with owner and due date inline
+  - callouts for HIGH items, e.g. > [!warning] and > [!question] for open questions
+
+[^1]: TRANSCRIPT
+<<<
+<PASTE TRANSCRIPT HERE>
+>>>`;
 
   function formatTime(seconds) {
     if (isNaN(seconds) || seconds < 0) return "00:00";
